@@ -40,6 +40,18 @@
   }
 }
 
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  color: #ffffff;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+}
+
 .login-card {
   position: relative;
   z-index: 1;
@@ -183,5 +195,34 @@ mat-form-field {
 
   .brand h1 {
     font-size: 23px;
+  }
+}
+
+// ---- Dark mode ----
+:host-context(.dark-theme) {
+  .login-page {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+
+    &::before { background: #4c1d95; opacity: 0.5; }
+    &::after { background: #312e81; opacity: 0.5; }
+  }
+
+  .login-card {
+    background: #171d2e;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  }
+
+  .brand h1 {
+    color: #e5e7eb;
+  }
+
+  .brand .subtitle {
+    color: #9ca3af;
+  }
+
+  .login-note {
+    background: #1f2540;
+    border-color: #2b3352;
+    color: #c4b5fd;
   }
 }

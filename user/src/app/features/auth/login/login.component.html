@@ -1,4 +1,12 @@
 <div class="login-page">
+  <button mat-icon-button
+          type="button"
+          class="theme-toggle"
+          (click)="toggleTheme()"
+          [matTooltip]="(themeService.isDark$ | async) ? 'Switch to light mode' : 'Switch to dark mode'">
+    <mat-icon>{{ (themeService.isDark$ | async) ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+
   <div class="login-card">
     <div class="brand">
       <div class="brand-badge">

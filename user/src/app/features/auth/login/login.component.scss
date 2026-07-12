@@ -1,10 +1,23 @@
 .login-page {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  color: #ffffff;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
 }
 
 .login-card {
@@ -88,6 +101,34 @@
 
     &:hover {
       text-decoration: underline;
+    }
+  }
+}
+
+// ---- Dark mode ----
+:host-context(.dark-theme) {
+  .login-page {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  }
+
+  .login-card {
+    background: #171d2e;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .brand h1 {
+    color: #e5e7eb;
+  }
+
+  .brand .subtitle {
+    color: #9ca3af;
+  }
+
+  .login-alt {
+    color: #9ca3af;
+
+    a {
+      color: #a5b4fc;
     }
   }
 }
