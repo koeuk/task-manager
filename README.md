@@ -6,9 +6,9 @@ A full-stack task management application built with Laravel (Backend) and Angula
 
 ```
 task-management/
-├── backend/        # Laravel 11 REST API
-├── admin/ # Angular 18 Admin Panel
-└── user/  # Angular 18 User Application
+├── backend/   # Laravel 11 REST API
+├── admin/     # Angular 18 Admin Panel
+└── user/      # Angular 18 User Application
 ```
 
 ## Features
@@ -42,9 +42,10 @@ task-management/
 - **Framework**: Angular 18
 - **Admin Panel**: Separate Angular app for administrators
 - **User App**: Dedicated Angular app for regular users
-- **UI Library**: Angular Material (to be configured)
+- **UI Library**: Angular Material
 - **HTTP Client**: Angular HttpClient
 - **CSS Framework**: SCSS
+- **Theming**: Light/dark mode with a persisted toggle
 
 ## Installation
 
@@ -140,10 +141,12 @@ ng serve --port=4201
 ## API Endpoints
 
 ### Authentication
-- `POST /api/register` - User registration
-- `POST /api/login` - User login
-- `POST /api/logout` - User logout
-- `GET /api/user` - Get authenticated user
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get authenticated user
+- `PUT /api/auth/profile` - Update profile
+- `POST /api/auth/change-password` - Change password
 
 ### Projects
 - `GET /api/projects` - List all projects
@@ -165,6 +168,7 @@ ng serve --port=4201
 - `POST /api/task-lists` - Create task list
 - `PUT /api/task-lists/{id}` - Update task list
 - `DELETE /api/task-lists/{id}` - Delete task list
+- `POST /api/task-lists/reorder` - Reorder task lists
 
 ### Comments
 - `GET /api/tasks/{taskId}/comments` - List task comments
@@ -209,15 +213,19 @@ For detailed schema information, see `backend/DATABASE_SCHEMA.md`
 - Database migrations
 - Models and relationships
 - Authentication with Sanctum
-- API controllers
+- API controllers (projects, task lists, tasks, comments, admin)
 - Admin middleware
 - CORS configuration
 
-🚧 Frontend (Angular)
-- Project setup complete
-- Components and services (in progress)
-- UI implementation (pending)
-- API integration (pending)
+✅ Admin Panel (Angular)
+- Login, dashboard (with charts), users, projects, tasks, reports, profile, settings
+- CRUD with search/filter/pagination and API integration
+- Light/dark mode
+
+✅ User App (Angular)
+- Login/register, dashboard, projects (list + detail), tasks, profile, settings
+- Refresh-safe authentication and API integration
+- Light/dark mode
 
 ## License
 
