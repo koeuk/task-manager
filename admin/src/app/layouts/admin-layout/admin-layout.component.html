@@ -1,9 +1,10 @@
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav 
-    #sidenav 
-    class="sidenav" 
-    [mode]="'side'" 
-    [opened]="sidenavOpened"
+<mat-sidenav-container class="sidenav-container" [class.collapsed]="collapsed">
+  <mat-sidenav
+    #sidenav
+    class="sidenav"
+    [class.collapsed]="collapsed"
+    [mode]="'side'"
+    [opened]="true"
     [fixedInViewport]="true">
     
     <div class="sidenav-header">
@@ -23,7 +24,9 @@
          *ngFor="let item of navItems"
          [routerLink]="item.route"
          routerLinkActive="active-link"
-         [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}">
+         [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+         [matTooltip]="collapsed ? item.title : ''"
+         matTooltipPosition="right">
         <mat-icon matListItemIcon [matBadge]="item.badge"
                   [matBadgeHidden]="!item.badge"
                   matBadgeColor="warn"

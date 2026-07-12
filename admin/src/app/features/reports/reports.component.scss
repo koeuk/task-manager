@@ -31,7 +31,7 @@
     font-size: 20px;
     width: 20px;
     height: 20px;
-    color: #6366f1;
+    color: #94a3b8;
   }
 }
 
@@ -84,10 +84,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(100, 116, 139, 0.12);
 
     mat-icon {
-      color: #6366f1;
+      color: #94a3b8;
       font-size: 28px;
       width: 28px;
       height: 28px;
@@ -107,7 +107,7 @@
     color: #6b7280;
   }
 
-  &.card-accent .summary-icon { background: rgba(139, 92, 246, 0.12); mat-icon { color: #8b5cf6; } }
+  &.card-accent .summary-icon { background: rgba(148, 163, 184, 0.12); mat-icon { color: #cbd5e1; } }
   &.card-warn .summary-icon { background: rgba(245, 158, 11, 0.12); mat-icon { color: #f59e0b; } }
   &.card-success .summary-icon { background: rgba(16, 185, 129, 0.12); mat-icon { color: #10b981; } }
 }

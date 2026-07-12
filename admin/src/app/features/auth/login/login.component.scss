@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #7c3aed 100%);
+  background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #64748b 100%);
   position: relative;
   overflow: hidden;
 
@@ -26,7 +26,7 @@
   &::before {
     width: 420px;
     height: 420px;
-    background: #a78bfa;
+    background: #e2e8f0;
     top: -120px;
     right: -80px;
   }
@@ -34,7 +34,7 @@
   &::after {
     width: 380px;
     height: 380px;
-    background: #6366f1;
+    background: #94a3b8;
     bottom: -140px;
     left: -100px;
   }
@@ -87,8 +87,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 18px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    box-shadow: 0 10px 22px rgba(99, 102, 241, 0.4);
+    background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+    box-shadow: 0 10px 22px rgba(100, 116, 139, 0.4);
 
     mat-icon {
       font-size: 36px;
@@ -142,12 +142,12 @@ mat-form-field {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 8px 20px rgba(100, 116, 139, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover:not([disabled]) {
     transform: translateY(-1px);
-    box-shadow: 0 12px 26px rgba(99, 102, 241, 0.45);
+    box-shadow: 0 12px 26px rgba(100, 116, 139, 0.45);
   }
 
   &[disabled] {
@@ -172,9 +172,9 @@ mat-form-field {
   margin-top: 24px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: #f5f3ff;
-  border: 1px solid #ede9fe;
-  color: #6d5bb0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
   font-size: 12.5px;
   line-height: 1.5;
 
@@ -183,7 +183,7 @@ mat-form-field {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
-    color: #8b5cf6;
+    color: #cbd5e1;
   }
 }
 
@@ -201,10 +201,10 @@ mat-form-field {
 // ---- Dark mode ----
 :host-context(.dark-theme) {
   .login-page {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #334155 50%, #1e293b 100%);
 
-    &::before { background: #4c1d95; opacity: 0.5; }
-    &::after { background: #312e81; opacity: 0.5; }
+    &::before { background: #1e293b; opacity: 0.5; }
+    &::after { background: #334155; opacity: 0.5; }
   }
 
   .login-card {
@@ -223,6 +223,6 @@ mat-form-field {
   .login-note {
     background: #1f2540;
     border-color: #2b3352;
-    color: #c4b5fd;
+    color: #cbd5e1;
   }
 }

@@ -1,37 +1,37 @@
 @use '@angular/material' as mat;
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
-// ---- Dark theme: Material colors layered on top of the prebuilt light theme ----
-$dark-primary: mat.m2-define-palette(mat.$m2-indigo-palette);
-$dark-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
-$dark-warn: mat.m2-define-palette(mat.$m2-red-palette);
+// ---- Silver theme: neutral blue-gray primary/accent (replaces indigo-pink) ----
+$silver-warn: mat.m2-define-palette(mat.$m2-red-palette);
+
+// Light (base) silver — layered on top of the prebuilt light theme
+$light-primary: mat.m2-define-palette(mat.$m2-blue-gray-palette, 400, 200, 700);
+$light-accent: mat.m2-define-palette(mat.$m2-blue-gray-palette, 300, 100, 500);
+$light-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $light-primary,
+    accent: $light-accent,
+    warn: $silver-warn,
+  ),
+));
+
+body {
+  @include mat.all-component-colors($light-theme);
+}
+
+// Dark silver
+$dark-primary: mat.m2-define-palette(mat.$m2-blue-gray-palette, 300, 100, 500);
+$dark-accent: mat.m2-define-palette(mat.$m2-blue-gray-palette, 200, 50, 400);
 $dark-theme: mat.m2-define-dark-theme((
   color: (
     primary: $dark-primary,
     accent: $dark-accent,
-    warn: $dark-warn,
+    warn: $silver-warn,
   ),
 ));
 
 .dark-theme {
   @include mat.all-component-colors($dark-theme);
-}
-
-// Auth screens (login / register) sit on their own gradient and must always
-// stay light, even when the app is in dark mode.
-$light-primary: mat.m2-define-palette(mat.$m2-indigo-palette);
-$light-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
-$light-theme: mat.m2-define-light-theme((
-  color: (
-    primary: $light-primary,
-    accent: $light-accent,
-    warn: $dark-warn,
-  ),
-));
-
-.login-page,
-.register-container {
-  @include mat.all-component-colors($light-theme);
 }
 
 * {

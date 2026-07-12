@@ -5,7 +5,7 @@
   align-items: center;
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
 }
 
 .theme-toggle {
@@ -41,7 +41,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
     color: #fff;
 
     mat-icon {
@@ -95,7 +95,7 @@
   font-size: 14px;
 
   a {
-    color: #667eea;
+    color: #94a3b8;
     text-decoration: none;
     font-weight: 500;
 
@@ -108,7 +108,7 @@
 // ---- Dark mode ----
 :host-context(.dark-theme) {
   .login-page {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
   }
 
   .login-card {
@@ -128,7 +128,7 @@
     color: #9ca3af;
 
     a {
-      color: #a5b4fc;
+      color: #cbd5e1;
     }
   }
 }

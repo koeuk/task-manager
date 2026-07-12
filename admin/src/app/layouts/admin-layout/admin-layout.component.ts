@@ -40,6 +40,7 @@ interface NavItem {
 })
 export class AdminLayoutComponent implements OnInit {
   sidenavOpened = true;
+  collapsed = false;
   currentUser$;
   
   navItems: NavItem[] = [
@@ -62,7 +63,8 @@ export class AdminLayoutComponent implements OnInit {
   ngOnInit(): void {}
 
   toggleSidenav(): void {
-    this.sidenavOpened = !this.sidenavOpened;
+    // Collapse to an icon-only rail instead of hiding the sidebar entirely
+    this.collapsed = !this.collapsed;
   }
 
   toggleTheme(): void {

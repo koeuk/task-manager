@@ -37,6 +37,7 @@ import { User } from '../../core/models/user.model';
 export class UserLayoutComponent implements OnInit {
   currentUser$: Observable<User | null>;
   sidenavOpen = true;
+  collapsed = false;
 
   menuItems = [
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
@@ -55,7 +56,8 @@ export class UserLayoutComponent implements OnInit {
   ngOnInit(): void {}
 
   toggleSidenav(): void {
-    this.sidenavOpen = !this.sidenavOpen;
+    // Collapse to an icon-only rail instead of hiding the sidebar entirely
+    this.collapsed = !this.collapsed;
   }
 
   toggleTheme(): void {

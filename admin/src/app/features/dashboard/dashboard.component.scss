@@ -58,7 +58,7 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    background: #6366f1;
+    background: #94a3b8;
   }
 
   mat-card-content {
@@ -75,13 +75,13 @@
     align-items: center;
     justify-content: center;
     margin-right: 16px;
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(100, 116, 139, 0.12);
 
     mat-icon {
       font-size: 30px;
       height: 30px;
       width: 30px;
-      color: #6366f1;
+      color: #94a3b8;
     }
   }
 
@@ -104,13 +104,13 @@
 
   // Palette variants — cohesive indigo/violet family + supporting tones
   &.card-primary {
-    &::before { background: #6366f1; }
-    .stat-icon { background: rgba(99, 102, 241, 0.12); mat-icon { color: #6366f1; } }
+    &::before { background: #94a3b8; }
+    .stat-icon { background: rgba(100, 116, 139, 0.12); mat-icon { color: #94a3b8; } }
   }
 
   &.card-accent {
-    &::before { background: #8b5cf6; }
-    .stat-icon { background: rgba(139, 92, 246, 0.12); mat-icon { color: #8b5cf6; } }
+    &::before { background: #cbd5e1; }
+    .stat-icon { background: rgba(148, 163, 184, 0.12); mat-icon { color: #cbd5e1; } }
   }
 
   &.card-warn {
