@@ -17,7 +17,7 @@ Authorization: Bearer {token}
 
 #### Register
 - **Method**: POST
-- **URL**: `/register`
+- **URL**: `/auth/register`
 - **Access**: Public
 - **Request Body**:
 ```json
@@ -46,7 +46,7 @@ Authorization: Bearer {token}
 
 #### Login
 - **Method**: POST
-- **URL**: `/login`
+- **URL**: `/auth/login`
 - **Access**: Public
 - **Request Body**:
 ```json
@@ -59,7 +59,7 @@ Authorization: Bearer {token}
 
 #### Logout
 - **Method**: POST
-- **URL**: `/logout`
+- **URL**: `/auth/logout`
 - **Access**: Protected
 - **Response**:
 ```json
@@ -70,13 +70,13 @@ Authorization: Bearer {token}
 
 #### Get Current User
 - **Method**: GET
-- **URL**: `/user`
+- **URL**: `/auth/me`
 - **Access**: Protected
 - **Response**: User object
 
 #### Update Profile
 - **Method**: PUT
-- **URL**: `/profile`
+- **URL**: `/auth/profile`
 - **Access**: Protected
 - **Request Body**:
 ```json
@@ -90,7 +90,7 @@ Authorization: Bearer {token}
 
 #### Change Password
 - **Method**: POST
-- **URL**: `/change-password`
+- **URL**: `/auth/change-password`
 - **Access**: Protected
 - **Request Body**:
 ```json
@@ -489,14 +489,14 @@ Authorization: Bearer {token}
 
 #### Register a new user:
 ```bash
-curl -X POST http://localhost:8000/api/register \
+curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"John Doe","email":"john@example.com","password":"password123","password_confirmation":"password123"}'
 ```
 
 #### Login:
 ```bash
-curl -X POST http://localhost:8000/api/login \
+curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"john@example.com","password":"password123"}'
 ```

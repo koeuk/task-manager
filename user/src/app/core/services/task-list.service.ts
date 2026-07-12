@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TaskList } from '../models/project.model';
+import { environment } from '../../../environments/environment';
 
 interface TaskListResponse {
   message: string;
@@ -15,7 +16,7 @@ export interface ReorderListItem {
 
 @Injectable({ providedIn: 'root' })
 export class TaskListService {
-  private apiUrl = 'http://localhost:8000/api/task-lists';
+  private apiUrl = `${environment.apiUrl}/task-lists`;
 
   constructor(private http: HttpClient) {}
 

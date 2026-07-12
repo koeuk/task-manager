@@ -362,11 +362,13 @@ export class UserStateService {
 ## UI/UX Guidelines
 
 ### Theme
-- Primary Color: #3F51B5 (Indigo)
-- Accent Color: #FF4081 (Pink)
-- Success: #4CAF50
-- Warning: #FF9800
-- Error: #F44336
+- Primary Color: #6366F1 (Indigo)
+- Accent Color: #8B5CF6 (Violet)
+- Sidebar: navy gradient (#1B2238 → #141A2A)
+- Success: #10B981
+- Warning: #F59E0B
+- Error: #EF4444
+- Supports light and dark mode (persisted toggle)
 
 ### Layout
 - Fixed sidebar (collapsible)

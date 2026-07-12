@@ -10,6 +10,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatBadgeModule } from '@angular/material/badge';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 interface DashboardStats {
   total_projects: number;
@@ -68,7 +69,7 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData(): void {
-    this.http.get<DashboardStats>('http://localhost:8000/api/dashboard')
+    this.http.get<DashboardStats>(`${environment.apiUrl}/dashboard`)
       .subscribe({
         next: (data) => {
           this.stats = data;

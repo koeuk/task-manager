@@ -4,12 +4,13 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { User, LoginCredentials, RegisterCredentials, AuthResponse } from '../models/user.model';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8000/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private userKey = 'auth_user';
   private currentUserSubject = new BehaviorSubject<User | null>(this.readStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Project, Paginated, ProjectStatus } from '../models/project.model';
+import { environment } from '../../../environments/environment';
 
 export interface ProjectFilters {
   status?: ProjectStatus | '';
@@ -27,7 +28,7 @@ interface ProjectResponse {
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
-  private apiUrl = 'http://localhost:8000/api/projects';
+  private apiUrl = `${environment.apiUrl}/projects`;
 
   constructor(private http: HttpClient) {}
 

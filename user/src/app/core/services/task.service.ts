@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Task, Paginated, TaskStatus, TaskPriority } from '../models/project.model';
+import { environment } from '../../../environments/environment';
 
 export interface TaskFilters {
   project_id?: number;
@@ -41,7 +42,7 @@ export interface ReorderItem {
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
-  private apiUrl = 'http://localhost:8000/api/tasks';
+  private apiUrl = `${environment.apiUrl}/tasks`;
 
   constructor(private http: HttpClient) {}
 
