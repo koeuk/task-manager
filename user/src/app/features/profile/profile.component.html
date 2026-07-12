@@ -1,0 +1,89 @@
+<div class="page">
+  <h1>Profile</h1>
+
+  <div class="profile-banner" *ngIf="user">
+    <div class="avatar">{{ initials }}</div>
+    <div class="banner-info">
+      <h2>{{ user.name }}</h2>
+      <p>{{ user.email }}</p>
+      <span class="role-badge">{{ user.role }}</span>
+      <span class="since" *ngIf="user.created_at">Member since {{ user.created_at | date:'mediumDate' }}</span>
+    </div>
+  </div>
+
+  <div class="cards">
+    <mat-card class="form-card">
+      <h3>Profile Information</h3>
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" required>
+          <mat-error *ngIf="profileForm.get('name')?.hasError('required')">Name is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" required>
+          <mat-error *ngIf="profileForm.get('email')?.hasError('required')">Email is required</mat-error>
+          <mat-error *ngIf="profileForm.get('email')?.hasError('email')">Enter a valid email</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone" placeholder="Optional">
+        </mat-form-field>
+
+        <div class="actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="savingProfile">
+            <mat-progress-spinner *ngIf="savingProfile" diameter="18" mode="indeterminate"></mat-progress-spinner>
+            <span>Save changes</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+
+    <mat-card class="form-card">
+      <h3>Change Password</h3>
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Current password</mat-label>
+          <input matInput [type]="hideCurrent ? 'password' : 'text'" formControlName="current_password" required>
+          <button mat-icon-button matSuffix type="button" (click)="hideCurrent = !hideCurrent">
+            <mat-icon>{{ hideCurrent ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="passwordForm.get('current_password')?.hasError('required')">Required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>New password</mat-label>
+          <input matInput [type]="hideNew ? 'password' : 'text'" formControlName="password" required>
+          <button mat-icon-button matSuffix type="button" (click)="hideNew = !hideNew">
+            <mat-icon>{{ hideNew ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="passwordForm.get('password')?.hasError('required')">Required</mat-error>
+          <mat-error *ngIf="passwordForm.get('password')?.hasError('minlength')">At least 8 characters</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm new password</mat-label>
+          <input matInput [type]="hideConfirm ? 'password' : 'text'" formControlName="password_confirmation" required>
+          <button mat-icon-button matSuffix type="button" (click)="hideConfirm = !hideConfirm">
+            <mat-icon>{{ hideConfirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="passwordForm.get('password_confirmation')?.hasError('required')">Required</mat-error>
+        </mat-form-field>
+
+        <p class="mismatch" *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('password_confirmation')?.touched">
+          Passwords do not match.
+        </p>
+
+        <div class="actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="savingPassword">
+            <mat-progress-spinner *ngIf="savingPassword" diameter="18" mode="indeterminate"></mat-progress-spinner>
+            <span>Update password</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>

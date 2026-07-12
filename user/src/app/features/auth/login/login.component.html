@@ -1,0 +1,67 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-badge">
+        <mat-icon>task_alt</mat-icon>
+      </div>
+      <h1>Task Manager</h1>
+      <p class="subtitle">Sign in to your account</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput
+               type="email"
+               formControlName="email"
+               placeholder="user@example.com"
+               autocomplete="email">
+        <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+          Email is required
+        </mat-error>
+        <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+          Please enter a valid email
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input matInput
+               [type]="hidePassword ? 'password' : 'text'"
+               formControlName="password"
+               autocomplete="current-password">
+        <button mat-icon-button
+                matSuffix
+                (click)="hidePassword = !hidePassword"
+                [attr.aria-label]="'Toggle password visibility'"
+                [attr.aria-pressed]="!hidePassword"
+                type="button">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+          Password is required
+        </mat-error>
+      </mat-form-field>
+
+      <button mat-flat-button
+              color="primary"
+              type="submit"
+              class="full-width login-button"
+              [disabled]="loading || loginForm.invalid">
+        <mat-progress-spinner *ngIf="loading"
+                              class="btn-spinner"
+                              diameter="20"
+                              mode="indeterminate">
+        </mat-progress-spinner>
+        <mat-icon *ngIf="!loading">login</mat-icon>
+        <span>{{ loading ? 'Signing in…' : 'Sign In' }}</span>
+      </button>
+    </form>
+
+    <p class="login-alt">
+      Don't have an account? <a routerLink="/register">Register here</a>
+    </p>
+  </div>
+</div>

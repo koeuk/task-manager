@@ -1,0 +1,44 @@
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+  min-width: 420px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+
+  .full-width {
+    flex: 1;
+  }
+}
+
+.color-field {
+  width: 90px;
+
+  input[type="color"] {
+    padding: 0;
+    height: 24px;
+    cursor: pointer;
+  }
+}
+
+mat-dialog-actions {
+  padding: 8px 0 0;
+
+  button mat-progress-spinner {
+    display: inline-block;
+    margin-right: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  mat-dialog-content { min-width: unset; }
+  .row { flex-direction: column; gap: 0; }
+  .color-field { width: 100%; }
+}

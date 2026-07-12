@@ -1,0 +1,89 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthService } from '../../../core/services/auth.service';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
+  ],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
+})
+export class LoginComponent implements OnInit {
+  loginForm!: FormGroup;
+  loading = false;
+  returnUrl: string = '/dashboard';
+  hidePassword = true;
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
+  ) {}
+
+  ngOnInit(): void {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
+    });
+
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+
+    // Redirect if already logged in
+    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
+      this.router.navigate([this.returnUrl]);
+    }
+  }
+
+  onSubmit(): void {
+    if (this.loginForm.invalid) {
+      return;
+    }
+
+    this.loading = true;
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (response) => {
+        this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
+        this.router.navigate([this.returnUrl]);
+      },
+      error: (error) => {
+        this.loading = false;
+        let message = 'Login failed. Please try again.';
+        
+        if (error.status === 401) {
+          message = 'Invalid email or password.';
+        } else if (error.error?.message) {
+          message = error.error.message;
+        } else if (error.message === 'Access denied. Admin role required.') {
+          message = 'Access denied. Admin privileges required.';
+        }
+        
+        this.snackBar.open(message, 'Close', { 
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+}

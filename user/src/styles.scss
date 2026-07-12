@@ -1,0 +1,168 @@
+@use '@angular/material' as mat;
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+// ---- Dark theme: Material colors layered on top of the prebuilt light theme ----
+$dark-primary: mat.m2-define-palette(mat.$m2-indigo-palette);
+$dark-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+$dark-warn: mat.m2-define-palette(mat.$m2-red-palette);
+$dark-theme: mat.m2-define-dark-theme((
+  color: (
+    primary: $dark-primary,
+    accent: $dark-accent,
+    warn: $dark-warn,
+  ),
+));
+
+.dark-theme {
+  @include mat.all-component-colors($dark-theme);
+}
+
+// Auth screens (login / register) sit on their own gradient and must always
+// stay light, even when the app is in dark mode.
+$light-primary: mat.m2-define-palette(mat.$m2-indigo-palette);
+$light-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+$light-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $light-primary,
+    accent: $light-accent,
+    warn: $dark-warn,
+  ),
+));
+
+.login-page,
+.register-container {
+  @include mat.all-component-colors($light-theme);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+// Utility classes
+.full-width {
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.spacer {
+  flex: 1;
+}
+
+// Material overrides
+.mat-mdc-snack-bar-container {
+  &.error-snackbar {
+    --mdc-snackbar-container-color: #f44336;
+    --mat-snack-bar-button-color: white;
+  }
+}
+
+// Flat cards across the whole app: no shadow, small radius, subtle border
+mat-card.mat-mdc-card {
+  --mdc-elevated-card-container-elevation: none;
+  box-shadow: none !important;
+  border: 1px solid #e9e9ef;
+  border-radius: 8px;
+}
+
+// ---- Dark-mode overrides for custom (non-Material) surfaces ----
+// `body.dark-theme` raises specificity above component-encapsulated styles.
+body.dark-theme {
+  background: #0f1420;
+  color-scheme: dark;
+
+  // Layout shell
+  .content {
+    background: #0f1420;
+  }
+
+  .sidenav {
+    background: #171d2e;
+    border-right-color: #262c40;
+  }
+
+  .toolbar {
+    background: #171d2e;
+    color: #e5e7eb;
+  }
+
+  // Cards inside the app shell only (auth pages stay light)
+  .content mat-card.mat-mdc-card {
+    background: #171d2e;
+    border-color: #262c40;
+  }
+
+  // Tables & paginator inherit the dark card surface
+  .mat-mdc-table {
+    background: transparent;
+    --mat-table-background-color: transparent;
+  }
+
+  .mat-mdc-paginator {
+    background: transparent;
+    --mat-paginator-container-background-color: transparent;
+  }
+
+  .mat-mdc-header-row,
+  .mat-mdc-row {
+    background: transparent;
+  }
+
+  // Hardcoded dark headings/values flip to light
+  .page-title,
+  .stat-value,
+  .summary-value {
+    color: #e5e7eb;
+  }
+
+  .stat-title,
+  .summary-title,
+  .setting-desc {
+    color: #9ca3af;
+  }
+
+  .info-row {
+    color: #cbd5e1;
+    border-bottom-color: #262c40;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #12182a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #3a415c;
+  }
+}

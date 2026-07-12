@@ -1,0 +1,120 @@
+<div class="detail-loading" *ngIf="loading">
+  <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+</div>
+
+<ng-container *ngIf="!loading && task">
+  <div class="detail-header">
+    <div class="title-block">
+      <span class="priority-dot" [style.background]="priorityColor(task.priority)"
+            [matTooltip]="priorityLabel(task.priority) + ' priority'"></span>
+      <h2>{{ task.title }}</h2>
+    </div>
+    <button mat-icon-button (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="toolbar">
+      <mat-form-field appearance="outline" class="status-select" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [value]="task.status" (selectionChange)="changeStatus($event.value)">
+          <mat-option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <span class="spacer"></span>
+      <button mat-stroked-button (click)="editTask()">
+        <mat-icon>edit</mat-icon> Edit
+      </button>
+      <button mat-stroked-button color="warn" (click)="deleteTask()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-item" *ngIf="task.project">
+        <span class="meta-label">Project</span>
+        <span>{{ task.project.name }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Priority</span>
+        <span class="chip" [style.background]="priorityColor(task.priority)">{{ priorityLabel(task.priority) }}</span>
+      </div>
+      <div class="meta-item" *ngIf="task.due_date">
+        <span class="meta-label">Due</span>
+        <span>{{ task.due_date | date:'mediumDate' }}</span>
+      </div>
+      <div class="meta-item" *ngIf="task.estimated_hours">
+        <span class="meta-label">Estimate</span>
+        <span>{{ task.estimated_hours }}h</span>
+      </div>
+      <div class="meta-item" *ngIf="task.assignee">
+        <span class="meta-label">Assignee</span>
+        <span>{{ task.assignee.name }}</span>
+      </div>
+      <div class="meta-item" *ngIf="task.creator">
+        <span class="meta-label">Created by</span>
+        <span>{{ task.creator.name }}</span>
+      </div>
+    </div>
+
+    <div class="description" *ngIf="task.description">
+      <span class="meta-label">Description</span>
+      <p>{{ task.description }}</p>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="comments">
+      <h3>Comments ({{ comments.length }})</h3>
+
+      <div class="add-comment">
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <mat-label>Add a comment</mat-label>
+          <textarea matInput [(ngModel)]="newComment" rows="2"
+                    (keydown.control.enter)="addComment()"></textarea>
+        </mat-form-field>
+        <button mat-flat-button color="primary" (click)="addComment()"
+                [disabled]="postingComment || !newComment.trim()">
+          <mat-icon>send</mat-icon> Post
+        </button>
+      </div>
+
+      <div class="empty-comments" *ngIf="comments.length === 0">
+        No comments yet. Be the first to comment.
+      </div>
+
+      <div class="comment" *ngFor="let c of comments">
+        <div class="avatar">{{ (c.user?.name || '?')[0] | uppercase }}</div>
+        <div class="comment-body">
+          <div class="comment-head">
+            <span class="author">{{ c.user?.name || 'Unknown' }}</span>
+            <span class="time">{{ c.created_at | date:'medium' }}</span>
+            <span class="spacer"></span>
+            <ng-container *ngIf="canEditComment(c) && editingCommentId !== c.id">
+              <button mat-icon-button class="mini" (click)="startEditComment(c)" matTooltip="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="mini" color="warn" (click)="deleteComment(c)" matTooltip="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </ng-container>
+          </div>
+
+          <p *ngIf="editingCommentId !== c.id" class="comment-text">{{ c.comment }}</p>
+
+          <div *ngIf="editingCommentId === c.id" class="edit-comment">
+            <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+              <textarea matInput [(ngModel)]="editingText" rows="2"></textarea>
+            </mat-form-field>
+            <div class="edit-actions">
+              <button mat-button (click)="cancelEditComment()">Cancel</button>
+              <button mat-flat-button color="primary" (click)="saveEditComment(c)"
+                      [disabled]="!editingText.trim()">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+</ng-container>

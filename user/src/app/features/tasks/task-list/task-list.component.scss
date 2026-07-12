@@ -1,0 +1,119 @@
+.page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  h1 { margin: 0; font-size: 26px; font-weight: 600; }
+  .subtitle { margin: 4px 0 0; color: rgba(0, 0, 0, 0.55); }
+  button mat-icon { margin-right: 4px; }
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  .search { flex: 1; min-width: 220px; }
+  .filter { width: 160px; }
+}
+
+.loading, .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px;
+  text-align: center;
+}
+
+.empty {
+  color: rgba(0, 0, 0, 0.55);
+
+  mat-icon { font-size: 56px; height: 56px; width: 56px; color: rgba(0, 0, 0, 0.2); }
+  h3 { margin: 16px 0 4px; color: rgba(0, 0, 0, 0.75); }
+  p { margin: 0; }
+}
+
+.table-wrap {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.tasks-table {
+  width: 100%;
+
+  .task-row {
+    cursor: pointer;
+    &:hover { background: rgba(0, 0, 0, 0.03); }
+  }
+
+  .priority-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .task-title { font-weight: 500; vertical-align: middle; }
+  .project-name { color: rgba(0, 0, 0, 0.7); }
+
+  .chip {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .status-select {
+    width: 140px;
+    font-size: 13px;
+  }
+
+  .due.overdue { color: #f44336; font-weight: 600; }
+  .muted { color: rgba(0, 0, 0, 0.35); }
+}
+
+mat-paginator { margin-top: 8px; background: transparent; }
+
+// Tighten the inline status select so table rows stay compact
+.tasks-table .status-select ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 40px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+  .page { padding: 16px; }
+  .filters .filter { width: 100%; }
+}
+
+// ---- Dark theme ----
+:host-context(.dark-theme) {
+  .page-header h1,
+  .empty h3,
+  .tasks-table .task-title { color: #e5e7eb; }
+
+  .subtitle,
+  .empty { color: #9ca3af; }
+
+  .empty mat-icon { color: rgba(255, 255, 255, 0.18); }
+  .table-wrap { background: #171d2e; }
+  .tasks-table .task-row:hover { background: rgba(255, 255, 255, 0.04); }
+  .tasks-table .project-name { color: #cbd0da; }
+  .tasks-table .muted { color: #6b7280; }
+}

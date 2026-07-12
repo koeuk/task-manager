@@ -1,0 +1,102 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav 
+    #sidenav 
+    class="sidenav" 
+    [mode]="'side'" 
+    [opened]="sidenavOpened"
+    [fixedInViewport]="true">
+    
+    <div class="sidenav-header">
+      <div class="logo-badge">
+        <mat-icon>admin_panel_settings</mat-icon>
+      </div>
+      <div class="brand-text">
+        <h2 class="app-title">Admin Panel</h2>
+        <span class="app-subtitle">Task Management</span>
+      </div>
+    </div>
+
+    <p class="nav-section-label">Menu</p>
+
+    <mat-nav-list class="nav-list">
+      <a mat-list-item
+         *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         routerLinkActive="active-link"
+         [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}">
+        <mat-icon matListItemIcon [matBadge]="item.badge"
+                  [matBadgeHidden]="!item.badge"
+                  matBadgeColor="warn"
+                  matBadgeSize="small">
+          {{item.icon}}
+        </mat-icon>
+        <span matListItemTitle>{{item.title}}</span>
+      </a>
+    </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <div class="user-info" *ngIf="currentUser$ | async as user">
+        <div class="user-avatar">{{ (user.name || 'A').charAt(0).toUpperCase() }}</div>
+        <div class="user-details">
+          <p class="user-name">{{user.name}}</p>
+          <p class="user-role">Administrator</p>
+        </div>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" class="toolbar">
+      <button mat-icon-button (click)="toggleSidenav()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      
+      <span class="toolbar-title">Task Management System</span>
+      
+      <span class="spacer"></span>
+
+      <!-- Theme toggle -->
+      <button mat-icon-button (click)="toggleTheme()"
+              [matTooltip]="(themeService.isDark$ | async) ? 'Switch to light mode' : 'Switch to dark mode'">
+        <mat-icon>{{ (themeService.isDark$ | async) ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+
+      <!-- Notifications -->
+      <button mat-icon-button matTooltip="Notifications">
+        <mat-icon matBadge="3" matBadgeColor="warn" matBadgeSize="small">
+          notifications
+        </mat-icon>
+      </button>
+
+      <!-- User Menu -->
+      <button mat-icon-button [matMenuTriggerFor]="userMenu" matTooltip="Account">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      
+      <mat-menu #userMenu="matMenu">
+        <div class="user-menu-header" *ngIf="currentUser$ | async as user">
+          <p class="user-email">{{user.email}}</p>
+          <p class="user-role-badge">Admin</p>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item routerLink="/profile">
+          <mat-icon>person</mat-icon>
+          <span>Profile</span>
+        </button>
+        <button mat-menu-item routerLink="/settings">
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

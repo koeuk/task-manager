@@ -1,0 +1,90 @@
+.page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+
+  h1 { margin: 0 0 20px; font-size: 26px; font-weight: 600; }
+}
+
+.profile-banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  margin-bottom: 24px;
+
+  .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .banner-info {
+    h2 { margin: 0; font-size: 22px; }
+    p { margin: 2px 0 8px; opacity: 0.9; }
+  }
+
+  .role-badge {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.25);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+    margin-right: 12px;
+  }
+
+  .since { font-size: 13px; opacity: 0.85; }
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.form-card {
+  padding: 24px;
+
+  h3 { margin: 0 0 16px; font-size: 17px; font-weight: 600; }
+
+  form { display: flex; flex-direction: column; }
+}
+
+.full-width { width: 100%; }
+
+.mismatch {
+  color: #f44336;
+  font-size: 13px;
+  margin: -8px 0 12px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+
+  button mat-progress-spinner { display: inline-block; margin-right: 8px; }
+}
+
+@media (max-width: 600px) {
+  .page { padding: 16px; }
+  .profile-banner { flex-direction: column; text-align: center; }
+}
+
+// ---- Dark theme ----
+:host-context(.dark-theme) {
+  .page h1,
+  .form-card h3 { color: #e5e7eb; }
+}

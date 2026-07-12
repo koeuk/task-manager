@@ -1,0 +1,77 @@
+<div class="reports-container">
+  <h1 class="page-title">Reports</h1>
+
+  <mat-card class="range-card">
+    <div class="range-header">
+      <mat-icon>date_range</mat-icon>
+      <span>Filter by date range</span>
+    </div>
+    <form [formGroup]="rangeForm" class="range-form">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Start date</mat-label>
+        <input matInput [matDatepicker]="startPicker" formControlName="start">
+        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <span class="range-sep">—</span>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>End date</mat-label>
+        <input matInput [matDatepicker]="endPicker" formControlName="end">
+        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="button" (click)="loadReport()">
+        <mat-icon>refresh</mat-icon>
+        Apply
+      </button>
+    </form>
+  </mat-card>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+  </div>
+
+  <div *ngIf="!loading && report" class="report-content">
+    <div class="summary-grid">
+      <mat-card *ngFor="let card of summaryCards" class="summary-card" [ngClass]="'card-' + card.color">
+        <div class="summary-icon"><mat-icon>{{ card.icon }}</mat-icon></div>
+        <div>
+          <h2 class="summary-value">{{ cardValue(card.key) }}</h2>
+          <p class="summary-title">{{ card.title }}</p>
+        </div>
+      </mat-card>
+    </div>
+
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>Productivity by User</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="report.productivity_by_user">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>User</th>
+            <td mat-cell *matCellDef="let u">{{ u.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+          </ng-container>
+          <ng-container matColumnDef="completed_tasks">
+            <th mat-header-cell *matHeaderCellDef>Completed Tasks</th>
+            <td mat-cell *matCellDef="let u">{{ u.completed_tasks }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="productivityColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: productivityColumns;"></tr>
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="productivityColumns.length">
+              <div class="no-data">No data for this range</div>
+            </td>
+          </tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

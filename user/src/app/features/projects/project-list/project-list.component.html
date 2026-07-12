@@ -1,0 +1,91 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Projects</h1>
+      <p class="subtitle">{{ total }} project{{ total === 1 ? '' : 's' }}</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> New Project
+    </button>
+  </div>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Search projects</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Search by name">
+      <button *ngIf="searchControl.value" matSuffix mat-icon-button (click)="clearSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="status" subscriptSizing="dynamic">
+      <mat-label>Status</mat-label>
+      <mat-select [(value)]="statusFilter" (selectionChange)="onStatusChange()">
+        <mat-option [value]="''">All statuses</mat-option>
+        <mat-option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+  </div>
+
+  <div class="empty" *ngIf="!loading && projects.length === 0">
+    <mat-icon>folder_open</mat-icon>
+    <h3>No projects found</h3>
+    <p>Create your first project to get started.</p>
+    <button mat-flat-button color="primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> New Project
+    </button>
+  </div>
+
+  <div class="grid" *ngIf="!loading && projects.length > 0">
+    <mat-card class="project-card" *ngFor="let p of projects" (click)="openProject(p)"
+              [style.borderTopColor]="p.color || '#2196f3'">
+      <div class="card-top">
+        <div class="card-title">
+          <mat-icon class="proj-icon" [style.color]="p.color || '#2196f3'">folder</mat-icon>
+          <h3 [matTooltip]="p.name">{{ p.name }}</h3>
+        </div>
+        <button mat-icon-button (click)="$event.stopPropagation()" [matMenuTriggerFor]="menu" aria-label="Project actions">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="openEdit(p, $event)">
+            <mat-icon>edit</mat-icon><span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="confirmDelete(p, $event)">
+            <mat-icon color="warn">delete</mat-icon><span>Delete</span>
+          </button>
+        </mat-menu>
+      </div>
+
+      <p class="description">{{ p.description || 'No description' }}</p>
+
+      <div class="progress-row">
+        <span class="progress-label">{{ completedCount(p) }}/{{ taskCount(p) }} tasks</span>
+        <span class="progress-pct">{{ progress(p) }}%</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="progress(p)"></mat-progress-bar>
+
+      <div class="card-footer">
+        <span class="status-chip" [style.background]="projectStatusColor(p.status)">
+          {{ statusLabel(p.status) }}
+        </span>
+        <span class="due" *ngIf="p.due_date">
+          <mat-icon>event</mat-icon> {{ p.due_date | date:'MMM d' }}
+        </span>
+      </div>
+    </mat-card>
+  </div>
+
+  <mat-paginator *ngIf="!loading && total > pageSize"
+                 [length]="total"
+                 [pageSize]="pageSize"
+                 [pageIndex]="pageIndex"
+                 [pageSizeOptions]="[12, 24, 48]"
+                 (page)="onPage($event)">
+  </mat-paginator>
+</div>

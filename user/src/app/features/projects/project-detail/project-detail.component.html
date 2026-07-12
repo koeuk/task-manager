@@ -1,0 +1,102 @@
+<div class="loading" *ngIf="loading">
+  <mat-progress-spinner diameter="44" mode="indeterminate"></mat-progress-spinner>
+</div>
+
+<div class="page" *ngIf="!loading && project">
+  <div class="detail-header">
+    <button mat-icon-button (click)="goBack()" matTooltip="Back to projects">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <div class="header-main">
+      <div class="title-row">
+        <mat-icon class="proj-icon" [style.color]="project.color || '#2196f3'">folder</mat-icon>
+        <h1>{{ project.name }}</h1>
+        <span class="status-chip" [style.background]="projectStatusColor(project.status)">
+          {{ statusLabel(project.status) }}
+        </span>
+      </div>
+      <p class="description" *ngIf="project.description">{{ project.description }}</p>
+      <div class="progress-wrap">
+        <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+        <span class="progress-text">{{ completedTasks }}/{{ totalTasks }} done ({{ progress }}%)</span>
+      </div>
+    </div>
+
+    <button mat-icon-button [matMenuTriggerFor]="projMenu" aria-label="Project actions">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #projMenu="matMenu">
+      <button mat-menu-item (click)="editProject()"><mat-icon>edit</mat-icon><span>Edit project</span></button>
+      <button mat-menu-item (click)="deleteProject()"><mat-icon color="warn">delete</mat-icon><span>Delete project</span></button>
+    </mat-menu>
+  </div>
+
+  <div class="board" cdkDropListGroup>
+    <div class="column" *ngFor="let col of columns" [class.virtual]="col.isVirtual">
+      <div class="column-header">
+        <ng-container *ngIf="editingListId !== col.id || col.isVirtual">
+          <span class="col-name">{{ col.name }}</span>
+          <span class="col-count">{{ col.tasks.length }}</span>
+          <span class="spacer"></span>
+          <button *ngIf="!col.isVirtual" mat-icon-button class="mini" [matMenuTriggerFor]="listMenu" aria-label="List actions">
+            <mat-icon>more_horiz</mat-icon>
+          </button>
+          <mat-menu #listMenu="matMenu">
+            <button mat-menu-item (click)="startRenameList(col)"><mat-icon>edit</mat-icon><span>Rename</span></button>
+            <button mat-menu-item (click)="deleteList(col)"><mat-icon color="warn">delete</mat-icon><span>Delete</span></button>
+          </mat-menu>
+        </ng-container>
+
+        <div class="rename-box" *ngIf="editingListId === col.id && !col.isVirtual">
+          <input matInput class="rename-input" [(ngModel)]="editingListName"
+                 (keydown.enter)="saveRenameList(col)" (keydown.escape)="cancelRenameList()" autofocus>
+          <button mat-icon-button class="mini" (click)="saveRenameList(col)"><mat-icon>check</mat-icon></button>
+          <button mat-icon-button class="mini" (click)="cancelRenameList()"><mat-icon>close</mat-icon></button>
+        </div>
+      </div>
+
+      <div class="task-list" cdkDropList [cdkDropListData]="col.tasks"
+           (cdkDropListDropped)="drop($event, col)">
+        <div class="task-card" *ngFor="let task of col.tasks" cdkDrag (click)="openTask(task)">
+          <div class="card-top">
+            <span class="priority-dot" [style.background]="priorityColor(task.priority)"
+                  [matTooltip]="priorityLabel(task.priority)"></span>
+            <span class="task-title">{{ task.title }}</span>
+          </div>
+          <div class="card-meta">
+            <span class="status-tag" [style.color]="statusColor(task.status)"
+                  [style.borderColor]="statusColor(task.status)">{{ statusLabel(task.status) }}</span>
+            <span class="spacer"></span>
+            <span class="due" *ngIf="task.due_date" [matTooltip]="'Due ' + (task.due_date | date:'mediumDate')">
+              <mat-icon>event</mat-icon>{{ task.due_date | date:'MMM d' }}
+            </span>
+            <span class="assignee" *ngIf="task.assignee" [matTooltip]="task.assignee.name">
+              {{ (task.assignee.name || '?')[0] | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="empty-col" *ngIf="col.tasks.length === 0">No tasks</div>
+      </div>
+
+      <button *ngIf="!col.isVirtual" mat-button class="add-task-btn" (click)="addTask(col)">
+        <mat-icon>add</mat-icon> Add task
+      </button>
+    </div>
+
+    <div class="add-list-column">
+      <button *ngIf="!addingList" mat-stroked-button class="add-list-btn" (click)="startAddList()">
+        <mat-icon>add</mat-icon> Add list
+      </button>
+      <div class="new-list-box" *ngIf="addingList">
+        <input matInput class="rename-input" [(ngModel)]="newListName" placeholder="List name"
+               (keydown.enter)="saveNewList()" (keydown.escape)="cancelAddList()" autofocus>
+        <div class="new-list-actions">
+          <button mat-flat-button color="primary" (click)="saveNewList()" [disabled]="!newListName.trim()">Add</button>
+          <button mat-button (click)="cancelAddList()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

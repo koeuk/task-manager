@@ -1,0 +1,187 @@
+:host {
+  display: block;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #7c3aed 100%);
+  position: relative;
+  overflow: hidden;
+
+  // Soft decorative glows
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  &::before {
+    width: 420px;
+    height: 420px;
+    background: #a78bfa;
+    top: -120px;
+    right: -80px;
+  }
+
+  &::after {
+    width: 380px;
+    height: 380px;
+    background: #6366f1;
+    bottom: -140px;
+    left: -100px;
+  }
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 36px 28px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(24, 12, 60, 0.35);
+  animation: card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 28px;
+
+  .brand-badge {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    box-shadow: 0 10px 22px rgba(99, 102, 241, 0.4);
+
+    mat-icon {
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+      color: #fff;
+    }
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1e1b3a;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 400;
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Align the leading icon nicely inside the outlined field
+mat-form-field {
+  mat-icon[matPrefix] {
+    margin: 0 10px 0 4px;
+    color: #9ca3af;
+  }
+}
+
+.login-button {
+  height: 50px;
+  margin-top: 8px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover:not([disabled]) {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(99, 102, 241, 0.45);
+  }
+
+  &[disabled] {
+    box-shadow: none;
+  }
+
+  .btn-spinner {
+    display: inline-block;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.login-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f5f3ff;
+  border: 1px solid #ede9fe;
+  color: #6d5bb0;
+  font-size: 12.5px;
+  line-height: 1.5;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: #8b5cf6;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 32px 22px 22px;
+    border-radius: 16px;
+  }
+
+  .brand h1 {
+    font-size: 23px;
+  }
+}
