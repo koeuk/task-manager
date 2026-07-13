@@ -152,24 +152,20 @@
     }
 
     &.active-link {
-      // Brushed-silver pill: bright metallic surface + dark ink for a crisp
-      // inversion against the dark navy rail.
-      background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 48%, #94a3b8 100%);
-      color: #1e293b;
+      // Active = emphasized label + rail marker, not a filled button.
+      background: transparent;
+      color: #fff;
       font-weight: 600;
-      box-shadow:
-        0 8px 20px rgba(8, 12, 24, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.7);
-      --mdc-list-list-item-label-text-color: #1e293b;
-      --mdc-list-list-item-leading-icon-color: #334155;
-      --mat-list-list-item-leading-icon-color: #334155;
+      box-shadow: none;
+      --mdc-list-list-item-label-text-color: #fff;
+      --mdc-list-list-item-leading-icon-color: #e2e8f0;
+      --mat-list-list-item-leading-icon-color: #e2e8f0;
 
       &:hover {
-        background: linear-gradient(135deg, #f8fafc 0%, #dbe2ea 48%, #a3b0c2 100%);
-        color: #1e293b;
+        background: rgba(255, 255, 255, 0.06);
       }
 
-      // Glowing marker on the rail edge
+      // Accent bar marking the active item on the rail edge
       &::before {
         content: '';
         position: absolute;
@@ -177,10 +173,10 @@
         top: 50%;
         transform: translateY(-50%);
         width: 3px;
-        height: 24px;
+        height: 22px;
         border-radius: 0 4px 4px 0;
-        background: #f8fafc;
-        box-shadow: 0 0 10px rgba(226, 232, 240, 0.75);
+        background: #e2e8f0;
+        box-shadow: 0 0 10px rgba(226, 232, 240, 0.6);
       }
     }
 

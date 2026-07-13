@@ -19,6 +19,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { TaskService } from '../../../core/services/task.service';
 import { Task } from '../../../core/models/project.model';
 import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
+import { exportToCsv } from '../../../core/utils/csv-export';
 
 @Component({
   selector: 'app-task-list',
@@ -121,5 +122,22 @@ export class TaskListComponent implements OnInit {
 
   statusLabel(status: string): string {
     return status.replace('_', ' ');
+  }
+
+  exportCsv(): void {
+    const rows = this.dataSource.data;
+    if (!rows.length) {
+      this.snackBar.open('No tasks to export', 'Close', { duration: 3000 });
+      return;
+    }
+    exportToCsv('tasks', rows, [
+      { header: 'Title', value: t => t.title },
+      { header: 'Status', value: t => this.statusLabel(t.status) },
+      { header: 'Priority', value: t => t.priority },
+      { header: 'Assignee', value: t => t.assignee?.name ?? 'Unassigned' },
+      { header: 'Project', value: t => t.project?.name ?? '' },
+      { header: 'Due Date', value: t => t.due_date ?? '' },
+      { header: 'Created', value: t => t.created_at ?? '' }
+    ]);
   }
 }

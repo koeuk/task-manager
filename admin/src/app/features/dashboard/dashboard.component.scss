@@ -48,7 +48,7 @@
 .stat-card {
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 16px;
 
   // Accent strip on the left edge
   &::before {
@@ -121,6 +121,33 @@
   &.card-success {
     &::before { background: #10b981; }
     .stat-icon { background: rgba(16, 185, 129, 0.12); mat-icon { color: #10b981; } }
+  }
+}
+
+// Quick actions
+.quick-actions-card {
+  margin-bottom: 24px;
+
+  .quick-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .qa-label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6b7280;
+      margin-right: 4px;
+    }
+
+    a[mat-stroked-button] {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
   }
 }
 
