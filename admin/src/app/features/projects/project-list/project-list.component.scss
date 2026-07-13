@@ -8,6 +8,13 @@ mat-card-header {
   width: 100%;
   display: flex;
 
+  // Material wraps the title in an internal .mat-mdc-card-header-text div that
+  // shrinks to its content; make it fill the header so the button sits far right.
+  ::ng-deep .mat-mdc-card-header-text {
+    flex: 1;
+    width: 100%;
+  }
+
   mat-card-title {
     display: flex;
     justify-content: space-between;

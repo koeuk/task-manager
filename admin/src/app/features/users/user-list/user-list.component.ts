@@ -20,6 +20,7 @@ import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 import { UserDialogComponent } from '../user-dialog/user-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { exportToCsv } from '../../../core/utils/csv-export';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({

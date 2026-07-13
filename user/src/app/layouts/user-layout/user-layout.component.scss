@@ -66,9 +66,12 @@
     
     a {
       &.active-link {
-        background: rgba(100, 116, 139, 0.1);
+        // Active = emphasized label + left marker, not a filled button.
+        background: transparent;
         border-left: 3px solid #94a3b8;
-        
+        font-weight: 600;
+        --mdc-list-list-item-label-text-color: #1e293b;
+
         mat-icon {
           color: #94a3b8;
         }
@@ -79,6 +82,11 @@
       }
     }
   }
+}
+
+// Dark mode: sidenav goes dark, so the active label must stay light.
+:host-context(.dark-theme) .sidenav mat-nav-list a.active-link {
+  --mdc-list-list-item-label-text-color: #fff;
 }
 
 .toolbar {
