@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 .reports-container {
   width: 100%;
 }
@@ -35,6 +37,9 @@
 }
 
 .range-form {
+  // Compact, smaller filter fields (matches the list filters)
+  @include mat.form-field-density(-4);
+
   display: flex;
   align-items: center;
   gap: 12px;
