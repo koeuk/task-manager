@@ -21,6 +21,7 @@ import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 import { UserDialogComponent } from '../user-dialog/user-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ResetPasswordDialogComponent } from '../reset-password-dialog/reset-password-dialog.component';
 import { exportToCsv } from '../../../core/utils/csv-export';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -157,16 +158,22 @@ export class UserListComponent implements OnInit {
   }
 
   resetPassword(user: User): void {
-    const password = prompt('Enter new password for ' + user.email + ':');
-    if (!password) return;
+    const dialogRef = this.dialog.open(ResetPasswordDialogComponent, {
+      width: '440px',
+      data: { email: user.email }
+    });
 
-    this.userService.resetUserPassword(user.id, password).subscribe({
-      next: () => {
-        this.snackBar.open('Password reset successfully', 'Close', { duration: 3000 });
-      },
-      error: () => {
-        this.snackBar.open('Failed to reset password', 'Close', { duration: 3000 });
-      }
+    dialogRef.afterClosed().subscribe((password: string | undefined) => {
+      if (!password) return;
+
+      this.userService.resetUserPassword(user.id, password).subscribe({
+        next: () => {
+          this.snackBar.open('Password reset successfully', 'Close', { duration: 3000 });
+        },
+        error: () => {
+          this.snackBar.open('Failed to reset password', 'Close', { duration: 3000 });
+        }
+      });
     });
   }
 

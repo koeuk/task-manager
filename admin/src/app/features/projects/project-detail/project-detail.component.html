@@ -1,0 +1,107 @@
+<div class="detail-container">
+  <div class="detail-topbar">
+    <a mat-stroked-button routerLink="/projects">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Projects
+    </a>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+  </div>
+
+  <div *ngIf="!loading && notFound" class="not-found">
+    <mat-icon>folder_off</mat-icon>
+    <p>Project not found.</p>
+  </div>
+
+  <ng-container *ngIf="!loading && project">
+    <!-- Header -->
+    <mat-card class="header-card">
+      <div class="header-main">
+        <span class="color-dot" [style.background]="project.color"></span>
+        <div>
+          <h1>{{ project.name }}</h1>
+          <p class="desc" *ngIf="project.description">{{ project.description }}</p>
+          <mat-chip [ngClass]="'status-' + project.status">{{ project.status | titlecase }}</mat-chip>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="meta-item"><span class="meta-label">Start</span><span>{{ project.start_date ? (project.start_date | date:'mediumDate') : '-' }}</span></div>
+        <div class="meta-item"><span class="meta-label">Due</span><span>{{ project.due_date ? (project.due_date | date:'mediumDate') : '-' }}</span></div>
+      </div>
+    </mat-card>
+
+    <!-- Completion -->
+    <mat-card class="completion-card">
+      <div class="completion-head">
+        <span>Completion</span>
+        <span class="completion-pct">{{ completion }}%</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="completion"></mat-progress-bar>
+      <div class="completion-sub">
+        <span>{{ tasks.length }} tasks total</span>
+        <span *ngIf="overdue > 0" class="overdue"><mat-icon>warning</mat-icon> {{ overdue }} overdue</span>
+      </div>
+    </mat-card>
+
+    <!-- Breakdowns -->
+    <div class="breakdown-row">
+      <mat-card class="breakdown-card">
+        <mat-card-header><mat-card-title>By Status</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="seg" *ngFor="let s of statusSegments">
+            <div class="seg-top"><span>{{ s.label }}</span><span>{{ s.count }}</span></div>
+            <mat-progress-bar mode="determinate" [value]="s.pct" [ngClass]="'bar-' + s.key"></mat-progress-bar>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="breakdown-card">
+        <mat-card-header><mat-card-title>By Priority</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="seg" *ngFor="let s of prioritySegments">
+            <div class="seg-top"><span>{{ s.label }}</span><span>{{ s.count }}</span></div>
+            <mat-progress-bar mode="determinate" [value]="s.pct" [ngClass]="'bar-p-' + s.key"></mat-progress-bar>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Task list -->
+    <mat-card class="tasks-card">
+      <mat-card-header><mat-card-title>Tasks</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="tasks" *ngIf="tasks.length">
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let t">{{ t.title }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let t"><mat-chip [ngClass]="'status-' + t.status">{{ statusLabel(t.status) | titlecase }}</mat-chip></td>
+          </ng-container>
+          <ng-container matColumnDef="priority">
+            <th mat-header-cell *matHeaderCellDef>Priority</th>
+            <td mat-cell *matCellDef="let t"><mat-chip [ngClass]="'priority-' + t.priority">{{ t.priority | titlecase }}</mat-chip></td>
+          </ng-container>
+          <ng-container matColumnDef="assignee">
+            <th mat-header-cell *matHeaderCellDef>Assignee</th>
+            <td mat-cell *matCellDef="let t">{{ t.assignee?.name || 'Unassigned' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="due_date">
+            <th mat-header-cell *matHeaderCellDef>Due</th>
+            <td mat-cell *matCellDef="let t">{{ t.due_date ? (t.due_date | date:'mediumDate') : '-' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="taskColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: taskColumns;"></tr>
+        </table>
+
+        <div class="empty" *ngIf="!tasks.length">
+          <mat-icon>assignment</mat-icon>
+          <p>No tasks in this project yet.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

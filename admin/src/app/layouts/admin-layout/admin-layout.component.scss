@@ -245,10 +245,9 @@
   top: 0;
   z-index: 10;
   color: #fff;
-  // Uniform slate so white text/icons stay legible across the whole bar
-  // (the old gradient faded to light silver under the right-side icons).
-  background: linear-gradient(90deg, #5f6e84 0%, #6f7f96 100%);
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.15);
+  // Navy to match the sidebar — unifies the top bar and rail into one shell.
+  background: linear-gradient(90deg, #1b2238 0%, #1e2540 100%);
+  box-shadow: 0 2px 10px rgba(8, 12, 24, 0.3);
 
   .toolbar-title {
     margin-left: 16px;
