@@ -3,10 +3,16 @@
     <mat-card-header>
       <mat-card-title>
         <span>User Management</span>
-        <button mat-raised-button color="primary" (click)="openUserDialog()">
-          <mat-icon>add</mat-icon>
-          Add User
-        </button>
+        <span class="header-actions">
+          <button mat-stroked-button (click)="exportCsv()">
+            <mat-icon>download</mat-icon>
+            Export CSV
+          </button>
+          <button mat-raised-button color="primary" (click)="openUserDialog()">
+            <mat-icon>add</mat-icon>
+            Add User
+          </button>
+        </span>
       </mat-card-title>
     </mat-card-header>
 

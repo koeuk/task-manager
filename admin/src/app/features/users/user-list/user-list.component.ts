@@ -185,4 +185,19 @@ export class UserListComponent implements OnInit {
   onPageChange(): void {
     this.loadUsers();
   }
+
+  exportCsv(): void {
+    const rows = this.dataSource.data;
+    if (!rows.length) {
+      this.snackBar.open('No users to export', 'Close', { duration: 3000 });
+      return;
+    }
+    exportToCsv('users', rows, [
+      { header: 'Name', value: u => u.name },
+      { header: 'Email', value: u => u.email },
+      { header: 'Role', value: u => u.role },
+      { header: 'Phone', value: u => u.phone ?? '' },
+      { header: 'Created', value: u => u.created_at ?? '' }
+    ]);
+  }
 }

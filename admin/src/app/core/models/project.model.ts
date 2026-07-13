@@ -43,6 +43,7 @@ export interface Task {
   updated_at: string;
   creator?: User;
   assignee?: User;
+  project?: Project;
   comments?: Comment[];
 }
 

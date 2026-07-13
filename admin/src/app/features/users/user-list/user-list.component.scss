@@ -24,8 +24,10 @@ mat-card-header {
     flex: 1;
     margin: 0;
 
-    button {
+    .header-actions {
       margin-left: auto;
+      display: flex;
+      gap: 10px;
     }
   }
 }
