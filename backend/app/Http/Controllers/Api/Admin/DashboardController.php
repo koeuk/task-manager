@@ -9,8 +9,22 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @group Admin · Dashboard
+ *
+ * System-wide stats and reports. Requires an authenticated **admin** account.
+ *
+ * @authenticated
+ */
 class DashboardController extends Controller
 {
+    /**
+     * Admin dashboard
+     *
+     * System-wide totals plus task/priority/role breakdowns and recent activity.
+     *
+     * @response 200 {"total_users": 5, "total_projects": 3, "total_tasks": 12, "completed_tasks": 5, "active_projects": 2, "tasks_by_status": [], "tasks_by_priority": [], "recent_projects": [], "recent_tasks": [], "user_stats": []}
+     */
     public function index()
     {
         $stats = [
@@ -41,6 +55,15 @@ class DashboardController extends Controller
         return response()->json($stats);
     }
 
+    /**
+     * Reports (date range)
+     *
+     * Aggregated metrics over a date range plus per-user productivity. Defaults to the last month.
+     *
+     * @queryParam start_date date Range start (Y-m-d). Example: 2026-06-14
+     * @queryParam end_date date Range end (Y-m-d). Example: 2026-07-14
+     * @response 200 {"tasks_created": 8, "tasks_completed": 5, "projects_created": 2, "new_users": 1, "productivity_by_user": []}
+     */
     public function reports(Request $request)
     {
         $startDate = $request->input('start_date', now()->subMonth());

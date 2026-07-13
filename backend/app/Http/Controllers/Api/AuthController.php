@@ -13,8 +13,26 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * @group Authentication
+ *
+ * Register, log in, and manage the authenticated user's account and password.
+ */
 class AuthController extends Controller
 {
+    /**
+     * Register a new user
+     *
+     * Creates a `user`-role account and returns an API token. Admin accounts cannot be created here.
+     *
+     * @unauthenticated
+     * @bodyParam name string required The user's full name. Example: Jane Doe
+     * @bodyParam email string required A unique email address. Example: jane@example.com
+     * @bodyParam password string required At least 8 characters. Example: secret123
+     * @bodyParam password_confirmation string required Must match password. Example: secret123
+     * @bodyParam phone string Optional phone number. Example: +85512345678
+     * @response 201 scenario="Created" {"user": {"id": 1, "name": "Jane Doe", "email": "jane@example.com", "role": "user"}, "token": "1|AbCdEf...", "token_type": "Bearer"}
+     */
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -41,6 +59,17 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * Log in
+     *
+     * Authenticates with email + password and returns an API token.
+     *
+     * @unauthenticated
+     * @bodyParam email string required Example: jane@example.com
+     * @bodyParam password string required Example: secret123
+     * @response 200 scenario="Success" {"user": {"id": 1, "name": "Jane Doe", "email": "jane@example.com", "role": "user"}, "token": "1|AbCdEf...", "token_type": "Bearer"}
+     * @response 401 scenario="Invalid credentials" {"message": "Invalid credentials"}
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -64,6 +93,14 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Log out
+     *
+     * Revokes the API token used for the current request.
+     *
+     * @authenticated
+     * @response 200 {"message": "Successfully logged out"}
+     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -73,11 +110,27 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Get the authenticated user
+     *
+     * @authenticated
+     * @response 200 {"id": 1, "name": "Jane Doe", "email": "jane@example.com", "role": "user", "phone": null, "avatar": null}
+     */
     public function user(Request $request)
     {
         return response()->json($request->user());
     }
 
+    /**
+     * Update profile
+     *
+     * @authenticated
+     * @bodyParam name string The user's full name. Example: Jane D.
+     * @bodyParam email string A unique email address. Example: jane@example.com
+     * @bodyParam phone string Phone number. Example: +85512345678
+     * @bodyParam avatar string Avatar URL. Example: https://example.com/avatar.png
+     * @response 200 {"message": "Profile updated successfully", "user": {"id": 1, "name": "Jane D."}}
+     */
     public function updateProfile(Request $request)
     {
         $user = $request->user();
@@ -97,6 +150,19 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Change password
+     *
+     * The user portal sends `current_password` (required there); the admin panel may omit it.
+     * When supplied, the current password is verified.
+     *
+     * @authenticated
+     * @bodyParam current_password string The current password (verified only when provided). Example: oldpass123
+     * @bodyParam password string required New password, at least 8 characters. Example: newpass123
+     * @bodyParam password_confirmation string required Must match password. Example: newpass123
+     * @response 200 {"message": "Password changed successfully"}
+     * @response 422 scenario="Wrong current password" {"message": "Current password is incorrect"}
+     */
     public function changePassword(Request $request)
     {
         $validated = $request->validate([
@@ -125,9 +191,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Generate a password reset token for the given email.
-     * In production the token would be emailed; here it is returned in the
-     * response so the SPA reset flow works without a configured mailer.
+     * Request a password reset token
+     *
+     * Generates a reset token. In production it would be emailed; here it is returned
+     * in the response so the SPA reset flow works without a configured mailer.
+     *
+     * @unauthenticated
+     * @bodyParam email string required Example: jane@example.com
+     * @response 200 {"message": "Password reset token generated.", "email": "jane@example.com", "token": "AbCdEf..."}
      */
     public function forgotPassword(Request $request)
     {
@@ -163,7 +234,15 @@ class AuthController extends Controller
     }
 
     /**
-     * Reset the password using the emailed token.
+     * Reset password with a token
+     *
+     * @unauthenticated
+     * @bodyParam email string required Example: jane@example.com
+     * @bodyParam token string required The token from the reset request. Example: AbCdEf...
+     * @bodyParam password string required New password, at least 8 characters. Example: newpass123
+     * @bodyParam password_confirmation string required Must match password. Example: newpass123
+     * @response 200 {"message": "Password has been reset successfully. You can now log in."}
+     * @response 422 scenario="Invalid/expired token" {"message": "Invalid password reset token."}
      */
     public function resetPassword(Request $request)
     {
@@ -203,7 +282,13 @@ class AuthController extends Controller
     }
 
     /**
-     * Upload/replace the authenticated user's avatar image.
+     * Upload avatar
+     *
+     * Uploads/replaces the authenticated user's avatar image.
+     *
+     * @authenticated
+     * @bodyParam avatar file required Image file (jpeg, jpg, png, gif, webp), max 2 MB.
+     * @response 200 {"message": "Avatar updated successfully", "avatar": "http://localhost:8000/storage/avatars/abc.png"}
      */
     public function uploadAvatar(Request $request)
     {

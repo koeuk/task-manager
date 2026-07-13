@@ -8,10 +8,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * @group Admin · Users
+ *
+ * User management. Requires an authenticated **admin** account.
+ *
+ * @authenticated
+ */
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List users
+     *
+     * @queryParam role string Filter by role: admin, user. Example: user
+     * @queryParam search string Search by name or email. Example: jane
+     * @queryParam per_page integer Results per page (default 15). Example: 15
      */
     public function index(Request $request)
     {
@@ -38,7 +49,14 @@ class UserController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a user
+     *
+     * @bodyParam name string required Example: Jane Doe
+     * @bodyParam email string required Unique email. Example: jane@example.com
+     * @bodyParam password string required At least 8 characters. Example: secret123
+     * @bodyParam role string required One of: admin, user. Example: user
+     * @bodyParam phone string Optional phone number. Example: +85512345678
+     * @response 201 {"id": 5, "name": "Jane Doe", "email": "jane@example.com", "role": "user"}
      */
     public function store(Request $request)
     {
@@ -62,7 +80,9 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get a user
+     *
+     * @urlParam id integer required The user ID. Example: 1
      */
     public function show(string $id)
     {
@@ -71,7 +91,13 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a user
+     *
+     * @urlParam id integer required The user ID. Example: 1
+     * @bodyParam name string Example: Jane D.
+     * @bodyParam email string Unique email. Example: jane@example.com
+     * @bodyParam role string One of: admin, user. Example: admin
+     * @bodyParam phone string Phone number. Example: +85512345678
      */
     public function update(Request $request, string $id)
     {
@@ -90,7 +116,13 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a user
+     *
+     * The last remaining admin cannot be deleted.
+     *
+     * @urlParam id integer required The user ID. Example: 2
+     * @response 200 {"message": "User deleted successfully"}
+     * @response 403 scenario="Last admin" {"message": "Cannot delete the last admin user"}
      */
     public function destroy(string $id)
     {
@@ -114,7 +146,13 @@ class UserController extends Controller
     }
 
     /**
-     * Update user role
+     * Update a user's role
+     *
+     * The last remaining admin cannot be demoted.
+     *
+     * @urlParam id integer required The user ID. Example: 2
+     * @bodyParam role string required One of: admin, user. Example: admin
+     * @response 403 scenario="Last admin" {"message": "Cannot remove admin role from the last admin user"}
      */
     public function updateRole(Request $request, string $id)
     {
@@ -140,7 +178,13 @@ class UserController extends Controller
     }
 
     /**
-     * Reset user password
+     * Reset a user's password
+     *
+     * Admin sets a new password for the user (no current password needed).
+     *
+     * @urlParam id integer required The user ID. Example: 2
+     * @bodyParam password string required New password, at least 8 characters. Example: newpass123
+     * @response 200 {"message": "Password reset successfully"}
      */
     public function resetPassword(Request $request, string $id)
     {

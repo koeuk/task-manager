@@ -1,0 +1,115 @@
+name: 'Admin · Dashboard'
+description: |-
+
+  System-wide stats and reports. Requires an authenticated **admin** account.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/dashboard
+    metadata:
+      custom: []
+      groupName: 'Admin · Dashboard'
+      groupDescription: |-
+
+        System-wide stats and reports. Requires an authenticated **admin** account.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Admin dashboard'
+      description: 'System-wide totals plus task/priority/role breakdowns and recent activity.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"total_users": 5, "total_projects": 3, "total_tasks": 12, "completed_tasks": 5, "active_projects": 2, "tasks_by_status": [], "tasks_by_priority": [], "recent_projects": [], "recent_tasks": [], "user_stats": []}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin/reports
+    metadata:
+      custom: []
+      groupName: 'Admin · Dashboard'
+      groupDescription: |-
+
+        System-wide stats and reports. Requires an authenticated **admin** account.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Reports (date range)'
+      description: 'Aggregated metrics over a date range plus per-user productivity. Defaults to the last month.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      start_date:
+        custom: []
+        name: start_date
+        description: 'date Range start (Y-m-d).'
+        required: false
+        example: '2026-06-14'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      end_date:
+        custom: []
+        name: end_date
+        description: 'date Range end (Y-m-d).'
+        required: false
+        example: '2026-07-14'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      start_date: '2026-06-14'
+      end_date: '2026-07-14'
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"tasks_created": 8, "tasks_completed": 5, "projects_created": 2, "new_users": 1, "productivity_by_user": []}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

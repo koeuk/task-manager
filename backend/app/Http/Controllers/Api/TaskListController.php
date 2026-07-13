@@ -6,10 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\TaskList;
 use Illuminate\Http\Request;
 
+/**
+ * @group Task Lists
+ *
+ * Columns within a project (e.g. "To Do", "In Progress") that group tasks on the board.
+ *
+ * @authenticated
+ */
 class TaskListController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List task lists
+     *
+     * @queryParam project_id integer Filter by project. Example: 1
      */
     public function index(Request $request)
     {
@@ -26,7 +35,12 @@ class TaskListController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a task list
+     *
+     * @bodyParam project_id integer required The parent project ID. Example: 1
+     * @bodyParam name string required The list name. Example: To Do
+     * @bodyParam position integer Ordering position (defaults to the end). Example: 0
+     * @response 201 {"message": "Task list created successfully", "task_list": {"id": 1, "project_id": 1, "name": "To Do", "position": 0}}
      */
     public function store(Request $request)
     {
@@ -50,7 +64,9 @@ class TaskListController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get a task list
+     *
+     * @urlParam id integer required The task list ID. Example: 1
      */
     public function show(string $id)
     {
@@ -64,7 +80,11 @@ class TaskListController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a task list
+     *
+     * @urlParam id integer required The task list ID. Example: 1
+     * @bodyParam name string The list name. Example: In Progress
+     * @bodyParam position integer Ordering position. Example: 1
      */
     public function update(Request $request, string $id)
     {
@@ -84,7 +104,10 @@ class TaskListController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a task list
+     *
+     * @urlParam id integer required The task list ID. Example: 1
+     * @response 200 {"message": "Task list deleted successfully"}
      */
     public function destroy(string $id)
     {
@@ -97,7 +120,14 @@ class TaskListController extends Controller
     }
 
     /**
-     * Update task list positions
+     * Reorder task lists
+     *
+     * Persists new positions for a set of task lists.
+     *
+     * @bodyParam task_lists object[] required The lists with new positions.
+     * @bodyParam task_lists[].id integer required The task list ID. Example: 1
+     * @bodyParam task_lists[].position integer required The new position. Example: 0
+     * @response 200 {"message": "Task lists reordered successfully"}
      */
     public function reorder(Request $request)
     {

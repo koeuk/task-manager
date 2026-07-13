@@ -9,10 +9,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @group Projects
+ *
+ * Create and manage projects. Each project holds task lists and tasks.
+ *
+ * @authenticated
+ */
 class ProjectController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List projects
+     *
+     * Returns a paginated list of projects (with their task lists and tasks).
+     *
+     * @queryParam status string Filter by status: planning, active, on_hold, completed, archived. Example: active
+     * @queryParam search string Filter by project name. Example: website
+     * @queryParam per_page integer Results per page (default 15). Example: 15
+     * @queryParam page integer Page number. Example: 1
      */
     public function index(Request $request)
     {
@@ -34,7 +48,16 @@ class ProjectController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a project
+     *
+     * @bodyParam name string required The project name. Example: Website Redesign
+     * @bodyParam description string A longer description. Example: Full redesign of the marketing site.
+     * @bodyParam color string A hex color (max 7 chars). Example: #2196f3
+     * @bodyParam icon string An icon name. Example: folder
+     * @bodyParam start_date date Start date (Y-m-d). Example: 2026-07-01
+     * @bodyParam due_date date Due date (Y-m-d), on/after start_date. Example: 2026-08-01
+     * @bodyParam status string One of: planning, active, on_hold, completed, archived. Example: active
+     * @response 201 {"message": "Project created successfully", "project": {"id": 1, "name": "Website Redesign", "status": "active"}}
      */
     public function store(Request $request)
     {
@@ -57,7 +80,12 @@ class ProjectController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get a project
+     *
+     * Returns the project with its task lists, tasks, assignees, creators, and comments.
+     *
+     * @urlParam id integer required The project ID. Example: 1
+     * @response 404 {"message": "No query results for model [App\\Models\\Project] 1"}
      */
     public function show(string $id)
     {
@@ -73,7 +101,17 @@ class ProjectController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a project
+     *
+     * @urlParam id integer required The project ID. Example: 1
+     * @bodyParam name string The project name. Example: Website Redesign v2
+     * @bodyParam description string A longer description. Example: Updated scope.
+     * @bodyParam color string A hex color (max 7 chars). Example: #10b981
+     * @bodyParam icon string An icon name. Example: rocket
+     * @bodyParam start_date date Start date (Y-m-d). Example: 2026-07-01
+     * @bodyParam due_date date Due date (Y-m-d), on/after start_date. Example: 2026-09-01
+     * @bodyParam status string One of: planning, active, on_hold, completed, archived. Example: completed
+     * @response 200 {"message": "Project updated successfully", "project": {"id": 1, "name": "Website Redesign v2"}}
      */
     public function update(Request $request, string $id)
     {
@@ -98,7 +136,12 @@ class ProjectController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a project
+     *
+     * Deletes the project and cascades to its tasks.
+     *
+     * @urlParam id integer required The project ID. Example: 1
+     * @response 200 {"message": "Project deleted successfully"}
      */
     public function destroy(string $id)
     {
@@ -111,7 +154,13 @@ class ProjectController extends Controller
     }
 
     /**
-     * Get dashboard statistics for the authenticated user
+     * User dashboard
+     *
+     * Aggregated stats for the authenticated user: project/task counts, recent
+     * projects, upcoming tasks, and recent tasks.
+     *
+     * @group Dashboard
+     * @response 200 {"total_projects": 3, "active_projects": 2, "completed_projects": 1, "total_tasks": 12, "pending_tasks": 4, "in_progress_tasks": 3, "completed_tasks": 5, "overdue_tasks": 1, "recent_projects": [], "upcoming_tasks": [], "recent_tasks": []}
      */
     public function dashboard()
     {

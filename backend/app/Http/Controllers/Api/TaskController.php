@@ -6,10 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
+/**
+ * @group Tasks
+ *
+ * Create and manage tasks within projects and task lists.
+ *
+ * @authenticated
+ */
 class TaskController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List tasks
+     *
+     * Returns a paginated list of tasks (with project, list, creator, assignee, comments).
+     *
+     * @queryParam project_id integer Filter by project. Example: 1
+     * @queryParam task_list_id integer Filter by task list. Example: 2
+     * @queryParam status string Filter by status: todo, in_progress, review, completed. Example: in_progress
+     * @queryParam priority string Filter by priority: low, medium, high, critical. Example: high
+     * @queryParam assigned_to integer Filter by assignee user ID. Example: 3
+     * @queryParam search string Search title/description. Example: homepage
+     * @queryParam per_page integer Results per page (default 15). Example: 15
      */
     public function index(Request $request)
     {
@@ -57,7 +74,22 @@ class TaskController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a task
+     *
+     * The authenticated user is recorded as the creator.
+     *
+     * @bodyParam project_id integer required The project ID. Example: 1
+     * @bodyParam task_list_id integer The task list (column) ID. Example: 2
+     * @bodyParam title string required The task title. Example: Design the homepage
+     * @bodyParam description string A longer description. Example: Hero, nav, and footer.
+     * @bodyParam priority string One of: low, medium, high, critical. Example: high
+     * @bodyParam status string One of: todo, in_progress, review, completed. Example: todo
+     * @bodyParam assigned_to integer User ID to assign. Example: 3
+     * @bodyParam start_date date Start date/time. Example: 2026-07-10
+     * @bodyParam due_date date Due date/time, on/after start_date. Example: 2026-07-20
+     * @bodyParam estimated_hours number Estimated hours. Example: 4.5
+     * @bodyParam position integer Ordering position within the list. Example: 0
+     * @response 201 {"message": "Task created successfully", "task": {"id": 1, "title": "Design the homepage", "status": "todo", "priority": "high"}}
      */
     public function store(Request $request)
     {
@@ -86,7 +118,11 @@ class TaskController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get a task
+     *
+     * Returns the task with project, list, creator, assignee, and comments.
+     *
+     * @urlParam id integer required The task ID. Example: 1
      */
     public function show(string $id)
     {
@@ -102,7 +138,22 @@ class TaskController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a task
+     *
+     * Setting status to `completed` stamps completed_at automatically.
+     *
+     * @urlParam id integer required The task ID. Example: 1
+     * @bodyParam task_list_id integer Move to another list. Example: 3
+     * @bodyParam title string The task title. Example: Design the homepage v2
+     * @bodyParam description string A longer description. Example: Updated brief.
+     * @bodyParam priority string One of: low, medium, high, critical. Example: critical
+     * @bodyParam status string One of: todo, in_progress, review, completed. Example: completed
+     * @bodyParam assigned_to integer User ID to assign. Example: 3
+     * @bodyParam start_date date Start date/time. Example: 2026-07-10
+     * @bodyParam due_date date Due date/time. Example: 2026-07-25
+     * @bodyParam estimated_hours number Estimated hours. Example: 6
+     * @bodyParam position integer Ordering position. Example: 1
+     * @response 200 {"message": "Task updated successfully", "task": {"id": 1, "status": "completed"}}
      */
     public function update(Request $request, string $id)
     {
@@ -137,7 +188,10 @@ class TaskController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a task
+     *
+     * @urlParam id integer required The task ID. Example: 1
+     * @response 200 {"message": "Task deleted successfully"}
      */
     public function destroy(string $id)
     {
@@ -150,7 +204,16 @@ class TaskController extends Controller
     }
 
     /**
-     * Update task positions
+     * Reorder tasks
+     *
+     * Persists new positions (and optionally new task lists) for a set of tasks —
+     * used by the board's drag-and-drop.
+     *
+     * @bodyParam tasks object[] required The tasks with new positions.
+     * @bodyParam tasks[].id integer required The task ID. Example: 1
+     * @bodyParam tasks[].position integer required The new position. Example: 0
+     * @bodyParam tasks[].task_list_id integer The list the task now belongs to. Example: 2
+     * @response 200 {"message": "Tasks reordered successfully"}
      */
     public function reorder(Request $request)
     {
