@@ -5,11 +5,20 @@
 
 mat-card-header {
   margin-bottom: 20px;
+  width: 100%;
+  display: flex;
 
   mat-card-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    flex: 1;
+    margin: 0;
+
+    button {
+      margin-left: auto;
+    }
   }
 }
 
