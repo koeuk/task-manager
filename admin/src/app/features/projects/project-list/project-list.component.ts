@@ -19,6 +19,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
 import { ProjectDialogComponent } from '../project-dialog/project-dialog.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-project-list',
@@ -99,16 +100,29 @@ export class ProjectListComponent implements OnInit {
   }
 
   deleteProject(project: Project): void {
-    if (!confirm(`Delete project "${project.name}"? This also removes its tasks.`)) return;
-
-    this.projectService.deleteProject(project.id).subscribe({
-      next: () => {
-        this.snackBar.open('Project deleted', 'Close', { duration: 3000 });
-        this.loadProjects();
-      },
-      error: (error) => {
-        this.snackBar.open(error.error?.message || 'Failed to delete project', 'Close', { duration: 5000 });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete project?',
+        message: `"${project.name}" and all of its tasks will be permanently removed. This cannot be undone.`,
+        confirmText: 'Delete',
+        danger: true,
+        icon: 'delete'
       }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.projectService.deleteProject(project.id).subscribe({
+        next: () => {
+          this.snackBar.open('Project deleted', 'Close', { duration: 3000 });
+          this.loadProjects();
+        },
+        error: (error) => {
+          this.snackBar.open(error.error?.message || 'Failed to delete project', 'Close', { duration: 5000 });
+        }
+      });
     });
   }
 

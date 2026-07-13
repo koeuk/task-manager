@@ -9,8 +9,10 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { Router } from '@angular/router';
 
 interface NavItem {
@@ -18,6 +20,12 @@ interface NavItem {
   route: string;
   icon: string;
   badge?: number;
+}
+
+interface AppNotification {
+  icon: string;
+  title: string;
+  time: string;
 }
 
 @Component({
@@ -33,7 +41,8 @@ interface NavItem {
     MatListModule,
     MatMenuModule,
     MatBadgeModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatDividerModule
   ],
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.scss']
@@ -42,6 +51,10 @@ export class AdminLayoutComponent implements OnInit {
   sidenavOpened = true;
   collapsed = false;
   currentUser$;
+
+  // No notification backend yet — start empty so the badge reflects reality
+  // instead of a hardcoded count. Push items here (or wire a service) as needed.
+  notifications: AppNotification[] = [];
   
   navItems: NavItem[] = [
     { title: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
@@ -55,12 +68,35 @@ export class AdminLayoutComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private notificationService: NotificationService
   ) {
     this.currentUser$ = this.authService.currentUser$;
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Populate the bell with real recent-activity notifications
+    this.notificationService.loadNotifications().subscribe(items => {
+      this.notifications = items.map(n => ({
+        icon: n.icon,
+        title: n.title,
+        time: n.subtitle + (n.time ? ' · ' + this.relativeTime(n.time) : '')
+      }));
+    });
+  }
+
+  private relativeTime(iso: string): string {
+    const then = new Date(iso).getTime();
+    if (isNaN(then)) return '';
+    const diff = Date.now() - then;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
 
   toggleSidenav(): void {
     // Collapse to an icon-only rail instead of hiding the sidebar entirely

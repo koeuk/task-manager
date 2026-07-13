@@ -169,16 +169,29 @@ export class UserListComponent implements OnInit {
   }
 
   deleteUser(user: User): void {
-    if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
-
-    this.userService.deleteUser(user.id).subscribe({
-      next: () => {
-        this.snackBar.open('User deleted successfully', 'Close', { duration: 3000 });
-        this.loadUsers();
-      },
-      error: (error) => {
-        this.snackBar.open(error.error?.message || 'Failed to delete user', 'Close', { duration: 5000 });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete user?',
+        message: `${user.name} (${user.email}) will be permanently removed. This cannot be undone.`,
+        confirmText: 'Delete',
+        danger: true,
+        icon: 'delete'
       }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.userService.deleteUser(user.id).subscribe({
+        next: () => {
+          this.snackBar.open('User deleted successfully', 'Close', { duration: 3000 });
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.snackBar.open(error.error?.message || 'Failed to delete user', 'Close', { duration: 5000 });
+        }
+      });
     });
   }
 

@@ -19,6 +19,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { TaskService } from '../../../core/services/task.service';
 import { Task } from '../../../core/models/project.model';
 import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { exportToCsv } from '../../../core/utils/csv-export';
 
 @Component({
@@ -101,16 +102,29 @@ export class TaskListComponent implements OnInit {
   }
 
   deleteTask(task: Task): void {
-    if (!confirm(`Delete task "${task.title}"?`)) return;
-
-    this.taskService.deleteTask(task.id).subscribe({
-      next: () => {
-        this.snackBar.open('Task deleted', 'Close', { duration: 3000 });
-        this.loadTasks();
-      },
-      error: (error) => {
-        this.snackBar.open(error.error?.message || 'Failed to delete task', 'Close', { duration: 5000 });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete task?',
+        message: `"${task.title}" will be permanently removed. This cannot be undone.`,
+        confirmText: 'Delete',
+        danger: true,
+        icon: 'delete'
       }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.taskService.deleteTask(task.id).subscribe({
+        next: () => {
+          this.snackBar.open('Task deleted', 'Close', { duration: 3000 });
+          this.loadTasks();
+        },
+        error: (error) => {
+          this.snackBar.open(error.error?.message || 'Failed to delete task', 'Close', { duration: 5000 });
+        }
+      });
     });
   }
 
