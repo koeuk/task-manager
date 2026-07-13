@@ -127,6 +127,7 @@
 .nav-list {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden; // stop the phantom horizontal scrollbar from the active accent bar
   padding: 4px 0;
 
   // Material MDC drives label/icon color through these custom properties
@@ -139,10 +140,10 @@
 
   a {
     color: rgba(255, 255, 255, 0.75);
-    padding: 0 16px;
-    margin: 4px 12px;
+    padding: 0 24px;
+    margin: 2px 0;
     height: 46px;
-    border-radius: 10px;
+    border-radius: 0;
     position: relative;
     transition: background 0.2s ease, color 0.2s ease;
 
@@ -169,7 +170,7 @@
       &::before {
         content: '';
         position: absolute;
-        left: -12px;
+        left: 0;
         top: 50%;
         transform: translateY(-50%);
         width: 3px;

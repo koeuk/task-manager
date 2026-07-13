@@ -168,6 +168,19 @@ mat-card.mat-mdc-card {
   .notif-item-time { font-size: 12px; color: #94a3b8; }
 }
 
+// Dark mode: match the panel to the app's dark card surface + readable text
+body.dark-theme .notif-menu {
+  --mat-menu-container-color: #171d2e;
+  border: 1px solid #262c40;
+
+  .notif-header { color: #e5e7eb; }
+  .notif-count,
+  .notif-empty,
+  .notif-item-time { color: #94a3b8; }
+
+  .notif-empty mat-icon { color: #94a3b8; }
+}
+
 // ---- Dark-mode overrides for custom (non-Material) surfaces ----
 // `body.dark-theme` raises specificity above component-encapsulated styles.
 body.dark-theme {
