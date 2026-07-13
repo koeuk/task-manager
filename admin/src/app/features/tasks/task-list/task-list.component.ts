@@ -21,6 +21,7 @@ import { Task } from '../../../core/models/project.model';
 import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { exportToCsv } from '../../../core/utils/csv-export';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-task-list',
@@ -59,11 +60,14 @@ export class TaskListComponent implements OnInit {
     private taskService: TaskService,
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    this.filterForm = this.fb.group({ search: [''], status: [''], priority: [''] });
+    // Allow deep-linking with a search term (e.g. from a notification)
+    const initialSearch = this.route.snapshot.queryParamMap.get('search') || '';
+    this.filterForm = this.fb.group({ search: [initialSearch], status: [''], priority: [''] });
 
     this.filterForm.get('search')?.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())

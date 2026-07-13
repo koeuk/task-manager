@@ -9,6 +9,15 @@ use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
+// API root - health / welcome response (avoids a bare 404 at /api)
+Route::get('/', function () {
+    return response()->json([
+        'name'    => config('app.name', 'Task Management API'),
+        'status'  => 'ok',
+        'version' => '1.0.0',
+    ]);
+});
+
 // Public routes - Auth (tighter rate limit: 10 requests/min per IP)
 Route::prefix('auth')->middleware('throttle:10,1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);

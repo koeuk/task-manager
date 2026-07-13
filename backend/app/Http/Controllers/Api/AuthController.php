@@ -100,13 +100,16 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $validated = $request->validate([
-            'current_password' => 'required',
+            'current_password' => 'nullable',
             'password' => ['required', 'confirmed', Password::min(8)]
         ]);
 
         $user = $request->user();
 
-        if (!Hash::check($validated['current_password'], $user->password)) {
+        // Verify the current password only when it is supplied. The user portal
+        // still sends and requires it; the admin panel lets an already-authenticated
+        // admin set a new password without re-entering the old one.
+        if ($request->filled('current_password') && !Hash::check($validated['current_password'], $user->password)) {
             return response()->json([
                 'message' => 'Current password is incorrect'
             ], 422);

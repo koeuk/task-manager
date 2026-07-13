@@ -3,8 +3,9 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface AppSettings {
   appName: string;
-  appLogo: string; // data URL / image URL; empty = default icon
-  accent: string;  // hex color for primary buttons / brand accents
+  appLogo: string;    // data URL / image URL; empty = default icon
+  accent: string;     // hex color for primary buttons / brand accents
+  background: string; // content-area page background (light mode)
 }
 
 export interface AccentPreset {
@@ -15,7 +16,8 @@ export interface AccentPreset {
 const DEFAULTS: AppSettings = {
   appName: 'Admin Panel',
   appLogo: '',
-  accent: '#64748b'
+  accent: '#64748b',
+  background: '#f4f6f8'
 };
 
 @Injectable({ providedIn: 'root' })
@@ -32,6 +34,15 @@ export class AppSettingsService {
     { name: 'Violet', value: '#7c3aed' },
     { name: 'Rose', value: '#e11d48' },
     { name: 'Amber', value: '#d97706' }
+  ];
+
+  readonly backgroundPresets: AccentPreset[] = [
+    { name: 'Default', value: '#f4f6f8' },
+    { name: 'White', value: '#ffffff' },
+    { name: 'Warm', value: '#f7f5f2' },
+    { name: 'Mint', value: '#eef6f1' },
+    { name: 'Sky', value: '#eef4fb' },
+    { name: 'Lavender', value: '#f3f1fb' }
   ];
 
   constructor() {
@@ -54,7 +65,9 @@ export class AppSettingsService {
   }
 
   private apply(s: AppSettings): void {
-    document.documentElement.style.setProperty('--app-accent', s.accent);
+    const root = document.documentElement.style;
+    root.setProperty('--app-accent', s.accent);
+    root.setProperty('--app-bg', s.background);
     if (s.appName) {
       document.title = s.appName;
     }

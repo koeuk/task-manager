@@ -11,12 +11,14 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AppSettingsService } from '../../core/services/app-settings.service';
+import { NotificationService, AppNotification } from '../../core/services/notification.service';
 import { environment } from '../../../environments/environment';
 
-type Section = 'profile' | 'appearance' | 'security' | 'about';
+type Section = 'profile' | 'appearance' | 'notifications' | 'security' | 'about';
 
 @Component({
   selector: 'app-settings',
@@ -47,9 +49,13 @@ export class SettingsComponent implements OnInit {
   navItems: { id: Section; icon: string; label: string }[] = [
     { id: 'profile', icon: 'person', label: 'Profile' },
     { id: 'appearance', icon: 'palette', label: 'Appearance' },
+    { id: 'notifications', icon: 'notifications', label: 'Notifications' },
     { id: 'security', icon: 'lock', label: 'Security' },
     { id: 'about', icon: 'info', label: 'About' }
   ];
+
+  notifications: AppNotification[] = [];
+  loadingNotifications = false;
 
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
@@ -64,7 +70,9 @@ export class SettingsComponent implements OnInit {
     private authService: AuthService,
     private snackBar: MatSnackBar,
     public themeService: ThemeService,
-    public appSettings: AppSettingsService
+    public appSettings: AppSettingsService,
+    private notificationService: NotificationService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -76,7 +84,6 @@ export class SettingsComponent implements OnInit {
     });
 
     this.passwordForm = this.fb.group({
-      current_password: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       password_confirmation: ['', [Validators.required]]
     }, { validators: this.matchPasswords });
@@ -84,6 +91,33 @@ export class SettingsComponent implements OnInit {
     this.appNameControl = this.fb.group({
       appName: [this.appSettings.current.appName, [Validators.required]]
     });
+
+    this.loadNotifications();
+  }
+
+  loadNotifications(): void {
+    this.loadingNotifications = true;
+    this.notificationService.loadNotifications().subscribe(items => {
+      this.notifications = items;
+      this.loadingNotifications = false;
+    });
+  }
+
+  openNotification(n: AppNotification): void {
+    // Admin has no per-task page — open the Tasks list, searching for this task
+    this.router.navigate(['/tasks'], { queryParams: { search: n.title } });
+  }
+
+  relativeTime(iso?: string): string {
+    if (!iso) return '';
+    const then = new Date(iso).getTime();
+    if (isNaN(then)) return '';
+    const mins = Math.floor((Date.now() - then) / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
   }
 
   get currentUser() {
@@ -155,6 +189,10 @@ export class SettingsComponent implements OnInit {
 
   setAccent(color: string): void {
     this.appSettings.update({ accent: color });
+  }
+
+  setBackground(color: string): void {
+    this.appSettings.update({ background: color });
   }
 
   toggleTheme(dark: boolean): void {

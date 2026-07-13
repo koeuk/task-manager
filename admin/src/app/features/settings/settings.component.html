@@ -117,6 +117,27 @@
 
           <mat-divider></mat-divider>
 
+          <!-- Background color -->
+          <div class="setting-block">
+            <div class="setting-label">
+              <span class="title">Background color</span>
+              <span class="desc">Page background for the app (light mode).</span>
+            </div>
+            <div class="bg-swatches">
+              <button *ngFor="let b of appSettings.backgroundPresets"
+                      type="button"
+                      class="bg-swatch"
+                      [class.active]="(appSettings.settings$ | async)?.background === b.value"
+                      [style.background]="b.value"
+                      [matTooltip]="b.name"
+                      (click)="setBackground(b.value)">
+                <mat-icon *ngIf="(appSettings.settings$ | async)?.background === b.value">check</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
           <!-- Theme mode -->
           <div class="setting-block row">
             <div class="setting-label">
@@ -129,16 +150,43 @@
         </mat-card-content>
       </mat-card>
 
+      <!-- NOTIFICATIONS -->
+      <mat-card *ngSwitchCase="'notifications'" class="form-card">
+        <mat-card-header>
+          <mat-card-title>Notifications</mat-card-title>
+          <button mat-icon-button (click)="loadNotifications()" matTooltip="Refresh">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="loadingNotifications" class="notif-loading">
+            <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+          </div>
+
+          <div *ngIf="!loadingNotifications && !notifications.length" class="notif-empty">
+            <mat-icon>notifications_none</mat-icon>
+            <p>You're all caught up</p>
+          </div>
+
+          <div class="notif-list" *ngIf="!loadingNotifications && notifications.length">
+            <button class="notif-row" type="button" *ngFor="let n of notifications" (click)="openNotification(n)">
+              <div class="notif-icon"><mat-icon>{{ n.icon }}</mat-icon></div>
+              <div class="notif-body">
+                <span class="notif-title">{{ n.title }}</span>
+                <span class="notif-sub">{{ n.subtitle }}</span>
+              </div>
+              <span class="notif-time">{{ relativeTime(n.time) }}</span>
+              <mat-icon class="notif-chevron">chevron_right</mat-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
       <!-- SECURITY -->
       <mat-card *ngSwitchCase="'security'" class="form-card">
         <mat-card-header><mat-card-title>Change Password</mat-card-title></mat-card-header>
         <mat-card-content>
           <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Current password</mat-label>
-              <input matInput type="password" formControlName="current_password">
-              <mat-error>Current password is required</mat-error>
-            </mat-form-field>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>New password</mat-label>
               <input matInput type="password" formControlName="password">

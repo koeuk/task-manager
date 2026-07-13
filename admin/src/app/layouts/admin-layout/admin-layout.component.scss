@@ -274,7 +274,7 @@
 
 .content-wrapper {
   padding: 24px;
-  background: #f4f6f8;
+  background: var(--app-bg, #f4f6f8);
   min-height: calc(100vh - 64px);
 }
 
