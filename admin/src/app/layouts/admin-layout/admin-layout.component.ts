@@ -13,6 +13,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AppSettingsService } from '../../core/services/app-settings.service';
 import { Router } from '@angular/router';
 
 interface NavItem {
@@ -69,7 +70,8 @@ export class AdminLayoutComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     public themeService: ThemeService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    public appSettings: AppSettingsService
   ) {
     this.currentUser$ = this.authService.currentUser$;
   }

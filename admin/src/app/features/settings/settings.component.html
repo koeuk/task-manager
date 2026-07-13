@@ -1,0 +1,173 @@
+<div class="settings">
+  <h1 class="page-title">Settings</h1>
+
+  <div class="settings-shell">
+    <!-- Left nav -->
+    <nav class="settings-nav">
+      <button *ngFor="let item of navItems"
+              class="nav-item"
+              [class.active]="section === item.id"
+              (click)="section = item.id">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </button>
+    </nav>
+
+    <!-- Content -->
+    <div class="settings-content" [ngSwitch]="section">
+
+      <!-- PROFILE -->
+      <mat-card *ngSwitchCase="'profile'" class="form-card">
+        <mat-card-header><mat-card-title>Profile</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="avatar-row">
+            <div class="avatar">
+              <img *ngIf="currentUser?.avatar" [src]="currentUser?.avatar" alt="Avatar">
+              <span *ngIf="!currentUser?.avatar">{{ (currentUser?.name || 'A').charAt(0).toUpperCase() }}</span>
+            </div>
+            <div class="avatar-actions">
+              <button mat-stroked-button type="button" (click)="avatarInput.click()" [disabled]="uploadingAvatar">
+                <mat-icon>photo_camera</mat-icon> Change avatar
+              </button>
+              <input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelected($event)">
+              <p class="hint">JPG or PNG.</p>
+            </div>
+          </div>
+
+          <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Full name</mat-label>
+              <input matInput formControlName="name">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone">
+            </mat-form-field>
+            <div class="actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="profileForm.invalid || savingProfile">
+                <mat-progress-spinner *ngIf="savingProfile" diameter="18" mode="indeterminate"></mat-progress-spinner>
+                <span>Save changes</span>
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- APPEARANCE -->
+      <mat-card *ngSwitchCase="'appearance'" class="form-card">
+        <mat-card-header><mat-card-title>Appearance</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <!-- App name -->
+          <form [formGroup]="appNameControl" (ngSubmit)="saveAppName()" class="inline-form">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>App name</mat-label>
+              <input matInput formControlName="appName">
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="submit" [disabled]="appNameControl.invalid">Save</button>
+          </form>
+
+          <mat-divider></mat-divider>
+
+          <!-- App logo -->
+          <div class="setting-block">
+            <div class="setting-label">
+              <span class="title">App logo</span>
+              <span class="desc">Shown in the sidebar header.</span>
+            </div>
+            <div class="logo-row">
+              <div class="logo-preview">
+                <ng-container *ngIf="(appSettings.settings$ | async)?.appLogo as logo; else defaultLogo">
+                  <img [src]="logo" alt="Logo">
+                </ng-container>
+                <ng-template #defaultLogo><mat-icon>admin_panel_settings</mat-icon></ng-template>
+              </div>
+              <div>
+                <button mat-stroked-button type="button" (click)="logoInput.click()"><mat-icon>upload</mat-icon> Upload</button>
+                <button mat-button type="button" *ngIf="(appSettings.settings$ | async)?.appLogo" (click)="removeLogo()">Remove</button>
+                <input #logoInput type="file" accept="image/*" hidden (change)="onLogoSelected($event)">
+                <p class="hint">PNG/SVG, under 512 KB.</p>
+              </div>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Accent color -->
+          <div class="setting-block">
+            <div class="setting-label">
+              <span class="title">Accent color</span>
+              <span class="desc">Used for primary buttons and highlights.</span>
+            </div>
+            <div class="swatches">
+              <button *ngFor="let p of appSettings.accentPresets"
+                      type="button"
+                      class="swatch"
+                      [class.active]="(appSettings.settings$ | async)?.accent === p.value"
+                      [style.background]="p.value"
+                      [matTooltip]="p.name"
+                      (click)="setAccent(p.value)">
+                <mat-icon *ngIf="(appSettings.settings$ | async)?.accent === p.value">check</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Theme mode -->
+          <div class="setting-block row">
+            <div class="setting-label">
+              <span class="title">Dark mode</span>
+              <span class="desc">Switch between light and dark themes.</span>
+            </div>
+            <mat-slide-toggle [checked]="!!(themeService.isDark$ | async)"
+                              (change)="toggleTheme($event.checked)"></mat-slide-toggle>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- SECURITY -->
+      <mat-card *ngSwitchCase="'security'" class="form-card">
+        <mat-card-header><mat-card-title>Change Password</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Current password</mat-label>
+              <input matInput type="password" formControlName="current_password">
+              <mat-error>Current password is required</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>New password</mat-label>
+              <input matInput type="password" formControlName="password">
+              <mat-error>Minimum 8 characters</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Confirm new password</mat-label>
+              <input matInput type="password" formControlName="password_confirmation">
+              <mat-error *ngIf="passwordForm.hasError('mismatch')">Passwords do not match</mat-error>
+            </mat-form-field>
+            <div class="actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="passwordForm.invalid || loading">
+                <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate"></mat-progress-spinner>
+                <span>Update Password</span>
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- ABOUT -->
+      <mat-card *ngSwitchCase="'about'" class="form-card">
+        <mat-card-header><mat-card-title>System Information</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="info-row"><span>Application</span><span>{{ (appSettings.settings$ | async)?.appName || appName }}</span></div>
+          <div class="info-row"><span>Version</span><span>{{ version }}</span></div>
+          <div class="info-row"><span>API URL</span><span>{{ apiUrl }}</span></div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

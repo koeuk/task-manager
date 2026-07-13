@@ -94,6 +94,15 @@ body {
   }
 }
 
+// Configurable brand accent (Settings → Appearance) drives primary buttons
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary {
+  --mdc-filled-button-container-color: var(--app-accent, #64748b);
+  --mdc-protected-button-container-color: var(--app-accent, #64748b);
+  --mdc-filled-button-label-text-color: #fff;
+  --mdc-protected-button-label-text-color: #fff;
+}
+
 // Soft, rounded white cards with a whisper-soft shadow (Bankio-style layout)
 mat-card.mat-mdc-card {
   --mdc-elevated-card-container-elevation: none;

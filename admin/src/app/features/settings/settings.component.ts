@@ -8,8 +8,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
+import { AppSettingsService } from '../../core/services/app-settings.service';
 import { environment } from '../../../environments/environment';
+
+type Section = 'profile' | 'appearance' | 'security' | 'about';
 
 @Component({
   selector: 'app-settings',
@@ -23,67 +30,31 @@ import { environment } from '../../../environments/environment';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatSlideToggleModule,
+    MatDividerModule,
+    MatTooltipModule
   ],
-  template: `
-    <div class="page">
-      <h1 class="page-title">Settings</h1>
-
-      <mat-card class="form-card">
-        <mat-card-header><mat-card-title>Change Password</mat-card-title></mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Current password</mat-label>
-              <input matInput type="password" formControlName="current_password">
-              <mat-error>Current password is required</mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>New password</mat-label>
-              <input matInput type="password" formControlName="password">
-              <mat-error>Minimum 8 characters</mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Confirm new password</mat-label>
-              <input matInput type="password" formControlName="password_confirmation">
-              <mat-error *ngIf="passwordForm.hasError('mismatch')">Passwords do not match</mat-error>
-            </mat-form-field>
-
-            <button mat-flat-button color="primary" type="submit" [disabled]="passwordForm.invalid || loading">
-              <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate"></mat-progress-spinner>
-              <span>Update Password</span>
-            </button>
-          </form>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="form-card">
-        <mat-card-header><mat-card-title>System Information</mat-card-title></mat-card-header>
-        <mat-card-content>
-          <div class="info-row"><span>Application</span><span>{{ appName }}</span></div>
-          <div class="info-row"><span>Version</span><span>{{ version }}</span></div>
-          <div class="info-row"><span>API URL</span><span>{{ apiUrl }}</span></div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
-  styles: [`
-    .page { max-width: 640px; margin: 0 auto; }
-    .page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 24px; color: #1e1b3a; }
-    .form-card { margin-bottom: 24px; }
-    .full-width { width: 100%; }
-    form { display: flex; flex-direction: column; }
-    button mat-progress-spinner { display: inline-block; margin-right: 8px; }
-    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; color: #444; }
-    .info-row:last-child { border-bottom: none; }
-    .info-row span:first-child { color: #6b7280; }
-  `]
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
-  passwordForm!: FormGroup;
+  section: Section = 'profile';
   loading = false;
+  savingProfile = false;
+  uploadingAvatar = false;
+
+  navItems: { id: Section; icon: string; label: string }[] = [
+    { id: 'profile', icon: 'person', label: 'Profile' },
+    { id: 'appearance', icon: 'palette', label: 'Appearance' },
+    { id: 'security', icon: 'lock', label: 'Security' },
+    { id: 'about', icon: 'info', label: 'About' }
+  ];
+
+  profileForm!: FormGroup;
+  passwordForm!: FormGroup;
+  appNameControl!: FormGroup;
+
   appName = (environment as any).appName || 'Task Manager Admin';
   version = (environment as any).version || '1.0.0';
   apiUrl = environment.apiUrl;
@@ -91,27 +62,109 @@ export class SettingsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    public themeService: ThemeService,
+    public appSettings: AppSettingsService
   ) {}
 
   ngOnInit(): void {
+    const user = this.authService.currentUserValue;
+    this.profileForm = this.fb.group({
+      name: [user?.name || '', [Validators.required]],
+      email: [user?.email || '', [Validators.required, Validators.email]],
+      phone: [user?.phone || '']
+    });
+
     this.passwordForm = this.fb.group({
       current_password: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       password_confirmation: ['', [Validators.required]]
     }, { validators: this.matchPasswords });
+
+    this.appNameControl = this.fb.group({
+      appName: [this.appSettings.current.appName, [Validators.required]]
+    });
   }
 
-  private matchPasswords(group: AbstractControl): ValidationErrors | null {
-    const pw = group.get('password')?.value;
-    const confirm = group.get('password_confirmation')?.value;
-    return pw && confirm && pw !== confirm ? { mismatch: true } : null;
+  get currentUser() {
+    return this.authService.currentUserValue;
   }
 
+  // ---- Profile ----
+  onSaveProfile(): void {
+    if (this.profileForm.invalid) return;
+    this.savingProfile = true;
+    this.authService.updateProfile(this.profileForm.value).subscribe({
+      next: () => {
+        this.snackBar.open('Profile updated', 'Close', { duration: 3000 });
+        this.savingProfile = false;
+      },
+      error: (err) => {
+        this.savingProfile = false;
+        this.snackBar.open(err.error?.message || 'Failed to update profile', 'Close', { duration: 5000 });
+      }
+    });
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.uploadingAvatar = true;
+    this.authService.uploadAvatar(file).subscribe({
+      next: () => {
+        this.snackBar.open('Avatar updated', 'Close', { duration: 3000 });
+        this.uploadingAvatar = false;
+      },
+      error: (err) => {
+        this.uploadingAvatar = false;
+        this.snackBar.open(err.error?.message || 'Failed to upload avatar', 'Close', { duration: 5000 });
+      }
+    });
+    input.value = '';
+  }
+
+  // ---- Appearance ----
+  saveAppName(): void {
+    if (this.appNameControl.invalid) return;
+    this.appSettings.update({ appName: this.appNameControl.value.appName.trim() });
+    this.snackBar.open('App name updated', 'Close', { duration: 2500 });
+  }
+
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (file.size > 512 * 1024) {
+      this.snackBar.open('Logo must be under 512 KB', 'Close', { duration: 4000 });
+      input.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.appSettings.update({ appLogo: reader.result as string });
+      this.snackBar.open('Logo updated', 'Close', { duration: 2500 });
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  removeLogo(): void {
+    this.appSettings.update({ appLogo: '' });
+  }
+
+  setAccent(color: string): void {
+    this.appSettings.update({ accent: color });
+  }
+
+  toggleTheme(dark: boolean): void {
+    this.themeService.setDark(dark);
+  }
+
+  // ---- Security ----
   onChangePassword(): void {
     if (this.passwordForm.invalid) return;
     this.loading = true;
-
     this.authService.changePassword(this.passwordForm.value).subscribe({
       next: () => {
         this.snackBar.open('Password updated', 'Close', { duration: 3000 });
@@ -123,5 +176,11 @@ export class SettingsComponent implements OnInit {
         this.snackBar.open(error.error?.message || 'Failed to update password', 'Close', { duration: 5000 });
       }
     });
+  }
+
+  private matchPasswords(group: AbstractControl): ValidationErrors | null {
+    const pw = group.get('password')?.value;
+    const confirm = group.get('password_confirmation')?.value;
+    return pw && confirm && pw !== confirm ? { mismatch: true } : null;
   }
 }

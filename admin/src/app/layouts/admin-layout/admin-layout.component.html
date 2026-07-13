@@ -7,12 +7,13 @@
     [opened]="true"
     [fixedInViewport]="true">
     
-    <div class="sidenav-header">
+    <div class="sidenav-header" *ngIf="appSettings.settings$ | async as s">
       <div class="logo-badge">
-        <mat-icon>admin_panel_settings</mat-icon>
+        <img *ngIf="s.appLogo" [src]="s.appLogo" alt="Logo">
+        <mat-icon *ngIf="!s.appLogo">admin_panel_settings</mat-icon>
       </div>
       <div class="brand-text">
-        <h2 class="app-title">Admin Panel</h2>
+        <h2 class="app-title">{{ s.appName }}</h2>
         <span class="app-subtitle">Task Management</span>
       </div>
     </div>
