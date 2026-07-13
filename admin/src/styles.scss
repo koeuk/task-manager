@@ -19,6 +19,11 @@ body {
   @include mat.all-component-colors($light-theme);
 }
 
+// Compact, smaller form fields inside dialogs (matches the list filters' density)
+.mat-mdc-dialog-container {
+  @include mat.form-field-density(-4);
+}
+
 // Dark silver
 $dark-primary: mat.m2-define-palette(mat.$m2-blue-gray-palette, 300, 100, 500);
 $dark-accent: mat.m2-define-palette(mat.$m2-blue-gray-palette, 200, 50, 400);

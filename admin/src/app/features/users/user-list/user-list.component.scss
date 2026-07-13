@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 .user-list-container {
   width: 100%;
 }
@@ -32,13 +34,17 @@ mat-card-header {
 }
 
 .filter-form {
+  // Compact, smaller filter fields
+  @include mat.form-field-density(-4);
+
   display: flex;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 20px;
-  
+  font-size: 13px;
+
   mat-form-field {
     flex: 1;
-    max-width: 300px;
+    max-width: 240px;
   }
 }
 
