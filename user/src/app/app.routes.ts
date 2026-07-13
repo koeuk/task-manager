@@ -11,6 +11,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+  },
+  {
     path: '',
     loadComponent: () => import('./layouts/user-layout/user-layout.component').then(m => m.UserLayoutComponent),
     canActivate: [authGuard],
@@ -30,6 +34,10 @@ export const routes: Routes = [
       {
         path: 'tasks',
         loadComponent: () => import('./features/tasks/task-list/task-list.component').then(m => m.TaskListComponent)
+      },
+      {
+        path: 'calendar',
+        loadComponent: () => import('./features/calendar/calendar.component').then(m => m.CalendarComponent)
       },
       {
         path: 'profile',

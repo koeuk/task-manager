@@ -43,6 +43,7 @@ export class UserLayoutComponent implements OnInit {
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
     { icon: 'folder', label: 'Projects', route: '/projects' },
     { icon: 'task', label: 'My Tasks', route: '/tasks' },
+    { icon: 'calendar_month', label: 'Calendar', route: '/calendar' },
     { icon: 'person', label: 'Profile', route: '/profile' }
   ];
 

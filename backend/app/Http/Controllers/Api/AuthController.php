@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -114,6 +117,84 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Password changed successfully'
+        ]);
+    }
+
+    /**
+     * Generate a password reset token for the given email.
+     * In production the token would be emailed; here it is returned in the
+     * response so the SPA reset flow works without a configured mailer.
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        // Do not reveal whether the email exists
+        if (!$user) {
+            return response()->json([
+                'message' => 'If an account exists for that email, a reset token has been generated.'
+            ]);
+        }
+
+        $token = Str::random(64);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'email' => $request->email,
+                'token' => Hash::make($token),
+                'created_at' => now()
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Password reset token generated.',
+            'email' => $request->email,
+            'token' => $token // emailed in production
+        ]);
+    }
+
+    /**
+     * Reset the password using the emailed token.
+     */
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'token' => 'required|string',
+            'password' => ['required', 'confirmed', Password::min(8)]
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $validated['email'])
+            ->first();
+
+        if (!$record || !Hash::check($validated['token'], $record->token)) {
+            return response()->json([
+                'message' => 'Invalid password reset token.'
+            ], 422);
+        }
+
+        // Tokens are valid for 60 minutes
+        if (Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
+            DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+            return response()->json([
+                'message' => 'Password reset token has expired.'
+            ], 422);
+        }
+
+        User::where('email', $validated['email'])->update([
+            'password' => Hash::make($validated['password'])
+        ]);
+
+        DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+
+        return response()->json([
+            'message' => 'Password has been reset successfully. You can now log in.'
         ]);
     }
 }

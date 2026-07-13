@@ -19,6 +19,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 import { UserDialogComponent } from '../user-dialog/user-dialog.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
@@ -124,15 +125,31 @@ export class UserListComponent implements OnInit {
 
   changeUserRole(user: User): void {
     const newRole = user.role === 'admin' ? 'user' : 'admin';
-    
-    this.userService.updateUserRole(user.id, newRole).subscribe({
-      next: () => {
-        this.snackBar.open(`User role changed to ${newRole}`, 'Close', { duration: 3000 });
-        this.loadUsers();
-      },
-      error: (error) => {
-        this.snackBar.open(error.error?.message || 'Failed to change role', 'Close', { duration: 5000 });
+    const roleLabel = newRole.charAt(0).toUpperCase() + newRole.slice(1);
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: `Change role to ${roleLabel}?`,
+        message: `${user.name} will be given "${roleLabel}" permissions. Are you sure you want to change this user's role?`,
+        confirmText: `Change to ${roleLabel}`,
+        cancelText: 'Cancel',
+        icon: 'swap_horiz'
       }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.userService.updateUserRole(user.id, newRole).subscribe({
+        next: () => {
+          this.snackBar.open(`User role changed to ${newRole}`, 'Close', { duration: 3000 });
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.snackBar.open(error.error?.message || 'Failed to change role', 'Close', { duration: 5000 });
+        }
+      });
     });
   }
 

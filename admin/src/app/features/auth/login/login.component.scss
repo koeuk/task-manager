@@ -2,6 +2,20 @@
   display: block;
 }
 
+.forgot-link {
+  text-align: right;
+  margin: -4px 0 8px;
+
+  a {
+    font-size: 13px;
+    color: #475569;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
 .login-page {
   min-height: 100vh;
   display: flex;
