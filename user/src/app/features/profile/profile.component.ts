@@ -33,6 +33,7 @@ export class ProfileComponent implements OnInit {
   passwordForm!: FormGroup;
   savingProfile = false;
   savingPassword = false;
+  avatarUploading = false;
   hideCurrent = true;
   hideNew = true;
   hideConfirm = true;
@@ -70,6 +71,34 @@ export class ProfileComponent implements OnInit {
 
   get initials(): string {
     return (this.user?.name || '?').trim().charAt(0).toUpperCase();
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.snackBar.open('Please choose an image file', 'Close', { duration: 4000 });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      this.snackBar.open('Image must be 2 MB or smaller', 'Close', { duration: 4000 });
+      return;
+    }
+
+    this.avatarUploading = true;
+    this.authService.uploadAvatar(file).subscribe({
+      next: () => {
+        this.avatarUploading = false;
+        this.snackBar.open('Avatar updated', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        this.avatarUploading = false;
+        this.snackBar.open(error.error?.message || 'Failed to upload avatar', 'Close', { duration: 5000 });
+      }
+    });
+    input.value = '';
   }
 
   saveProfile(): void {

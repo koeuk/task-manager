@@ -76,6 +76,10 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
+                <button mat-menu-item [routerLink]="['/projects', project.id]">
+                  <mat-icon>analytics</mat-icon>
+                  <span>View details</span>
+                </button>
                 <button mat-menu-item (click)="openDialog(project)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>

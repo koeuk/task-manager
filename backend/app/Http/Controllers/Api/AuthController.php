@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
@@ -195,6 +196,35 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Password has been reset successfully. You can now log in.'
+        ]);
+    }
+
+    /**
+     * Upload/replace the authenticated user's avatar image.
+     */
+    public function uploadAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:2048' // 2 MB
+        ]);
+
+        $user = $request->user();
+
+        // Remove the previously stored avatar (only files we stored under /storage)
+        if ($user->avatar && str_contains($user->avatar, '/storage/avatars/')) {
+            $old = Str::after($user->avatar, '/storage/');
+            Storage::disk('public')->delete($old);
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $url = url('storage/' . $path);
+
+        $user->update(['avatar' => $url]);
+
+        return response()->json([
+            'message' => 'Avatar updated successfully',
+            'user' => $user,
+            'avatar' => $url
         ]);
     }
 }

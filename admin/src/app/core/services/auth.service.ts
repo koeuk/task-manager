@@ -89,6 +89,14 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/auth/change-password`, data);
   }
 
+  uploadAvatar(file: File): Observable<{ message: string; user: User; avatar: string }> {
+    const form = new FormData();
+    form.append('avatar', file);
+    return this.http.post<{ message: string; user: User; avatar: string }>(`${this.apiUrl}/auth/avatar`, form).pipe(
+      tap(res => this.setUser(res.user))
+    );
+  }
+
   forgotPassword(email: string): Observable<{ message: string; email?: string; token?: string }> {
     return this.http.post<{ message: string; email?: string; token?: string }>(`${this.apiUrl}/auth/forgot-password`, { email });
   }

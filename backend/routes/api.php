@@ -25,6 +25,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         Route::get('/me', [AuthController::class, 'user']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::post('/change-password', [AuthController::class, 'changePassword']);
+        Route::post('/avatar', [AuthController::class, 'uploadAvatar']);
     });
 
     // Projects

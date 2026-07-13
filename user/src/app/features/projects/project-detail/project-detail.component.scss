@@ -117,14 +117,18 @@
 
 .task-card {
   background: #fff;
-  border-radius: 8px;
+  border: 1px solid #edeff2;
+  border-radius: 12px;
   padding: 10px 12px;
   margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   cursor: pointer;
-  transition: box-shadow 0.15s;
+  // No shadow (flat) and no transform hover (cdkDrag-draggable) — use a border
+  // for separation and animate its color for drag-safe hover feedback.
+  transition: border-color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover { box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18); }
+  &:hover {
+    border-color: #cbd5e1;
+  }
 
   .card-top {
     display: flex;
@@ -249,8 +253,8 @@
 
   .task-card {
     background: #212a44;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-    &:hover { box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55); }
+    border-color: #2b3352;
+    &:hover { border-color: #3a4570; }
   }
 
   .empty-col { color: #6b7280; }

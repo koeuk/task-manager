@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -26,6 +27,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     ReactiveFormsModule,
     MatTableModule,
     MatPaginatorModule,
@@ -95,7 +97,7 @@ export class ProjectListComponent implements OnInit {
   }
 
   openDialog(project?: Project): void {
-    this.dialog.open(ProjectDialogComponent, { width: '520px', data: project || null })
+    this.dialog.open(ProjectDialogComponent, { width: '560px', data: project || null })
       .afterClosed().subscribe(result => { if (result) this.loadProjects(); });
   }
 

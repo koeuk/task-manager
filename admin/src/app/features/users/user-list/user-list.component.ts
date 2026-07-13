@@ -116,7 +116,7 @@ export class UserListComponent implements OnInit {
 
   openUserDialog(user?: User): void {
     const dialogRef = this.dialog.open(UserDialogComponent, {
-      width: '500px',
+      width: '560px',
       data: user || null
     });
 
