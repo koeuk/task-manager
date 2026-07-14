@@ -54,7 +54,8 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
     
-    if (this.authService.isAuthenticated()) {
+    // A guest holds a token but must still be able to log into a real account.
+    if (this.authService.isAuthenticated() && !this.authService.isGuest) {
       this.router.navigate([this.returnUrl]);
     }
 

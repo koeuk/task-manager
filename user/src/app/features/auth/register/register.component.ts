@@ -43,7 +43,8 @@ export class RegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
+    // A guest holds a token but must still be able to register a real account.
+    if (this.authService.isAuthenticated() && !this.authService.isGuest) {
       this.router.navigate(['/dashboard']);
     }
 
