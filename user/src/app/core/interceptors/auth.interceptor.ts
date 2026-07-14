@@ -38,7 +38,7 @@ export class AuthInterceptor implements HttpInterceptor {
           // Resolve AuthService lazily so it is not required while it is still
           // being constructed.
           this.injector.get(AuthService).logout();
-          this.router.navigate(['/login']);
+          this.router.navigate(['/dashboard']);
         }
         return throwError(() => error);
       })

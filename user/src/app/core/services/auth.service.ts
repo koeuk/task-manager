@@ -76,18 +76,18 @@ export class AuthService {
         complete: () => {
           this.clearToken();
           this.currentUserSubject.next(null);
-          this.router.navigate(['/login']);
+          this.router.navigate(['/dashboard']);
         },
         error: () => {
           this.clearToken();
           this.currentUserSubject.next(null);
-          this.router.navigate(['/login']);
+          this.router.navigate(['/dashboard']);
         }
       });
     } else {
       this.clearToken();
       this.currentUserSubject.next(null);
-      this.router.navigate(['/login']);
+      this.router.navigate(['/dashboard']);
     }
   }
 
@@ -154,7 +154,7 @@ export class AuthService {
     if (!this.isGuest) {
       return true;
     }
-    this.router.navigate(['/login']);
+    this.router.navigate(['/dashboard']);
     return false;
   }
 

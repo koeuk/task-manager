@@ -1,15 +1,16 @@
 import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
+import { CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = async () => {
   const authService = inject(AuthService);
-  const router = inject(Router);
 
   if (authService.isAuthenticated()) {
     return true;
   }
 
-  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-  return false;
+  // There is no login page — silently establish a shared guest session so the
+  // app is always reachable. Real logins happen via the in-app login dialog.
+  await authService.ensureGuestSession();
+  return true;
 };
