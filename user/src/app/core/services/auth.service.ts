@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { User, LoginCredentials, RegisterCredentials, AuthResponse } from '../models/user.model';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -20,8 +19,7 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router,
-    private snackBar: MatSnackBar
+    private router: Router
   ) {
     // Revalidate the persisted session in the background on app start
     this.loadCurrentUser();
@@ -145,22 +143,6 @@ export class AuthService {
   /** True when the current session is the shared guest account. */
   get isGuest(): boolean {
     return this.currentUserValue?.email === this.guestCredentials.email;
-  }
-
-  /**
-   * Gate for write actions (create/edit/delete). Real users may proceed; a guest
-   * is nudged to log in and the action is blocked.
-   * @returns true if the current user may write, false if they must log in first.
-   */
-  canWrite(): boolean {
-    if (!this.isGuest) {
-      return true;
-    }
-    this.snackBar
-      .open('Please log in to create or make changes.', 'Log in', { duration: 6000 })
-      .onAction()
-      .subscribe(() => this.logout());
-    return false;
   }
 
   isAuthenticated(): boolean {

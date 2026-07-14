@@ -18,7 +18,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Project, ProjectStatus } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PROJECT_STATUS_OPTIONS, statusLabel, projectStatusColor } from '../../../shared/task-meta';
@@ -52,7 +52,7 @@ export class ProjectListComponent implements OnInit {
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private router: Router,
-    private authService: AuthService
+    private writeGuard: WriteGuardService
   ) {}
 
   ngOnInit(): void {
@@ -97,10 +97,12 @@ export class ProjectListComponent implements OnInit {
   }
 
   openCreate(): void {
-    if (!this.authService.canWrite()) return;
-    const ref = this.dialog.open(ProjectFormDialogComponent, { width: '520px', data: {} });
-    ref.afterClosed().subscribe((result) => {
-      if (result) this.loadProjects();
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      const ref = this.dialog.open(ProjectFormDialogComponent, { width: '520px', data: {} });
+      ref.afterClosed().subscribe((result) => {
+        if (result) this.loadProjects();
+      });
     });
   }
 

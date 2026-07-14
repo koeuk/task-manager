@@ -70,7 +70,7 @@ interface CalendarDay {
     </div>
   `,
   styles: [`
-    .calendar-page { max-width: 1200px; margin: 0 auto; }
+    .calendar-page { width: 100%; }
     .cal-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
     .page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
     .cal-nav { display: flex; align-items: center; gap: 8px; }

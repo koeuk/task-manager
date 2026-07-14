@@ -69,7 +69,7 @@ import { ThemeService } from '../../core/services/theme.service';
     </div>
   `,
   styles: [`
-    .page { max-width: 720px; margin: 0 auto; }
+    .page { max-width: 100%; }
     .page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 24px; color: #1e1b3a; }
     .settings-card { margin-bottom: 20px; }
     .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }

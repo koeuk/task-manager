@@ -19,7 +19,7 @@ import { Project, Task } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
 import { TaskService, ReorderItem } from '../../../core/services/task.service';
 import { TaskListService } from '../../../core/services/task-list.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-dialog.component';
 import { TaskFormDialogComponent } from '../../tasks/task-form-dialog/task-form-dialog.component';
 import { TaskDetailDialogComponent } from '../../tasks/task-detail-dialog/task-detail-dialog.component';
@@ -70,7 +70,7 @@ export class ProjectDetailComponent implements OnInit {
     private taskListService: TaskListService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private authService: AuthService
+    private writeGuard: WriteGuardService
   ) {}
 
   ngOnInit(): void {
@@ -169,21 +169,25 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   addTask(column: BoardColumn): void {
-    if (!this.authService.canWrite()) return;
-    const ref = this.dialog.open(TaskFormDialogComponent, {
-      width: '560px',
-      data: { projectId: this.projectId, taskListId: column.id }
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result) this.loadProject();
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      const ref = this.dialog.open(TaskFormDialogComponent, {
+        width: '560px',
+        data: { projectId: this.projectId, taskListId: column.id }
+      });
+      ref.afterClosed().subscribe((result) => {
+        if (result) this.loadProject();
+      });
     });
   }
 
   // ---- Task lists ----
   startAddList(): void {
-    if (!this.authService.canWrite()) return;
-    this.addingList = true;
-    this.newListName = '';
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      this.addingList = true;
+      this.newListName = '';
+    });
   }
 
   cancelAddList(): void {

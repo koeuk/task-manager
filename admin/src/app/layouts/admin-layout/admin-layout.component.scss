@@ -52,6 +52,7 @@
       justify-content: center;
       margin: 4px 12px;
       padding: 0;
+      border-radius: 12px;
 
       mat-icon {
         margin-right: 0;
@@ -61,8 +62,13 @@
         display: none;
       }
 
-      &.active-link::before {
-        display: none;
+      // No room for the edge bar when collapsed — show active as a rounded highlight
+      &.active-link {
+        background: rgba(255, 255, 255, 0.1);
+
+        &::before { display: none; }
+
+        &:hover { background: rgba(255, 255, 255, 0.14); }
       }
     }
 

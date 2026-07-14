@@ -111,6 +111,7 @@ body .mat-mdc-outlined-button.mat-primary,
 body .mat-mdc-icon-button.mat-primary {
   --mdc-text-button-label-text-color: var(--app-accent, #64748b);
   --mdc-outlined-button-label-text-color: var(--app-accent, #64748b);
+  --mdc-outlined-button-outline-color: color-mix(in srgb, var(--app-accent, #64748b) 45%, transparent);
   --mdc-icon-button-icon-color: var(--app-accent, #64748b);
   --mat-icon-button-state-layer-color: var(--app-accent, #64748b);
   color: var(--app-accent, #64748b);

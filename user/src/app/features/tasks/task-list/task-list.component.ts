@@ -17,7 +17,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
 import { TaskService } from '../../../core/services/task.service';
 import { ProjectService } from '../../../core/services/project.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { TaskFormDialogComponent } from '../task-form-dialog/task-form-dialog.component';
 import { TaskDetailDialogComponent } from '../task-detail-dialog/task-detail-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -62,7 +62,7 @@ export class TaskListComponent implements OnInit {
     private projectService: ProjectService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private authService: AuthService
+    private writeGuard: WriteGuardService
   ) {}
 
   ngOnInit(): void {
@@ -122,17 +122,19 @@ export class TaskListComponent implements OnInit {
   }
 
   openCreate(): void {
-    if (!this.authService.canWrite()) return;
-    if (this.projects.length === 0) {
-      this.snackBar.open('Create a project first before adding tasks', 'Close', { duration: 4000 });
-      return;
-    }
-    const ref = this.dialog.open(TaskFormDialogComponent, {
-      width: '560px',
-      data: { projects: this.projects }
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result) this.loadTasks();
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      if (this.projects.length === 0) {
+        this.snackBar.open('Create a project first before adding tasks', 'Close', { duration: 4000 });
+        return;
+      }
+      const ref = this.dialog.open(TaskFormDialogComponent, {
+        width: '560px',
+        data: { projects: this.projects }
+      });
+      ref.afterClosed().subscribe((result) => {
+        if (result) this.loadTasks();
+      });
     });
   }
 
