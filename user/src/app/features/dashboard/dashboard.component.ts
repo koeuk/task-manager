@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatBadgeModule } from '@angular/material/badge';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
+import { WriteGuardService } from '../../core/services/write-guard.service';
 import { environment } from '../../../environments/environment';
 
 interface DashboardStats {
@@ -56,7 +57,9 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+    private writeGuard: WriteGuardService
   ) {}
 
   ngOnInit(): void {
@@ -65,6 +68,13 @@ export class DashboardComponent implements OnInit {
       if (user) {
         this.userName = user.name;
       }
+    });
+  }
+
+  /** "Create First Project" — guests are prompted to log in before continuing. */
+  createProject(): void {
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (ok) this.router.navigate(['/projects']);
     });
   }
 

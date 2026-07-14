@@ -72,7 +72,7 @@
         <div class="empty-state" *ngIf="!stats || stats.recent_projects.length === 0">
           <mat-icon>folder_open</mat-icon>
           <p>No projects yet</p>
-          <button mat-raised-button color="primary" routerLink="/projects">Create First Project</button>
+          <button mat-raised-button color="primary" (click)="createProject()">Create First Project</button>
         </div>
       </mat-card-content>
     </mat-card>

@@ -35,13 +35,28 @@
         <mat-icon matBadge="5" matBadgeColor="warn">notifications</mat-icon>
       </button>
 
-      <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-trigger">
-        <mat-icon>account_circle</mat-icon>
-        <span *ngIf="currentUser$ | async as user">{{ user.name }}</span>
-        <mat-icon>arrow_drop_down</mat-icon>
+      <button mat-button *ngIf="currentUser$ | async as user"
+              [matMenuTriggerFor]="userMenu" class="user-chip">
+        <span class="chip-avatar">
+          <img *ngIf="user.avatar" [src]="user.avatar" alt="">
+          <span *ngIf="!user.avatar">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
+        </span>
+        <span class="chip-name">{{ user.name }}</span>
+        <mat-icon class="chip-caret">expand_more</mat-icon>
       </button>
-      
-      <mat-menu #userMenu="matMenu">
+
+      <mat-menu #userMenu="matMenu" class="user-menu-panel">
+        <div class="um-header" *ngIf="currentUser$ | async as user" (click)="$event.stopPropagation()">
+          <span class="um-avatar">
+            <img *ngIf="user.avatar" [src]="user.avatar" alt="">
+            <span *ngIf="!user.avatar">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
+          </span>
+          <div class="um-info">
+            <span class="um-name">{{ user.name }}</span>
+            <span class="um-email">{{ user.email }}</span>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
         <button mat-menu-item routerLink="/profile">
           <mat-icon>person</mat-icon>
           <span>Profile</span>
