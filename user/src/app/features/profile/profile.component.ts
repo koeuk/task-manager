@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
+import { WriteGuardService } from '../../core/services/write-guard.service';
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const pw = group.get('password')?.value;
@@ -41,7 +42,8 @@ export class ProfileComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private writeGuard: WriteGuardService
   ) {}
 
   ngOnInit(): void {
@@ -77,6 +79,7 @@ export class ProfileComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+    if (this.writeGuard.blockGuest()) { input.value = ''; return; }
 
     if (!file.type.startsWith('image/')) {
       this.snackBar.open('Please choose an image file', 'Close', { duration: 4000 });
@@ -106,6 +109,7 @@ export class ProfileComponent implements OnInit {
       this.profileForm.markAllAsTouched();
       return;
     }
+    if (this.writeGuard.blockGuest()) return;
     this.savingProfile = true;
     const v = this.profileForm.value;
     this.authService.updateProfile({
@@ -129,6 +133,7 @@ export class ProfileComponent implements OnInit {
       this.passwordForm.markAllAsTouched();
       return;
     }
+    if (this.writeGuard.blockGuest()) return;
     this.savingPassword = true;
     this.authService.changePassword(this.passwordForm.value).subscribe({
       next: () => {

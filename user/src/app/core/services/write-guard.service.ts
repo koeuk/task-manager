@@ -9,6 +9,11 @@ import { LoginDialogComponent } from '../../features/auth/login-dialog/login-dia
 export class WriteGuardService {
   constructor(private auth: AuthService, private dialog: MatDialog) {}
 
+  /** True when browsing as the shared guest account. */
+  get isGuest(): boolean {
+    return this.auth.isGuest;
+  }
+
   /**
    * Ensure the current user may perform a write (create / edit). Real users emit
    * `true` immediately. Guests get the login dialog and emit `true` only if they
@@ -19,7 +24,7 @@ export class WriteGuardService {
       return of(true);
     }
     return this.dialog
-      .open(LoginDialogComponent, { width: '400px', restoreFocus: true })
+      .open(LoginDialogComponent, { width: '400px', restoreFocus: true, panelClass: 'auth-dialog' })
       .afterClosed()
       .pipe(map(() => !this.auth.isGuest));
   }
@@ -33,7 +38,7 @@ export class WriteGuardService {
     if (!this.auth.isGuest) {
       return false;
     }
-    this.dialog.open(LoginDialogComponent, { width: '400px', restoreFocus: true });
+    this.dialog.open(LoginDialogComponent, { width: '400px', restoreFocus: true, panelClass: 'auth-dialog' });
     return true;
   }
 }

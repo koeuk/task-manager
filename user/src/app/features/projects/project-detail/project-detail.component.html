@@ -58,7 +58,7 @@
 
       <div class="task-list" cdkDropList [cdkDropListData]="col.tasks"
            (cdkDropListDropped)="drop($event, col)">
-        <div class="task-card" *ngFor="let task of col.tasks" cdkDrag (click)="openTask(task)">
+        <div class="task-card" *ngFor="let task of col.tasks" cdkDrag [cdkDragDisabled]="isGuest" (click)="openTask(task)">
           <div class="card-top">
             <span class="priority-dot" [style.background]="priorityColor(task.priority)"
                   [matTooltip]="priorityLabel(task.priority)"></span>

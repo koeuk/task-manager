@@ -78,6 +78,11 @@ export class ProjectDetailComponent implements OnInit {
     this.loadProject();
   }
 
+  /** Guests browse read-only — used to disable drag-and-drop on the board. */
+  get isGuest(): boolean {
+    return this.writeGuard.isGuest;
+  }
+
   loadProject(): void {
     this.loading = true;
     this.projectService.getProject(this.projectId).subscribe({
@@ -208,6 +213,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   startRenameList(column: BoardColumn): void {
+    if (this.writeGuard.blockGuest()) return;
     this.editingListId = column.id;
     this.editingListName = column.name;
   }
@@ -231,6 +237,7 @@ export class ProjectDetailComponent implements OnInit {
 
   deleteList(column: BoardColumn): void {
     if (column.id == null) return;
+    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -253,6 +260,7 @@ export class ProjectDetailComponent implements OnInit {
   // ---- Project ----
   editProject(): void {
     if (!this.project) return;
+    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(ProjectFormDialogComponent, {
       width: '520px',
       data: { project: this.project }
@@ -264,6 +272,7 @@ export class ProjectDetailComponent implements OnInit {
 
   deleteProject(): void {
     if (!this.project) return;
+    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {

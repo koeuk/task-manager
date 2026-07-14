@@ -87,6 +87,7 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   changeStatus(status: TaskStatus): void {
+    if (this.writeGuard.blockGuest()) { this.loadTask(); return; }
     this.taskService.updateStatus(this.task.id, status).subscribe({
       next: (res) => {
         this.task = { ...this.task, ...res.task };
@@ -97,6 +98,7 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   editTask(): void {
+    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(TaskFormDialogComponent, {
       width: '560px',
       data: { task: this.task }
@@ -110,6 +112,7 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   deleteTask(): void {
+    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -154,6 +157,7 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   startEditComment(c: Comment): void {
+    if (this.writeGuard.blockGuest()) return;
     this.editingCommentId = c.id;
     this.editingText = c.comment;
   }
@@ -176,6 +180,7 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   deleteComment(c: Comment): void {
+    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: { title: 'Delete comment', message: 'Delete this comment?', confirmText: 'Delete', danger: true }

@@ -94,6 +94,16 @@ body {
   }
 }
 
+// Auth dialog: single uniform 24px padding (reset Material's uneven title/
+// content/actions padding so nothing floats in empty white bands).
+.auth-dialog {
+  .mat-mdc-dialog-surface { padding: 24px; border-radius: 16px; }
+  .mat-mdc-dialog-title { padding: 0; }
+  .mat-mdc-dialog-title::before { display: none; }
+  .mat-mdc-dialog-content { padding: 0; margin: 0; max-height: none; }
+  .mat-mdc-dialog-actions { padding: 8px 0 0; margin: 0; min-height: auto; }
+}
+
 // Soft, rounded white cards with a whisper-soft shadow (Bankio-style layout)
 mat-card.mat-mdc-card {
   --mdc-elevated-card-container-elevation: none;
