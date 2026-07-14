@@ -145,6 +145,19 @@ export class AuthService {
     return this.currentUserValue?.email === this.guestCredentials.email;
   }
 
+  /**
+   * Gate for write actions (create/edit/delete). Real users may proceed; a guest
+   * is redirected to log in and the action is blocked.
+   * @returns true if the current user may write, false if they must log in first.
+   */
+  canWrite(): boolean {
+    if (!this.isGuest) {
+      return true;
+    }
+    this.router.navigate(['/login']);
+    return false;
+  }
+
   isAuthenticated(): boolean {
     return !!this.getToken();
   }

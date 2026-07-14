@@ -91,11 +91,13 @@ import { Project } from '../../../core/models/project.model';
     </form>
   `,
   styles: [`
-    .dialog-content { display: flex; flex-direction: column; padding-top: 8px; min-width: 420px; }
+    .dialog-content { display: flex; flex-direction: column; padding: 8px 16px 4px; min-width: 420px; }
     .full-width { width: 100%; }
     .row { display: flex; gap: 12px; }
     .row mat-form-field { flex: 1; }
     .color-field { max-width: 110px; }
+    h2[mat-dialog-title] { padding: 16px 16px 4px; }
+    mat-dialog-actions { padding: 8px 16px 16px; gap: 8px; }
     mat-dialog-actions button mat-progress-spinner { display: inline-block; margin-right: 8px; }
   `]
 })

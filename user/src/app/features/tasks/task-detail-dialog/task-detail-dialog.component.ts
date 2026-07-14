@@ -16,6 +16,7 @@ import { Task, Comment, TaskStatus } from '../../../core/models/project.model';
 import { TaskService } from '../../../core/services/task.service';
 import { CommentService } from '../../../core/services/comment.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { TaskFormDialogComponent } from '../task-form-dialog/task-form-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { STATUS_OPTIONS, statusLabel, priorityLabel, statusColor, priorityColor } from '../../../shared/task-meta';
@@ -52,6 +53,7 @@ export class TaskDetailDialogComponent implements OnInit {
     private taskService: TaskService,
     private commentService: CommentService,
     private authService: AuthService,
+    private writeGuard: WriteGuardService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<TaskDetailDialogComponent>,
@@ -133,19 +135,21 @@ export class TaskDetailDialogComponent implements OnInit {
   addComment(): void {
     const text = this.newComment.trim();
     if (!text) return;
-    if (!this.authService.canWrite()) return;
-    this.postingComment = true;
-    this.commentService.createComment(this.task.id, text).subscribe({
-      next: () => {
-        this.newComment = '';
-        this.postingComment = false;
-        this.changed = true;
-        this.reloadComments();
-      },
-      error: () => {
-        this.postingComment = false;
-        this.snackBar.open('Failed to add comment', 'Close', { duration: 4000 });
-      }
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      this.postingComment = true;
+      this.commentService.createComment(this.task.id, text).subscribe({
+        next: () => {
+          this.newComment = '';
+          this.postingComment = false;
+          this.changed = true;
+          this.reloadComments();
+        },
+        error: () => {
+          this.postingComment = false;
+          this.snackBar.open('Failed to add comment', 'Close', { duration: 4000 });
+        }
+      });
     });
   }
 

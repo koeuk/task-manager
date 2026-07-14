@@ -108,33 +108,39 @@ export class ProjectListComponent implements OnInit {
 
   openEdit(project: Project, event: Event): void {
     event.stopPropagation();
-    const ref = this.dialog.open(ProjectFormDialogComponent, { width: '520px', data: { project } });
-    ref.afterClosed().subscribe((result) => {
-      if (result) this.loadProjects();
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      const ref = this.dialog.open(ProjectFormDialogComponent, { width: '520px', data: { project } });
+      ref.afterClosed().subscribe((result) => {
+        if (result) this.loadProjects();
+      });
     });
   }
 
   confirmDelete(project: Project, event: Event): void {
     event.stopPropagation();
-    const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '420px',
-      data: {
-        title: 'Delete project',
-        message: `Delete "${project.name}" and all its tasks? This cannot be undone.`,
-        confirmText: 'Delete',
-        danger: true
-      }
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.projectService.deleteProject(project.id).subscribe({
-          next: () => {
-            this.snackBar.open('Project deleted', 'Close', { duration: 3000 });
-            this.loadProjects();
-          },
-          error: () => this.snackBar.open('Failed to delete project', 'Close', { duration: 4000 })
-        });
-      }
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      const ref = this.dialog.open(ConfirmDialogComponent, {
+        width: '420px',
+        data: {
+          title: 'Delete project',
+          message: `Delete "${project.name}" and all its tasks? This cannot be undone.`,
+          confirmText: 'Delete',
+          danger: true
+        }
+      });
+      ref.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          this.projectService.deleteProject(project.id).subscribe({
+            next: () => {
+              this.snackBar.open('Project deleted', 'Close', { duration: 3000 });
+              this.loadProjects();
+            },
+            error: () => this.snackBar.open('Failed to delete project', 'Close', { duration: 4000 })
+          });
+        }
+      });
     });
   }
 

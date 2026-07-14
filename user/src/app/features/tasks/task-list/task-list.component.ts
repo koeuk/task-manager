@@ -115,9 +115,12 @@ export class TaskListComponent implements OnInit {
   }
 
   changeStatus(task: Task, status: TaskStatus): void {
-    this.taskService.updateStatus(task.id, status).subscribe({
-      next: (res) => (task.status = res.task.status),
-      error: () => this.snackBar.open('Failed to update status', 'Close', { duration: 4000 })
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) { this.loadTasks(); return; } // reset the optimistic select
+      this.taskService.updateStatus(task.id, status).subscribe({
+        next: (res) => (task.status = res.task.status),
+        error: () => this.snackBar.open('Failed to update status', 'Close', { duration: 4000 })
+      });
     });
   }
 
@@ -151,33 +154,39 @@ export class TaskListComponent implements OnInit {
 
   editTask(task: Task, event: Event): void {
     event.stopPropagation();
-    const ref = this.dialog.open(TaskFormDialogComponent, { width: '560px', data: { task } });
-    ref.afterClosed().subscribe((result) => {
-      if (result) this.loadTasks();
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      const ref = this.dialog.open(TaskFormDialogComponent, { width: '560px', data: { task } });
+      ref.afterClosed().subscribe((result) => {
+        if (result) this.loadTasks();
+      });
     });
   }
 
   confirmDelete(task: Task, event: Event): void {
     event.stopPropagation();
-    const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '420px',
-      data: {
-        title: 'Delete task',
-        message: `Delete "${task.title}"? This cannot be undone.`,
-        confirmText: 'Delete',
-        danger: true
-      }
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.taskService.deleteTask(task.id).subscribe({
-          next: () => {
-            this.snackBar.open('Task deleted', 'Close', { duration: 3000 });
-            this.loadTasks();
-          },
-          error: () => this.snackBar.open('Failed to delete task', 'Close', { duration: 4000 })
-        });
-      }
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      const ref = this.dialog.open(ConfirmDialogComponent, {
+        width: '420px',
+        data: {
+          title: 'Delete task',
+          message: `Delete "${task.title}"? This cannot be undone.`,
+          confirmText: 'Delete',
+          danger: true
+        }
+      });
+      ref.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          this.taskService.deleteTask(task.id).subscribe({
+            next: () => {
+              this.snackBar.open('Task deleted', 'Close', { duration: 3000 });
+              this.loadTasks();
+            },
+            error: () => this.snackBar.open('Failed to delete task', 'Close', { duration: 4000 })
+          });
+        }
+      });
     });
   }
 

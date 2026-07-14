@@ -23,4 +23,17 @@ export class WriteGuardService {
       .afterClosed()
       .pipe(map(() => !this.auth.isGuest));
   }
+
+  /**
+   * Synchronous guard for write actions. If the current user is a guest, opens the
+   * login dialog and returns `true` (meaning: block the action). Real users get `false`.
+   * Usage: `if (this.writeGuard.blockGuest()) return;`
+   */
+  blockGuest(): boolean {
+    if (!this.auth.isGuest) {
+      return false;
+    }
+    this.dialog.open(LoginDialogComponent, { width: '400px', restoreFocus: true });
+    return true;
+  }
 }
