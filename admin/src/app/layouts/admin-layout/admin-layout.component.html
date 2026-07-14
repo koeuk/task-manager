@@ -39,13 +39,19 @@
     </mat-nav-list>
 
     <div class="sidenav-footer">
-      <div class="user-info" *ngIf="currentUser$ | async as user">
-        <div class="user-avatar">{{ (user.name || 'A').charAt(0).toUpperCase() }}</div>
+      <button class="user-info" *ngIf="currentUser$ | async as user"
+              [matMenuTriggerFor]="userMenu"
+              type="button">
+        <div class="user-avatar">
+          <img *ngIf="user.avatar" [src]="user.avatar" alt="Avatar">
+          <span *ngIf="!user.avatar">{{ (user.name || 'A').charAt(0).toUpperCase() }}</span>
+        </div>
         <div class="user-details">
           <p class="user-name">{{user.name}}</p>
           <p class="user-role">Administrator</p>
         </div>
-      </div>
+        <mat-icon class="user-caret">expand_less</mat-icon>
+      </button>
     </div>
   </mat-sidenav>
 
@@ -105,11 +111,7 @@
       </mat-menu>
 
       <!-- User Menu -->
-      <button mat-icon-button [matMenuTriggerFor]="userMenu" matTooltip="Account">
-        <mat-icon>account_circle</mat-icon>
-      </button>
-      
-      <mat-menu #userMenu="matMenu">
+      <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
         <div class="user-menu-header" *ngIf="currentUser$ | async as user">
           <p class="user-email">{{user.email}}</p>
           <p class="user-role-badge">Admin</p>
