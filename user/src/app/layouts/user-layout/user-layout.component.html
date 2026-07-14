@@ -51,7 +51,11 @@
           <span>Settings</span>
         </button>
         <mat-divider></mat-divider>
-        <button mat-menu-item (click)="logout()">
+        <button mat-menu-item *ngIf="isGuest" (click)="login()">
+          <mat-icon>login</mat-icon>
+          <span>Log in</span>
+        </button>
+        <button mat-menu-item *ngIf="!isGuest" (click)="logout()">
           <mat-icon>logout</mat-icon>
           <span>Logout</span>
         </button>

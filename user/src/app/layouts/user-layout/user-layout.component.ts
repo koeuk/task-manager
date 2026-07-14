@@ -68,4 +68,14 @@ export class UserLayoutComponent implements OnInit {
   logout(): void {
     this.authService.logout();
   }
+
+  /** True when browsing as the shared guest account (no real login). */
+  get isGuest(): boolean {
+    return this.authService.isGuest;
+  }
+
+  /** End the guest session and show the login form so a user can sign into their own account. */
+  login(): void {
+    this.authService.logout();
+  }
 }

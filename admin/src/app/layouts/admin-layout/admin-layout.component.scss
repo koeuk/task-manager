@@ -32,7 +32,7 @@
     overflow: hidden;
   }
 
-  // ---- Collapsed icon-only rail ----
+  // ---- Collapsed icon-only rail (items centered) ----
   &.collapsed {
     width: 76px;
 
@@ -50,7 +50,7 @@
 
     .nav-list a {
       justify-content: center;
-      margin: 4px 14px;
+      margin: 4px 12px;
       padding: 0;
 
       mat-icon {

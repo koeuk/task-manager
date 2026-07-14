@@ -10,7 +10,8 @@
   <div class="login-card">
     <div class="brand">
       <div class="brand-badge">
-        <mat-icon>admin_panel_settings</mat-icon>
+        <img *ngIf="(appSettings.settings$ | async)?.appLogo as logo" [src]="logo" alt="Logo">
+        <mat-icon *ngIf="!(appSettings.settings$ | async)?.appLogo">admin_panel_settings</mat-icon>
       </div>
       <h1>Admin Login</h1>
       <p class="subtitle">Task Management System</p>

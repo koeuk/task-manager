@@ -11,7 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AppSettingsService } from '../../core/services/app-settings.service';
@@ -72,7 +72,8 @@ export class SettingsComponent implements OnInit {
     public themeService: ThemeService,
     public appSettings: AppSettingsService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -91,6 +92,12 @@ export class SettingsComponent implements OnInit {
     this.appNameControl = this.fb.group({
       appName: [this.appSettings.current.appName, [Validators.required]]
     });
+
+    // Open a specific section when navigated with ?section=... (e.g. from the bell)
+    const requested = this.route.snapshot.queryParamMap.get('section') as Section | null;
+    if (requested && this.navItems.some(i => i.id === requested)) {
+      this.section = requested;
+    }
 
     this.loadNotifications();
   }

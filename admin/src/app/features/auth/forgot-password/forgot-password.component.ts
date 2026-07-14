@@ -88,11 +88,11 @@ import { AuthService } from '../../../core/services/auth.service';
   styles: [`
     .login-page {
       min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
-      background: linear-gradient(135deg, #64748b 0%, #94a3b8 50%, #475569 100%);
+      background: linear-gradient(135deg, #eef1f5 0%, #f6f8fa 45%, #dde3ea 100%);
     }
     .login-card {
       width: 100%; max-width: 420px; padding: 40px 36px 28px; background: #fff;
-      border-radius: 20px; box-shadow: 0 24px 60px rgba(30, 20, 60, 0.32);
+      border-radius: 20px; border: 1px solid #e6e9ee; box-shadow: none;
     }
     .brand { text-align: center; margin-bottom: 28px; }
     .brand-badge {

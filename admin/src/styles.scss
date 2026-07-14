@@ -94,13 +94,26 @@ body {
   }
 }
 
-// Configurable brand accent (Settings → Appearance) drives primary buttons
-.mat-mdc-unelevated-button.mat-primary,
-.mat-mdc-raised-button.mat-primary {
+// Configurable brand accent (Settings → Appearance) drives all primary buttons.
+// The `body` prefix matches Material's own `body`-scoped color rules (from
+// `body { @include all-component-colors }`) so this override actually wins.
+body .mat-mdc-unelevated-button.mat-primary,
+body .mat-mdc-raised-button.mat-primary {
   --mdc-filled-button-container-color: var(--app-accent, #64748b);
   --mdc-protected-button-container-color: var(--app-accent, #64748b);
   --mdc-filled-button-label-text-color: #fff;
   --mdc-protected-button-label-text-color: #fff;
+}
+
+// Text / stroked / icon primary buttons take the accent as their foreground
+body .mat-mdc-button.mat-primary,
+body .mat-mdc-outlined-button.mat-primary,
+body .mat-mdc-icon-button.mat-primary {
+  --mdc-text-button-label-text-color: var(--app-accent, #64748b);
+  --mdc-outlined-button-label-text-color: var(--app-accent, #64748b);
+  --mdc-icon-button-icon-color: var(--app-accent, #64748b);
+  --mat-icon-button-state-layer-color: var(--app-accent, #64748b);
+  color: var(--app-accent, #64748b);
 }
 
 // Soft, rounded white cards with a whisper-soft shadow (Bankio-style layout)
@@ -159,6 +172,12 @@ mat-card.mat-mdc-card {
     transition: background 0.15s ease;
 
     &:hover { background: #f7f9fb; }
+  }
+
+  // Pin the actions column to the right edge of the table
+  .mat-column-actions {
+    text-align: right;
+    padding-right: 8px;
   }
 }
 

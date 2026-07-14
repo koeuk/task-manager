@@ -133,6 +133,7 @@ export class TaskDetailDialogComponent implements OnInit {
   addComment(): void {
     const text = this.newComment.trim();
     if (!text) return;
+    if (!this.authService.canWrite()) return;
     this.postingComment = true;
     this.commentService.createComment(this.task.id, text).subscribe({
       next: () => {

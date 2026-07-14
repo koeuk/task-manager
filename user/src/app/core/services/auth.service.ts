@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { User, LoginCredentials, RegisterCredentials, AuthResponse } from '../models/user.model';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -12,12 +13,15 @@ import { environment } from '../../../environments/environment';
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private userKey = 'auth_user';
+  /** Shared guest identity used when nobody has logged in (public/guest mode). */
+  private readonly guestCredentials = { email: 'guest@example.com', password: 'guest-access-123' };
   private currentUserSubject = new BehaviorSubject<User | null>(this.readStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {
     // Revalidate the persisted session in the background on app start
     this.loadCurrentUser();
@@ -119,6 +123,44 @@ export class AuthService {
 
   resetPassword(data: { email: string; token: string; password: string; password_confirmation: string }): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, data);
+  }
+
+  /**
+   * Ensure there is an active session. If no token is stored, sign in silently as
+   * the shared guest account so the app is usable without an explicit login.
+   * Always resolves (even on failure) so app bootstrap is never blocked.
+   */
+  ensureGuestSession(): Promise<void> {
+    if (this.getToken()) {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      this.login(this.guestCredentials).subscribe({
+        next: () => resolve(),
+        error: () => resolve()
+      });
+    });
+  }
+
+  /** True when the current session is the shared guest account. */
+  get isGuest(): boolean {
+    return this.currentUserValue?.email === this.guestCredentials.email;
+  }
+
+  /**
+   * Gate for write actions (create/edit/delete). Real users may proceed; a guest
+   * is nudged to log in and the action is blocked.
+   * @returns true if the current user may write, false if they must log in first.
+   */
+  canWrite(): boolean {
+    if (!this.isGuest) {
+      return true;
+    }
+    this.snackBar
+      .open('Please log in to create or make changes.', 'Log in', { duration: 6000 })
+      .onAction()
+      .subscribe(() => this.logout());
+    return false;
   }
 
   isAuthenticated(): boolean {

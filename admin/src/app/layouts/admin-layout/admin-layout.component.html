@@ -87,12 +87,20 @@
           <p>You're all caught up</p>
         </div>
 
-        <button mat-menu-item *ngFor="let n of notifications" class="notif-item">
+        <button mat-menu-item *ngFor="let n of notifications" class="notif-item"
+                routerLink="/settings" [queryParams]="{ section: 'notifications' }">
           <mat-icon>{{ n.icon }}</mat-icon>
           <div class="notif-item-text">
             <span class="notif-item-title">{{ n.title }}</span>
             <span class="notif-item-time">{{ n.time }}</span>
           </div>
+        </button>
+
+        <mat-divider *ngIf="notifications.length"></mat-divider>
+        <button mat-menu-item class="notif-viewall"
+                routerLink="/settings" [queryParams]="{ section: 'notifications' }">
+          <mat-icon>open_in_new</mat-icon>
+          <span>View all notifications</span>
         </button>
       </mat-menu>
 
