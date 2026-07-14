@@ -94,6 +94,20 @@ body {
   }
 }
 
+// Rounded buttons app-wide (icon buttons stay round; excluded).
+// Set the MDC shape tokens too so the ripple/overlay match the 8px corner.
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-stroked-button,
+.mat-mdc-button {
+  --mdc-filled-button-container-shape: 8px;
+  --mdc-protected-button-container-shape: 8px;
+  --mdc-outlined-button-container-shape: 8px;
+  --mdc-text-button-container-shape: 8px;
+  border-radius: 8px;
+}
+
 // Configurable brand accent (Settings → Appearance) drives all primary buttons.
 // The `body` prefix matches Material's own `body`-scoped color rules (from
 // `body { @include all-component-colors }`) so this override actually wins.

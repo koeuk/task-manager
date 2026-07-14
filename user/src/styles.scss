@@ -94,6 +94,20 @@ body {
   }
 }
 
+// Rounded buttons app-wide (icon buttons stay round; excluded).
+// Set the MDC shape tokens too so the ripple/overlay match the 8px corner.
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-stroked-button,
+.mat-mdc-button {
+  --mdc-filled-button-container-shape: 8px;
+  --mdc-protected-button-container-shape: 8px;
+  --mdc-outlined-button-container-shape: 8px;
+  --mdc-text-button-container-shape: 8px;
+  border-radius: 8px;
+}
+
 // Auth dialog: single uniform 24px padding (reset Material's uneven title/
 // content/actions padding so nothing floats in empty white bands).
 .auth-dialog {
