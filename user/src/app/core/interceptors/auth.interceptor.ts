@@ -32,9 +32,15 @@ export class AuthInterceptor implements HttpInterceptor {
       });
     }
 
+    // A 401 from an /auth/* call is a normal outcome (e.g. wrong password on
+    // login) — not an expired session. Treating those as "session expired" would
+    // log the user out on a failed login, and re-trigger logout() from its own
+    // /auth/logout 401. Those callers handle their own errors.
+    const isAuthRequest = req.url.includes('/auth/');
+
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
+        if (error.status === 401 && !isAuthRequest) {
           // Resolve AuthService lazily so it is not required while it is still
           // being constructed.
           this.injector.get(AuthService).logout();

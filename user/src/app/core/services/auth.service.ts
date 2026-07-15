@@ -140,9 +140,15 @@ export class AuthService {
     });
   }
 
-  /** True when the current session is the shared guest account. */
+  /**
+   * True unless a real (non-guest) user is signed in.
+   *
+   * A missing user must count as a guest: otherwise a null session (e.g. right
+   * after a failed login) would read as "not a guest" and slip past the write gate.
+   */
   get isGuest(): boolean {
-    return this.currentUserValue?.email === this.guestCredentials.email;
+    const user = this.currentUserValue;
+    return !user || user.email === this.guestCredentials.email;
   }
 
   /**

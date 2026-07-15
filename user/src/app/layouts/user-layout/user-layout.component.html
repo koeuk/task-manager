@@ -1,11 +1,18 @@
 <mat-sidenav-container class="sidenav-container" [class.collapsed]="collapsed">
   <mat-sidenav #sidenav mode="side" [opened]="true" class="sidenav" [class.collapsed]="collapsed">
     <div class="sidenav-header">
-      <mat-icon class="app-icon">task_alt</mat-icon>
-      <span class="app-title">Task Manager</span>
+      <div class="logo-badge">
+        <mat-icon>task_alt</mat-icon>
+      </div>
+      <div class="brand-text">
+        <h2 class="app-title">Task Manager</h2>
+        <span class="app-subtitle">Stay on top of your work</span>
+      </div>
     </div>
 
-    <mat-nav-list>
+    <p class="nav-section-label">Menu</p>
+
+    <mat-nav-list class="nav-list">
       <a mat-list-item
          *ngFor="let item of menuItems"
          [routerLink]="item.route"
@@ -16,14 +23,50 @@
         <span matListItemTitle>{{ item.label }}</span>
       </a>
     </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <button class="user-info" *ngIf="currentUser$ | async as user"
+              [matMenuTriggerFor]="userMenu"
+              type="button">
+        <span class="user-avatar">
+          <img *ngIf="user.avatar" [src]="user.avatar" alt="">
+          <span *ngIf="!user.avatar">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
+        </span>
+        <span class="user-details">
+          <span class="user-name">{{ user.name }}</span>
+          <span class="user-role">{{ isGuest ? 'Guest' : user.email }}</span>
+        </span>
+        <mat-icon class="user-caret">expand_less</mat-icon>
+      </button>
+    </div>
+
+    <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
+      <button mat-menu-item routerLink="/profile">
+        <mat-icon>person</mat-icon>
+        <span>Profile</span>
+      </button>
+      <button mat-menu-item routerLink="/settings">
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item *ngIf="isGuest" (click)="login()">
+        <mat-icon>login</mat-icon>
+        <span>Log in</span>
+      </button>
+      <button mat-menu-item *ngIf="!isGuest" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <mat-toolbar color="primary" class="toolbar">
-      <button mat-icon-button (click)="toggleSidenav()">
+    <mat-toolbar class="toolbar">
+      <button mat-icon-button (click)="toggleSidenav()" matTooltip="Toggle menu">
         <mat-icon>menu</mat-icon>
       </button>
-      
+
       <span class="spacer"></span>
 
       <button mat-icon-button (click)="toggleTheme()"
@@ -31,50 +74,40 @@
         <mat-icon>{{ (themeService.isDark$ | async) ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
 
-      <button mat-icon-button>
-        <mat-icon matBadge="5" matBadgeColor="warn">notifications</mat-icon>
+      <button mat-icon-button matTooltip="Notifications" [matMenuTriggerFor]="notifMenu">
+        <mat-icon [matBadge]="notifications.length"
+                  [matBadgeHidden]="!notifications.length"
+                  matBadgeColor="warn" matBadgeSize="small">
+          notifications
+        </mat-icon>
       </button>
 
-      <button mat-button *ngIf="currentUser$ | async as user"
-              [matMenuTriggerFor]="userMenu" class="user-chip">
-        <span class="chip-inner">
-          <span class="chip-avatar">
-            <img *ngIf="user.avatar" [src]="user.avatar" alt="">
-            <span *ngIf="!user.avatar">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
-          </span>
-          <span class="chip-name">{{ user.name }}</span>
-          <mat-icon class="chip-caret">expand_more</mat-icon>
-        </span>
-      </button>
-
-      <mat-menu #userMenu="matMenu" class="user-menu-panel">
-        <div class="um-header" *ngIf="currentUser$ | async as user" (click)="$event.stopPropagation()">
-          <span class="um-avatar">
-            <img *ngIf="user.avatar" [src]="user.avatar" alt="">
-            <span *ngIf="!user.avatar">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
-          </span>
-          <div class="um-info">
-            <span class="um-name">{{ user.name }}</span>
-            <span class="um-email">{{ user.email }}</span>
-          </div>
+      <mat-menu #notifMenu="matMenu" class="notif-menu">
+        <div class="notif-header">
+          <span class="notif-title">Notifications</span>
+          <span class="notif-count" *ngIf="notifications.length">{{ notifications.length }}</span>
         </div>
         <mat-divider></mat-divider>
-        <button mat-menu-item routerLink="/profile">
-          <mat-icon>person</mat-icon>
-          <span>Profile</span>
+
+        <div class="notif-empty" *ngIf="!notifications.length">
+          <mat-icon>notifications_none</mat-icon>
+          <p>You're all caught up</p>
+        </div>
+
+        <button mat-menu-item *ngFor="let n of notifications" class="notif-item" routerLink="/tasks">
+          <mat-icon [class.overdue]="n.overdue">{{ n.icon }}</mat-icon>
+          <div class="notif-item-text">
+            <span class="notif-item-title">{{ n.title }}</span>
+            <span class="notif-item-sub" [class.overdue]="n.overdue">
+              {{ n.subtitle }}<ng-container *ngIf="n.dueDate"> · {{ n.dueDate | date:'MMM d' }}</ng-container>
+            </span>
+          </div>
         </button>
-        <button mat-menu-item routerLink="/settings">
-          <mat-icon>settings</mat-icon>
-          <span>Settings</span>
-        </button>
-        <mat-divider></mat-divider>
-        <button mat-menu-item *ngIf="isGuest" (click)="login()">
-          <mat-icon>login</mat-icon>
-          <span>Log in</span>
-        </button>
-        <button mat-menu-item *ngIf="!isGuest" (click)="logout()">
-          <mat-icon>logout</mat-icon>
-          <span>Logout</span>
+
+        <mat-divider *ngIf="notifications.length"></mat-divider>
+        <button mat-menu-item *ngIf="notifications.length" routerLink="/tasks">
+          <mat-icon>open_in_new</mat-icon>
+          <span>View all tasks</span>
         </button>
       </mat-menu>
     </mat-toolbar>

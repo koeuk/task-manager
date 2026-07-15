@@ -9,10 +9,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { NotificationService, AppNotification } from '../../core/services/notification.service';
 import { Observable } from 'rxjs';
 import { User } from '../../core/models/user.model';
+
+interface MenuItem {
+  icon: string;
+  label: string;
+  route: string;
+}
 
 @Component({
   selector: 'app-user-layout',
@@ -29,32 +37,43 @@ import { User } from '../../core/models/user.model';
     MatButtonModule,
     MatMenuModule,
     MatBadgeModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatDividerModule
   ],
   templateUrl: './user-layout.component.html',
   styleUrls: ['./user-layout.component.scss']
 })
 export class UserLayoutComponent implements OnInit {
   currentUser$: Observable<User | null>;
-  sidenavOpen = true;
   collapsed = false;
 
-  menuItems = [
+  /** Primary nav only — account pages live in the footer menu. */
+  menuItems: MenuItem[] = [
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
     { icon: 'folder', label: 'Projects', route: '/projects' },
-    { icon: 'task', label: 'My Tasks', route: '/tasks' },
-    { icon: 'calendar_month', label: 'Calendar', route: '/calendar' },
-    { icon: 'person', label: 'Profile', route: '/profile' }
+    { icon: 'task_alt', label: 'My Tasks', route: '/tasks' },
+    { icon: 'calendar_month', label: 'Calendar', route: '/calendar' }
   ];
+
+  notifications: AppNotification[] = [];
 
   constructor(
     private authService: AuthService,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private notificationService: NotificationService
   ) {
     this.currentUser$ = this.authService.currentUser$;
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadNotifications();
+  }
+
+  loadNotifications(): void {
+    this.notificationService.loadNotifications().subscribe(items => {
+      this.notifications = items;
+    });
+  }
 
   toggleSidenav(): void {
     // Collapse to an icon-only rail instead of hiding the sidebar entirely

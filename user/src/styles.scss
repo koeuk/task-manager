@@ -108,6 +108,69 @@ body {
   border-radius: 8px;
 }
 
+// Notification dropdown (menu renders in an overlay, so style it globally)
+.notif-menu {
+  min-width: 320px;
+
+  .notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .notif-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: #ef4444;
+    border-radius: 10px;
+    padding: 1px 7px;
+  }
+
+  .notif-empty {
+    padding: 28px 16px;
+    text-align: center;
+    color: #94a3b8;
+
+    mat-icon { font-size: 40px; width: 40px; height: 40px; opacity: 0.5; }
+    p { margin: 8px 0 0; font-size: 13px; }
+  }
+
+  .notif-item-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.35;
+    min-width: 0;
+  }
+
+  .notif-item-title {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notif-item-sub {
+    font-size: 12px;
+    color: #94a3b8;
+
+    &.overdue { color: #ef4444; font-weight: 500; }
+  }
+
+  .notif-item mat-icon.overdue { color: #ef4444; }
+}
+
+body.dark-theme .notif-menu {
+  --mat-menu-container-color: #171d2e;
+  border: 1px solid #262c40;
+
+  .notif-header { color: #e5e7eb; }
+  .notif-empty { color: #94a3b8; }
+  .notif-empty mat-icon { color: #94a3b8; }
+}
+
 // Auth dialog: single uniform 24px padding (reset Material's uneven title/
 // content/actions padding so nothing floats in empty white bands).
 .auth-dialog {
