@@ -37,12 +37,14 @@
 
       <button mat-button *ngIf="currentUser$ | async as user"
               [matMenuTriggerFor]="userMenu" class="user-chip">
-        <span class="chip-avatar">
-          <img *ngIf="user.avatar" [src]="user.avatar" alt="">
-          <span *ngIf="!user.avatar">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
+        <span class="chip-inner">
+          <span class="chip-avatar">
+            <img *ngIf="user.avatar" [src]="user.avatar" alt="">
+            <span *ngIf="!user.avatar">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
+          </span>
+          <span class="chip-name">{{ user.name }}</span>
+          <mat-icon class="chip-caret">expand_more</mat-icon>
         </span>
-        <span class="chip-name">{{ user.name }}</span>
-        <mat-icon class="chip-caret">expand_more</mat-icon>
       </button>
 
       <mat-menu #userMenu="matMenu" class="user-menu-panel">

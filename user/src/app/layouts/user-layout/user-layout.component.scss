@@ -107,8 +107,8 @@
     border-radius: 20px;
     line-height: normal;
 
-    // Material nests button content in an internal label span — make it the flex row.
-    ::ng-deep .mdc-button__label {
+    // Own flex row inside the button label so item order/spacing is deterministic.
+    .chip-inner {
       display: inline-flex;
       align-items: center;
       gap: 8px;
