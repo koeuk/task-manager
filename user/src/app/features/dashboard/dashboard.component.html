@@ -151,6 +151,6 @@
       </span>
     </div>
 
-    <span class="task-date" [class.late]="late">{{ t.due_date | date:'MMM d' }}</span>
+    <span class="task-date" [class.late]="late">{{ t.due_date | date:'MMM d':'UTC' }}</span>
   </div>
 </ng-template>

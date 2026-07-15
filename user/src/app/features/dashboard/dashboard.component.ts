@@ -19,6 +19,7 @@ import { Task, Project } from '../../core/models/project.model';
 import { TaskFormDialogComponent } from '../tasks/task-form-dialog/task-form-dialog.component';
 import { TaskDetailDialogComponent } from '../tasks/task-detail-dialog/task-detail-dialog.component';
 import { priorityColor, priorityLabel, projectStatusColor } from '../../shared/task-meta';
+import { parseApiDate } from '../../shared/date-utils';
 import { environment } from '../../../environments/environment';
 
 interface DashboardStats {
@@ -140,8 +141,8 @@ export class DashboardComponent implements OnInit {
 
     const open = tasks.filter(t => t.status !== 'completed' && !!t.due_date);
     const withDate = open
-      .map(t => ({ task: t, due: new Date(t.due_date as string) }))
-      .filter(x => !isNaN(x.due.getTime()))
+      .map(t => ({ task: t, due: parseApiDate(t.due_date) }))
+      .filter((x): x is { task: Task; due: Date } => x.due !== null)
       .sort((a, b) => a.due.getTime() - b.due.getTime());
 
     this.overdueTasks = withDate.filter(x => x.due < startOfToday).map(x => x.task);
@@ -213,8 +214,8 @@ export class DashboardComponent implements OnInit {
 
   /** "3 days ago" / "in 2 days" style hint for a due date. */
   dueHint(task: Task): string {
-    if (!task.due_date) return '';
-    const due = new Date(task.due_date);
+    const due = parseApiDate(task.due_date);
+    if (!due) return '';
     const start = new Date();
     start.setHours(0, 0, 0, 0);
     const days = Math.round((new Date(due).setHours(0, 0, 0, 0) - start.getTime()) / 86400000);

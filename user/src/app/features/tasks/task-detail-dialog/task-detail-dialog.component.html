@@ -42,11 +42,11 @@
       </div>
       <div class="meta-item" *ngIf="task.due_date">
         <span class="meta-label">Due</span>
-        <span>{{ task.due_date | date:'mediumDate' }}</span>
+        <span>{{ task.due_date | date:'mediumDate':'UTC' }}</span>
       </div>
       <div class="meta-item" *ngIf="task.estimated_hours">
         <span class="meta-label">Estimate</span>
-        <span>{{ task.estimated_hours }}h</span>
+        <span>{{ +task.estimated_hours! }}h</span>
       </div>
       <div class="meta-item" *ngIf="task.assignee">
         <span class="meta-label">Assignee</span>

@@ -42,7 +42,8 @@ export interface Task {
   start_date?: string | null;
   due_date?: string | null;
   completed_at?: string | null;
-  estimated_hours?: number | null;
+  /** Laravel's `decimal:2` cast serialises this as a string (e.g. "4.50"). */
+  estimated_hours?: number | string | null;
   created_by: number;
   assigned_to?: number | null;
   // Eager-loaded relations (snake_case JSON keys from Laravel)

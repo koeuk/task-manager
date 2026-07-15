@@ -70,8 +70,8 @@
             <span class="status-tag" [style.color]="statusColor(task.status)"
                   [style.borderColor]="statusColor(task.status)">{{ statusLabel(task.status) }}</span>
             <span class="spacer"></span>
-            <span class="due" *ngIf="task.due_date" [matTooltip]="'Due ' + (task.due_date | date:'mediumDate')">
-              <mat-icon>event</mat-icon>{{ task.due_date | date:'MMM d' }}
+            <span class="due" *ngIf="task.due_date" [matTooltip]="'Due ' + (task.due_date | date:'mediumDate':'UTC')">
+              <mat-icon>event</mat-icon>{{ task.due_date | date:'MMM d':'UTC' }}
             </span>
             <span class="assignee" *ngIf="task.assignee" [matTooltip]="task.assignee.name">
               {{ (task.assignee.name || '?')[0] | uppercase }}

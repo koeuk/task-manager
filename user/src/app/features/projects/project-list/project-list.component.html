@@ -77,7 +77,7 @@
           {{ statusLabel(p.status) }}
         </span>
         <span class="due" *ngIf="p.due_date">
-          <mat-icon>event</mat-icon> {{ p.due_date | date:'MMM d' }}
+          <mat-icon>event</mat-icon> {{ p.due_date | date:'MMM d':'UTC' }}
         </span>
       </div>
     </mat-card>

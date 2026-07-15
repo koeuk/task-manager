@@ -93,7 +93,7 @@
 
       <div class="task-due">
         <span *ngIf="task.due_date" class="due" [class.overdue]="isOverdue(task)">
-          {{ task.due_date | date:'MMM d' }}
+          {{ task.due_date | date:'MMM d':'UTC' }}
           <small *ngIf="dueHint(task)">{{ dueHint(task) }}</small>
         </span>
         <span *ngIf="!task.due_date" class="muted">No due date</span>

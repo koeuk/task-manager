@@ -25,6 +25,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 import {
   STATUS_OPTIONS, PRIORITY_OPTIONS, statusLabel, priorityLabel, statusColor, priorityColor
 } from '../../../shared/task-meta';
+import { parseApiDate } from '../../../shared/date-utils';
 
 @Component({
   selector: 'app-task-list',
@@ -197,8 +198,12 @@ export class TaskListComponent implements OnInit {
   }
 
   isOverdue(task: Task): boolean {
-    if (!task.due_date || task.status === 'completed') return false;
-    return new Date(task.due_date) < new Date(new Date().toDateString());
+    if (task.status === 'completed') return false;
+    const due = parseApiDate(task.due_date);
+    if (!due) return false;
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return due < startOfToday;
   }
 
   /** Inline check-off: tick a row to complete (or un-complete) it. */
@@ -216,10 +221,11 @@ export class TaskListComponent implements OnInit {
 
   /** "Yesterday" / "in 2 days" style hint for a due date. */
   dueHint(task: Task): string {
-    if (!task.due_date) return '';
+    const due = parseApiDate(task.due_date);
+    if (!due) return '';
     const start = new Date();
     start.setHours(0, 0, 0, 0);
-    const days = Math.round((new Date(task.due_date).setHours(0, 0, 0, 0) - start.getTime()) / 86400000);
+    const days = Math.round((due.setHours(0, 0, 0, 0) - start.getTime()) / 86400000);
     if (days === 0) return 'Today';
     if (days === 1) return 'Tomorrow';
     if (days === -1) return 'Yesterday';

@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Project, ProjectStatus } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
-import { toDateString } from '../../../shared/date-utils';
+import { toDateString, parseApiDate } from '../../../shared/date-utils';
 
 @Component({
   selector: 'app-project-form-dialog',
@@ -54,8 +54,8 @@ export class ProjectFormDialogComponent implements OnInit {
       description: [p?.description ?? ''],
       status: [p?.status ?? 'planning', Validators.required],
       color: [p?.color ?? '#2196f3'],
-      start_date: [p?.start_date ? new Date(p.start_date) : null],
-      due_date: [p?.due_date ? new Date(p.due_date) : null]
+      start_date: [parseApiDate(p?.start_date)],
+      due_date: [parseApiDate(p?.due_date)]
     });
   }
 

@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
 import { TaskService, TaskPayload } from '../../../core/services/task.service';
-import { toDateString } from '../../../shared/date-utils';
+import { toDateString, parseApiDate } from '../../../shared/date-utils';
 
 export interface TaskFormData {
   task?: Task;
@@ -72,7 +72,7 @@ export class TaskFormDialogComponent implements OnInit {
       project_id: [t?.project_id ?? this.data?.projectId ?? null],
       priority: [t?.priority ?? 'medium', Validators.required],
       status: [t?.status ?? 'todo', Validators.required],
-      due_date: [t?.due_date ? new Date(t.due_date) : null],
+      due_date: [parseApiDate(t?.due_date)],
       estimated_hours: [t?.estimated_hours ?? null]
     });
 

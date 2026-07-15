@@ -3,6 +3,7 @@ import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { TaskService } from './task.service';
 import { Task } from '../models/project.model';
+import { parseApiDate } from '../../shared/date-utils';
 
 export interface AppNotification {
   id: number;
@@ -33,18 +34,21 @@ export class NotificationService {
   }
 
   private buildFeed(tasks: Task[]): AppNotification[] {
-    const now = new Date();
-    const cutoff = new Date();
+    // Compare whole days: a task due *today* is "due soon", not overdue.
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const cutoff = new Date(startOfToday);
     cutoff.setDate(cutoff.getDate() + DUE_SOON_DAYS);
+    cutoff.setHours(23, 59, 59, 999);
 
     return tasks
       .filter(t => t.status !== 'completed' && !!t.due_date)
-      .map(t => ({ task: t, due: new Date(t.due_date as string) }))
-      .filter(({ due }) => !isNaN(due.getTime()) && due <= cutoff)
+      .map(t => ({ task: t, due: parseApiDate(t.due_date) }))
+      .filter((x): x is { task: Task; due: Date } => x.due !== null && x.due <= cutoff)
       .sort((a, b) => a.due.getTime() - b.due.getTime())
       .slice(0, 8)
       .map(({ task, due }) => {
-        const overdue = due < now;
+        const overdue = due < startOfToday;
         const project = task.project?.name ? ` · ${task.project.name}` : '';
         return {
           id: task.id,
