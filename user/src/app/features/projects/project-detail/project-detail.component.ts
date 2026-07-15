@@ -25,6 +25,7 @@ import { TaskFormDialogComponent } from '../../tasks/task-form-dialog/task-form-
 import { TaskDetailDialogComponent } from '../../tasks/task-detail-dialog/task-detail-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { statusLabel, priorityLabel, statusColor, priorityColor, projectStatusColor } from '../../../shared/task-meta';
+import { parseApiDate } from '../../../shared/date-utils';
 
 interface BoardColumn {
   id: number | null; // task list id, or null for the "Unassigned" column
@@ -127,6 +128,22 @@ export class ProjectDetailComponent implements OnInit {
 
   get progress(): number {
     return this.totalTasks ? Math.round((this.completedTasks / this.totalTasks) * 100) : 0;
+  }
+
+  /** Past its due date and still open — surfaced in red on the task card. */
+  isOverdue(task: Task): boolean {
+    if (task.status === 'completed') return false;
+    const due = parseApiDate(task.due_date);
+    if (!due) return false;
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return due < startOfToday;
+  }
+
+  /** Include the year for dates outside the current year so they aren't ambiguous. */
+  dueFormat(task: Task): string {
+    const due = parseApiDate(task.due_date);
+    return due && due.getFullYear() !== new Date().getFullYear() ? 'MMM d, y' : 'MMM d';
   }
 
   // ---- Drag & drop ----

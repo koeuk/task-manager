@@ -68,12 +68,15 @@
   gap: 16px;
 }
 
-// Hover lift + flat surface come from the global `mat-card` rules.
+// Hover lift + flat surface come from the global `mat-card` rules. Padding is
+// ours: this card doesn't use <mat-card-content>, which is where Material's
+// own padding would otherwise come from.
 .project-card {
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  padding: 16px;
 }
 
 // ---- Head: colour tile + name/status + menu ----
