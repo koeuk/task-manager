@@ -4,8 +4,8 @@
   padding: 80px;
 }
 
+// The layout's `.content` already supplies the page padding — don't double it.
 .page {
-  padding: 20px 24px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -24,21 +24,27 @@
     align-items: center;
     gap: 10px;
 
-    h1 { margin: 0; font-size: 22px; font-weight: 600; }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #1e293b;
+    }
     .proj-icon { flex-shrink: 0; }
   }
 
   .status-chip {
-    padding: 3px 12px;
-    border-radius: 12px;
-    color: #fff;
+    padding: 3px 10px;
+    border-radius: 999px;
     font-size: 12px;
     font-weight: 600;
   }
 
   .description {
     margin: 6px 0 10px;
-    color: rgba(0, 0, 0, 0.6);
+    font-size: 13.5px;
+    color: #6b7280;
     max-width: 720px;
   }
 
@@ -49,7 +55,7 @@
     max-width: 420px;
 
     mat-progress-bar { flex: 1; border-radius: 4px; }
-    .progress-text { font-size: 12px; color: rgba(0, 0, 0, 0.55); white-space: nowrap; }
+    .progress-text { font-size: 12px; color: #6b7280; white-space: nowrap; }
   }
 }
 
@@ -232,9 +238,6 @@
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-@media (max-width: 600px) {
-  .page { padding: 16px; }
-}
 
 // ---- Dark theme ----
 :host-context(.dark-theme) {

@@ -12,6 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
@@ -31,7 +32,8 @@ import {
   imports: [
     CommonModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule,
-    MatButtonModule, MatMenuModule, MatProgressSpinnerModule, MatTooltipModule
+    MatButtonModule, MatMenuModule, MatProgressSpinnerModule, MatTooltipModule,
+    MatCheckboxModule
   ],
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss']
@@ -197,5 +199,32 @@ export class TaskListComponent implements OnInit {
   isOverdue(task: Task): boolean {
     if (!task.due_date || task.status === 'completed') return false;
     return new Date(task.due_date) < new Date(new Date().toDateString());
+  }
+
+  /** Inline check-off: tick a row to complete (or un-complete) it. */
+  toggleComplete(task: Task, event: Event): void {
+    event.stopPropagation();
+    const next: TaskStatus = task.status === 'completed' ? 'todo' : 'completed';
+    this.writeGuard.requireWrite().subscribe(ok => {
+      if (!ok) return;
+      this.taskService.updateStatus(task.id, next).subscribe({
+        next: (res) => (task.status = res.task.status),
+        error: () => this.snackBar.open('Failed to update task', 'Close', { duration: 4000 })
+      });
+    });
+  }
+
+  /** "Yesterday" / "in 2 days" style hint for a due date. */
+  dueHint(task: Task): string {
+    if (!task.due_date) return '';
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const days = Math.round((new Date(task.due_date).setHours(0, 0, 0, 0) - start.getTime()) / 86400000);
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Tomorrow';
+    if (days === -1) return 'Yesterday';
+    if (days < 0) return `${Math.abs(days)} days ago`;
+    if (days <= 7) return `in ${days} days`;
+    return '';
   }
 }

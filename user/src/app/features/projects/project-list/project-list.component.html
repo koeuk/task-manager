@@ -71,7 +71,9 @@
       <mat-progress-bar mode="determinate" [value]="progress(p)"></mat-progress-bar>
 
       <div class="card-footer">
-        <span class="status-chip" [style.background]="projectStatusColor(p.status)">
+        <span class="status-chip"
+              [style.color]="projectStatusColor(p.status)"
+              [style.background]="'color-mix(in srgb, ' + projectStatusColor(p.status) + ' 14%, transparent)'">
           {{ statusLabel(p.status) }}
         </span>
         <span class="due" *ngIf="p.due_date">

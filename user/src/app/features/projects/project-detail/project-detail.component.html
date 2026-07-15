@@ -12,7 +12,9 @@
       <div class="title-row">
         <mat-icon class="proj-icon" [style.color]="project.color || '#2196f3'">folder</mat-icon>
         <h1>{{ project.name }}</h1>
-        <span class="status-chip" [style.background]="projectStatusColor(project.status)">
+        <span class="status-chip"
+              [style.color]="projectStatusColor(project.status)"
+              [style.background]="'color-mix(in srgb, ' + projectStatusColor(project.status) + ' 14%, transparent)'">
           {{ statusLabel(project.status) }}
         </span>
       </div>
