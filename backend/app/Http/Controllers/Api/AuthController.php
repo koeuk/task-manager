@@ -304,7 +304,17 @@ class AuthController extends Controller
             Storage::disk('public')->delete($old);
         }
 
+        // store() returns false if the file could not be written (e.g. the
+        // storage directory is not writable). Without this check we would build
+        // url('storage/') and persist a broken avatar URL while reporting success.
         $path = $request->file('avatar')->store('avatars', 'public');
+
+        if (!$path) {
+            return response()->json([
+                'message' => 'Could not save the uploaded image. Please try again.'
+            ], 500);
+        }
+
         $url = url('storage/' . $path);
 
         $user->update(['avatar' => $url]);

@@ -29,8 +29,9 @@
               [matMenuTriggerFor]="userMenu"
               type="button">
         <span class="user-avatar">
-          <img *ngIf="user.avatar" [src]="user.avatar" alt="">
-          <span *ngIf="!user.avatar">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
+          <img *ngIf="user.avatar && !avatarBroken" [src]="user.avatar"
+               (error)="avatarBroken = true" alt="">
+          <span *ngIf="!user.avatar || avatarBroken">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
         </span>
         <span class="user-details">
           <span class="user-name">{{ user.name }}</span>

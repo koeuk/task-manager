@@ -35,6 +35,8 @@ export class ProfileComponent implements OnInit {
   savingProfile = false;
   savingPassword = false;
   avatarUploading = false;
+  /** Set when the avatar URL fails to load, so we fall back to initials. */
+  avatarBroken = false;
   hideCurrent = true;
   hideNew = true;
   hideConfirm = true;
@@ -94,6 +96,7 @@ export class ProfileComponent implements OnInit {
     this.authService.uploadAvatar(file).subscribe({
       next: () => {
         this.avatarUploading = false;
+        this.avatarBroken = false; // new image — let it try to load again
         this.snackBar.open('Avatar updated', 'Close', { duration: 3000 });
       },
       error: (error) => {

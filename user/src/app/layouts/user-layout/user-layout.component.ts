@@ -46,6 +46,8 @@ interface MenuItem {
 export class UserLayoutComponent implements OnInit {
   currentUser$: Observable<User | null>;
   collapsed = false;
+  /** Set when the avatar URL fails to load, so we fall back to initials. */
+  avatarBroken = false;
 
   /** Primary nav only — account pages live in the footer menu. */
   menuItems: MenuItem[] = [
