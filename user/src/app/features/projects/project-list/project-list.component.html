@@ -42,14 +42,25 @@
   </div>
 
   <div class="grid" *ngIf="!loading && projects.length > 0">
-    <mat-card class="project-card" *ngFor="let p of projects" (click)="openProject(p)"
-              [style.borderTopColor]="p.color || '#2196f3'">
-      <div class="card-top">
-        <div class="card-title">
-          <mat-icon class="proj-icon" [style.color]="p.color || '#2196f3'">folder</mat-icon>
+    <mat-card class="project-card" *ngFor="let p of projects" (click)="openProject(p)">
+      <div class="card-head">
+        <span class="proj-tile"
+              [style.color]="p.color || '#64748b'"
+              [style.background]="'color-mix(in srgb, ' + (p.color || '#64748b') + ' 14%, transparent)'">
+          <mat-icon>folder</mat-icon>
+        </span>
+
+        <div class="head-text">
           <h3 [matTooltip]="p.name">{{ p.name }}</h3>
+          <span class="status-chip"
+                [style.color]="projectStatusColor(p.status)"
+                [style.background]="'color-mix(in srgb, ' + projectStatusColor(p.status) + ' 14%, transparent)'">
+            {{ statusLabel(p.status) }}
+          </span>
         </div>
-        <button mat-icon-button (click)="$event.stopPropagation()" [matMenuTriggerFor]="menu" aria-label="Project actions">
+
+        <button mat-icon-button class="card-menu" (click)="$event.stopPropagation()"
+                [matMenuTriggerFor]="menu" aria-label="Project actions">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #menu="matMenu">
@@ -64,21 +75,27 @@
 
       <p class="description">{{ p.description || 'No description' }}</p>
 
-      <div class="progress-row">
-        <span class="progress-label">{{ completedCount(p) }}/{{ taskCount(p) }} tasks</span>
-        <span class="progress-pct">{{ progress(p) }}%</span>
+      <div class="progress-block">
+        <div class="progress-row">
+          <span class="progress-label">{{ completedCount(p) }} of {{ taskCount(p) }} tasks</span>
+          <span class="progress-pct">{{ progress(p) }}%</span>
+        </div>
+        <div class="bar">
+          <span class="bar-fill"
+                [style.width.%]="progress(p)"
+                [style.background]="p.color || '#64748b'"></span>
+        </div>
       </div>
-      <mat-progress-bar mode="determinate" [value]="progress(p)"></mat-progress-bar>
 
       <div class="card-footer">
-        <span class="status-chip"
-              [style.color]="projectStatusColor(p.status)"
-              [style.background]="'color-mix(in srgb, ' + projectStatusColor(p.status) + ' 14%, transparent)'">
-          {{ statusLabel(p.status) }}
+        <span class="due" *ngIf="p.due_date" [class.overdue]="isOverdue(p)">
+          <mat-icon>{{ isOverdue(p) ? 'event_busy' : 'event' }}</mat-icon>
+          {{ p.due_date | date:dueFormat(p):'UTC' }}
         </span>
-        <span class="due" *ngIf="p.due_date">
-          <mat-icon>event</mat-icon> {{ p.due_date | date:'MMM d':'UTC' }}
+        <span class="due muted" *ngIf="!p.due_date">
+          <mat-icon>event</mat-icon> No due date
         </span>
+        <mat-icon class="go">arrow_forward</mat-icon>
       </div>
     </mat-card>
   </div>

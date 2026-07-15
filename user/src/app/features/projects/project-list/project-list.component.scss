@@ -71,27 +71,42 @@
 // Hover lift + flat surface come from the global `mat-card` rules.
 .project-card {
   cursor: pointer;
-  border-top: 3px solid #2196f3;
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
 
-.card-top {
+// ---- Head: colour tile + name/status + menu ----
+.card-head {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
 
-  .card-title {
+  // Tinted tile in the project's own colour — same idiom as the sidebar badge
+  // and the dashboard stat icons.
+  .proj-tile {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 11px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-width: 0;
+    justify-content: center;
 
-    .proj-icon { flex-shrink: 0; font-size: 20px; width: 20px; height: 20px; }
+    mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  }
+
+  .head-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
 
     h3 {
       margin: 0;
+      max-width: 100%;
       font-size: 15.5px;
       font-weight: 600;
       color: #1e293b;
@@ -100,52 +115,94 @@
       text-overflow: ellipsis;
     }
   }
+
+  .card-menu {
+    flex-shrink: 0;
+    margin: -6px -8px 0 0;
+  }
+}
+
+.status-chip {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .description {
+  margin: 0;
   color: #6b7280;
   font-size: 13.5px;
   line-height: 1.45;
-  margin: 8px 0 16px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 39px;
+  min-height: 39px; // keeps cards aligned across the grid
 }
 
-.progress-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 6px;
+// ---- Progress ----
+.progress-block {
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 7px;
+    font-size: 12px;
+    color: #6b7280;
 
-  .progress-pct { font-weight: 600; color: #475569; }
+    .progress-pct { font-size: 12.5px; font-weight: 700; color: #475569; }
+  }
+
+  .bar {
+    height: 6px;
+    border-radius: 999px;
+    background: #eef1f5;
+    overflow: hidden;
+
+    .bar-fill {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
 }
 
+// ---- Footer ----
 .card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 16px;
-
-  .status-chip {
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-  }
+  padding-top: 12px;
+  border-top: 1px solid #f1f3f6;
 
   .due {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     font-size: 12.5px;
-    color: #94a3b8;
+    color: #64748b;
 
-    mat-icon { font-size: 16px; height: 16px; width: 16px; }
+    mat-icon { font-size: 15px; height: 15px; width: 15px; }
+
+    &.overdue { color: #ef4444; font-weight: 600; }
+    &.muted { color: #cbd5e1; }
   }
+
+  .go {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #cbd5e1;
+    transition: transform 0.25s ease, color 0.25s ease;
+  }
+}
+
+.project-card:hover .card-footer .go {
+  color: #64748b;
+  transform: translateX(3px);
 }
 
 mat-paginator { margin-top: 16px; background: transparent; }
@@ -153,14 +210,25 @@ mat-paginator { margin-top: 16px; background: transparent; }
 // ---- Dark theme ----
 :host-context(.dark-theme) {
   .page-header h1,
-  .card-title h3,
+  .card-head .head-text h3,
   .empty h3 { color: #e5e7eb; }
 
   .page-header .subtitle,
   .description,
-  .progress-row { color: #9ca3af; }
+  .progress-block .progress-row { color: #9ca3af; }
 
-  .progress-row .progress-pct { color: #cbd5e1; }
+  .progress-block .progress-row .progress-pct { color: #cbd5e1; }
+  .progress-block .bar { background: #2b3352; }
+
+  .card-footer {
+    border-top-color: #262c40;
+
+    .due { color: #94a3b8; }
+    .due.muted { color: #4b5563; }
+    .go { color: #4b5563; }
+  }
+
+  .project-card:hover .card-footer .go { color: #94a3b8; }
 
   .empty {
     background: #171d2e;

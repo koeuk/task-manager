@@ -22,6 +22,7 @@ import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PROJECT_STATUS_OPTIONS, statusLabel, projectStatusColor } from '../../../shared/task-meta';
+import { parseApiDate } from '../../../shared/date-utils';
 
 @Component({
   selector: 'app-project-list',
@@ -154,6 +155,25 @@ export class ProjectListComponent implements OnInit {
 
   completedCount(p: Project): number {
     return p.tasks?.filter(t => t.status === 'completed').length ?? 0;
+  }
+
+  /**
+   * Include the year for dates outside the current year, so a due date years
+   * away doesn't read as an ambiguous "Jan 1".
+   */
+  dueFormat(p: Project): string {
+    const due = parseApiDate(p.due_date);
+    return due && due.getFullYear() !== new Date().getFullYear() ? 'MMM d, y' : 'MMM d';
+  }
+
+  /** Past its due date and still open — surfaced in red on the card footer. */
+  isOverdue(p: Project): boolean {
+    if (p.status === 'completed' || p.status === 'archived') return false;
+    const due = parseApiDate(p.due_date);
+    if (!due) return false;
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return due < startOfToday;
   }
 
   progress(p: Project): number {
