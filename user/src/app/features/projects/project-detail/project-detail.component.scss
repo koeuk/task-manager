@@ -136,44 +136,52 @@
     border-color: #cbd5e1;
   }
 
-  .card-top {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
+  // Left accent bar reads priority at a glance — same idiom as the task list.
+  display: flex;
+  gap: 10px;
 
-    .priority-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-top: 4px;
-      flex-shrink: 0;
-    }
-    .task-title { font-size: 14px; line-height: 1.35; }
+  .prio-bar {
+    width: 3px;
+    align-self: stretch;
+    min-height: 28px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .card-body { flex: 1; min-width: 0; }
+
+  .task-title {
+    display: block;
+    font-size: 14px;
+    line-height: 1.35;
+    color: #1e293b;
   }
 
   .card-meta {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-top: 10px;
+    margin-top: 8px;
 
     .spacer { flex: 1; }
 
+    // Tinted pill, matching the project card / task list chips.
     .status-tag {
       font-size: 11px;
       font-weight: 600;
-      border: 1px solid;
-      border-radius: 10px;
+      border-radius: 999px;
       padding: 1px 8px;
     }
 
     .due {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
       font-size: 12px;
-      color: rgba(0, 0, 0, 0.55);
+      color: #64748b;
       mat-icon { font-size: 14px; height: 14px; width: 14px; }
+
+      &.overdue { color: #ef4444; font-weight: 600; }
     }
 
     .assignee {
@@ -247,8 +255,10 @@
 
   .detail-header .description,
   .progress-wrap .progress-text,
-  .add-task-btn,
-  .card-meta .due { color: #9ca3af; }
+  .add-task-btn { color: #9ca3af; }
+
+  .card-meta .due { color: #94a3b8; }
+  .card-meta .due.overdue { color: #f87171; }
 
   .column { background: #161c2b; }
   .column.virtual { background: #12182a; }

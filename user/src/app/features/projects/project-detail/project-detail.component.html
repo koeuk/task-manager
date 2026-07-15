@@ -61,21 +61,27 @@
       <div class="task-list" cdkDropList [cdkDropListData]="col.tasks"
            (cdkDropListDropped)="drop($event, col)">
         <div class="task-card" *ngFor="let task of col.tasks" cdkDrag [cdkDragDisabled]="isGuest" (click)="openTask(task)">
-          <div class="card-top">
-            <span class="priority-dot" [style.background]="priorityColor(task.priority)"
-                  [matTooltip]="priorityLabel(task.priority)"></span>
+          <span class="prio-bar" [style.background]="priorityColor(task.priority)"
+                [matTooltip]="priorityLabel(task.priority) + ' priority'"></span>
+
+          <div class="card-body">
             <span class="task-title">{{ task.title }}</span>
-          </div>
-          <div class="card-meta">
-            <span class="status-tag" [style.color]="statusColor(task.status)"
-                  [style.borderColor]="statusColor(task.status)">{{ statusLabel(task.status) }}</span>
-            <span class="spacer"></span>
-            <span class="due" *ngIf="task.due_date" [matTooltip]="'Due ' + (task.due_date | date:'mediumDate':'UTC')">
-              <mat-icon>event</mat-icon>{{ task.due_date | date:'MMM d':'UTC' }}
-            </span>
-            <span class="assignee" *ngIf="task.assignee" [matTooltip]="task.assignee.name">
-              {{ (task.assignee.name || '?')[0] | uppercase }}
-            </span>
+
+            <div class="card-meta">
+              <span class="status-tag"
+                    [style.color]="statusColor(task.status)"
+                    [style.background]="'color-mix(in srgb, ' + statusColor(task.status) + ' 14%, transparent)'">
+                {{ statusLabel(task.status) }}
+              </span>
+              <span class="spacer"></span>
+              <span class="due" *ngIf="task.due_date" [class.overdue]="isOverdue(task)"
+                    [matTooltip]="'Due ' + (task.due_date | date:'mediumDate':'UTC')">
+                <mat-icon>{{ isOverdue(task) ? 'event_busy' : 'event' }}</mat-icon>{{ task.due_date | date:dueFormat(task):'UTC' }}
+              </span>
+              <span class="assignee" *ngIf="task.assignee" [matTooltip]="task.assignee.name">
+                {{ (task.assignee.name || '?')[0] | uppercase }}
+              </span>
+            </div>
           </div>
         </div>
 
