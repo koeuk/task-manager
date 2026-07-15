@@ -77,23 +77,23 @@ import { AuthService } from '../../../core/services/auth.service';
           </button>
         </form>
 
-        <p class="auth-alt"><a routerLink="/login">Back to login</a></p>
+        <p class="auth-alt"><a routerLink="/dashboard">Back to app</a></p>
       </div>
     </div>
   `,
   styles: [`
     .login-page {
       min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #eef1f5 0%, #f6f8fa 45%, #dde3ea 100%);
     }
     .login-card {
       width: 100%; max-width: 420px; padding: 40px 36px 28px; background: #fff;
-      border-radius: 20px; box-shadow: 0 24px 60px rgba(30, 20, 60, 0.32);
+      border-radius: 20px; border: 1px solid #e6e9ee; box-shadow: none;
     }
     .brand { text-align: center; margin-bottom: 28px; }
     .brand-badge {
       width: 68px; height: 68px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;
-      border-radius: 18px; background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 10px 22px rgba(118,75,162,.4);
+      border-radius: 18px; background: linear-gradient(135deg, #94a3b8, #cbd5e1); box-shadow: 0 10px 22px rgba(100,116,139,.4);
     }
     .brand-badge mat-icon { font-size: 34px; width: 34px; height: 34px; color: #fff; }
     .brand h1 { margin: 0; font-size: 24px; font-weight: 700; color: #1e1b3a; }
@@ -107,7 +107,7 @@ import { AuthService } from '../../../core/services/auth.service';
     }
     .action-btn mat-progress-spinner { display: inline-block; }
     .auth-alt { margin: 20px 0 0; text-align: center; font-size: 14px; }
-    .auth-alt a { color: #764ba2; font-weight: 600; text-decoration: none; }
+    .auth-alt a { color: #475569; font-weight: 600; text-decoration: none; }
     .auth-alt a:hover { text-decoration: underline; }
   `]
 })
@@ -173,7 +173,7 @@ export class ForgotPasswordComponent implements OnInit {
       next: (res) => {
         this.loading = false;
         this.snackBar.open(res.message || 'Password reset successfully.', 'Close', { duration: 4000 });
-        this.router.navigate(['/login']);
+        this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.loading = false;

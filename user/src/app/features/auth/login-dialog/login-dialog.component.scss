@@ -57,6 +57,13 @@ mat-dialog-content {
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 }
 
+.forgot-line {
+  margin: -4px 0 10px;
+  text-align: right;
+
+  a { font-size: 13px; color: #64748b; font-weight: 500; text-decoration: none; &:hover { text-decoration: underline; } }
+}
+
 .register-line {
   margin: 0;
   font-size: 13px;
@@ -75,4 +82,5 @@ mat-dialog-actions {
   .brand h2 { color: #e5e7eb; }
   .brand .subtitle { color: #9ca3af; }
   .register-line { color: #9ca3af; a { color: #cbd5e1; } }
+  .forgot-line a { color: #cbd5e1; }
 }

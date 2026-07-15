@@ -1,8 +1,14 @@
+// The layout's `.content` already supplies the page padding — don't double it.
 .page {
-  padding: 24px;
-  max-width: 100%;
+  max-width: 1000px;
 
-  h1 { margin: 0 0 20px; font-size: 26px; font-weight: 600; }
+  h1 {
+    margin: 0 0 20px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1e293b;
+  }
 }
 
 .profile-banner {
@@ -107,7 +113,6 @@
 }
 
 @media (max-width: 600px) {
-  .page { padding: 16px; }
   .profile-banner { flex-direction: column; text-align: center; }
 }
 

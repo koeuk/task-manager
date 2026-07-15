@@ -69,17 +69,22 @@ import { ThemeService } from '../../core/services/theme.service';
     </div>
   `,
   styles: [`
-    .page { max-width: 100%; }
-    .page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 24px; color: #1e1b3a; }
-    .settings-card { margin-bottom: 20px; }
+    .page { max-width: 760px; }
+    .page-title { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 20px; color: #1e293b; }
+    .settings-card { margin-bottom: 16px; }
     .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
     .setting-label { display: flex; align-items: center; gap: 14px; }
-    .setting-label > mat-icon { color: #667eea; }
-    .setting-name { margin: 0; font-weight: 600; }
+    .setting-label > mat-icon { color: #94a3b8; }
+    .setting-name { margin: 0; font-weight: 600; color: #1e293b; }
     .setting-desc { margin: 2px 0 0; font-size: 13px; color: #6b7280; }
     .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
     .info-row:last-child { border-bottom: none; }
     .info-row span:first-child { color: #6b7280; }
+
+    :host-context(.dark-theme) .page-title,
+    :host-context(.dark-theme) .setting-name { color: #e5e7eb; }
+    :host-context(.dark-theme) .setting-desc { color: #9ca3af; }
+    :host-context(.dark-theme) .info-row { border-bottom-color: #262c40; }
   `]
 })
 export class SettingsComponent {

@@ -61,4 +61,13 @@ export class LoginDialogComponent {
     this.dialogRef.close(false);
     this.router.navigate(['/register']);
   }
+
+  /**
+   * Password recovery entry point. Without this the /forgot-password page is
+   * unreachable — the login page that used to link to it no longer exists.
+   */
+  goToForgotPassword(): void {
+    this.dialogRef.close(false);
+    this.router.navigate(['/forgot-password']);
+  }
 }

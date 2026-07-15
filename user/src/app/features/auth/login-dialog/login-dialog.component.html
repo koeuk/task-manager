@@ -30,6 +30,10 @@
         <mat-error *ngIf="form.get('password')?.hasError('required')">Password is required</mat-error>
       </mat-form-field>
 
+      <p class="forgot-line">
+        <a href="javascript:void(0)" (click)="goToForgotPassword()">Forgot password?</a>
+      </p>
+
       <p class="register-line">
         Don't have an account? <a href="javascript:void(0)" (click)="goToRegister()">Register</a>
       </p>

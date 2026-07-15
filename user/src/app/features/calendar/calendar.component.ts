@@ -72,7 +72,8 @@ interface CalendarDay {
   styles: [`
     .calendar-page { width: 100%; }
     .cal-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
-    .page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+    .page-title { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0; color: #1e293b; }
+    :host-context(.dark-theme) .page-title { color: #e5e7eb; }
     .cal-nav { display: flex; align-items: center; gap: 8px; }
     .cal-month { font-size: 16px; font-weight: 600; min-width: 150px; text-align: center; }
     .cal-loading { display: flex; justify-content: center; padding: 60px; }
@@ -80,7 +81,7 @@ interface CalendarDay {
     .cal-weekday { padding: 10px 8px; text-align: center; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; opacity: .7; background: rgba(128,128,128,0.06); }
     .cal-cell { min-height: 104px; padding: 6px; background: var(--cal-cell-bg, #fff); display: flex; flex-direction: column; gap: 4px; }
     .cal-cell.other-month { opacity: .45; }
-    .cal-cell.today .cell-date { background: #764ba2; color: #fff; }
+    .cal-cell.today .cell-date { background: #64748b; color: #fff; }
     .cell-date { align-self: flex-start; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 13px; font-weight: 600; }
     .cell-tasks { display: flex; flex-direction: column; gap: 3px; overflow: hidden; }
     .task-chip { border: none; text-align: left; cursor: pointer; font-size: 11px; padding: 2px 6px; border-radius: 4px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
