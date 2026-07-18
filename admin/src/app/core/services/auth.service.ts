@@ -85,7 +85,7 @@ export class AuthService {
     );
   }
 
-  changePassword(data: { current_password?: string; password: string; password_confirmation: string }): Observable<{ message: string }> {
+  changePassword(data: { current_password: string; password: string; password_confirmation: string }): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/auth/change-password`, data);
   }
 

@@ -46,6 +46,18 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
+    /** Projects this user owns. */
+    public function ownedProjects()
+    {
+        return $this->hasMany(Project::class, 'owner_id');
+    }
+
+    /** Projects this user has been added to as a member or editor. */
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class)->withPivot('role')->withTimestamps();
+    }
+
     public function isAdmin()
     {
         return $this->role === 'admin';

@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -157,7 +158,7 @@ class AuthController extends Controller
      * When supplied, the current password is verified.
      *
      * @authenticated
-     * @bodyParam current_password string The current password (verified only when provided). Example: oldpass123
+     * @bodyParam current_password string required The current password. Example: oldpass123
      * @bodyParam password string required New password, at least 8 characters. Example: newpass123
      * @bodyParam password_confirmation string required Must match password. Example: newpass123
      * @response 200 {"message": "Password changed successfully"}
@@ -166,16 +167,16 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $validated = $request->validate([
-            'current_password' => 'nullable',
+            'current_password' => 'required',
             'password' => ['required', 'confirmed', Password::min(8)]
         ]);
 
         $user = $request->user();
 
-        // Verify the current password only when it is supplied. The user portal
-        // still sends and requires it; the admin panel lets an already-authenticated
-        // admin set a new password without re-entering the old one.
-        if ($request->filled('current_password') && !Hash::check($validated['current_password'], $user->password)) {
+        // Always verify the current password. A valid session token is not enough on
+        // its own — without this check anyone holding a stolen or borrowed token could
+        // change the password and lock the real owner out of their account.
+        if (!Hash::check($validated['current_password'], $user->password)) {
             return response()->json([
                 'message' => 'Current password is incorrect'
             ], 422);
@@ -193,12 +194,17 @@ class AuthController extends Controller
     /**
      * Request a password reset token
      *
-     * Generates a reset token. In production it would be emailed; here it is returned
-     * in the response so the SPA reset flow works without a configured mailer.
+     * Generates a reset token and delivers it out of band. The token is only echoed
+     * in the response on a local environment, as a development convenience — returning
+     * it anywhere else would let anyone reset any account, including an admin's.
+     *
+     * TODO: configure a real mailer and send the token from here. Until then, on a
+     * non-local environment the token must be read from the mail log and pasted into
+     * the reset form manually.
      *
      * @unauthenticated
      * @bodyParam email string required Example: jane@example.com
-     * @response 200 {"message": "Password reset token generated.", "email": "jane@example.com", "token": "AbCdEf..."}
+     * @response 200 {"message": "If an account exists for that email, a reset token has been generated."}
      */
     public function forgotPassword(Request $request)
     {
@@ -206,13 +212,16 @@ class AuthController extends Controller
             'email' => 'required|email'
         ]);
 
+        // Identical response whether or not the account exists, so this endpoint
+        // cannot be used to enumerate registered email addresses.
+        $response = [
+            'message' => 'If an account exists for that email, a reset token has been generated.'
+        ];
+
         $user = User::where('email', $request->email)->first();
 
-        // Do not reveal whether the email exists
         if (!$user) {
-            return response()->json([
-                'message' => 'If an account exists for that email, a reset token has been generated.'
-            ]);
+            return response()->json($response);
         }
 
         $token = Str::random(64);
@@ -226,11 +235,17 @@ class AuthController extends Controller
             ]
         );
 
-        return response()->json([
-            'message' => 'Password reset token generated.',
+        Log::info('Password reset token generated', [
             'email' => $request->email,
-            'token' => $token // emailed in production
+            'token' => $token
         ]);
+
+        if (app()->environment('local')) {
+            $response['email'] = $request->email;
+            $response['token'] = $token;
+        }
+
+        return response()->json($response);
     }
 
     /**

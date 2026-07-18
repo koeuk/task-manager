@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\TaskList;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @group Task Lists
@@ -137,11 +138,15 @@ class TaskListController extends Controller
             'task_lists.*.position' => 'required|integer'
         ]);
 
-        foreach ($validated['task_lists'] as $listData) {
-            TaskList::where('id', $listData['id'])->update([
-                'position' => $listData['position']
-            ]);
-        }
+        // One transaction so a mid-loop failure cannot leave half the board at new
+        // positions and half at old ones.
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['task_lists'] as $listData) {
+                TaskList::where('id', $listData['id'])->update([
+                    'position' => $listData['position']
+                ]);
+            }
+        });
 
         return response()->json([
             'message' => 'Task lists reordered successfully'

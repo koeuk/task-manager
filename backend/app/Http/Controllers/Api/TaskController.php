@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @group Tasks
@@ -224,12 +225,20 @@ class TaskController extends Controller
             'tasks.*.task_list_id' => 'nullable|exists:task_lists,id'
         ]);
 
-        foreach ($validated['tasks'] as $taskData) {
-            Task::where('id', $taskData['id'])->update([
-                'position' => $taskData['position'],
-                'task_list_id' => $taskData['task_list_id'] ?? null
-            ]);
-        }
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['tasks'] as $taskData) {
+                $attributes = ['position' => $taskData['position']];
+
+                // Only move the task between lists when the caller actually said so.
+                // Treating an absent key as null would silently detach the task from
+                // its column, which is not what "reorder within a list" should do.
+                if (array_key_exists('task_list_id', $taskData)) {
+                    $attributes['task_list_id'] = $taskData['task_list_id'];
+                }
+
+                Task::where('id', $taskData['id'])->update($attributes);
+            }
+        });
 
         return response()->json([
             'message' => 'Tasks reordered successfully'

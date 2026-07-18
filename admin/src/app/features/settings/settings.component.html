@@ -188,6 +188,11 @@
         <mat-card-content>
           <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
             <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Current password</mat-label>
+              <input matInput type="password" formControlName="current_password">
+              <mat-error>Current password is required</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
               <mat-label>New password</mat-label>
               <input matInput type="password" formControlName="password">
               <mat-error>Minimum 8 characters</mat-error>

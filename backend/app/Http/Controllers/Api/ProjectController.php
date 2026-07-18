@@ -30,8 +30,8 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Project::with(['taskLists', 'tasks']);
-        
+        $query = Project::visibleTo($request->user())->with(['taskLists', 'tasks']);
+
         // Filter by status if provided
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -71,6 +71,8 @@ class ProjectController extends Controller
             'status' => 'nullable|in:planning,active,on_hold,completed,archived'
         ]);
 
+        $validated['owner_id'] = $request->user()->id;
+
         $project = Project::create($validated);
 
         return response()->json([
@@ -87,7 +89,7 @@ class ProjectController extends Controller
      * @urlParam id integer required The project ID. Example: 1
      * @response 404 {"message": "No query results for model [App\\Models\\Project] 1"}
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         $project = Project::with([
             'taskLists.tasks.assignee',
@@ -96,6 +98,10 @@ class ProjectController extends Controller
             'tasks.creator',
             'tasks.comments.user'
         ])->findOrFail($id);
+
+        if (!$project->isVisibleTo($request->user())) {
+            abort(404);
+        }
 
         return response()->json($project);
     }
@@ -116,6 +122,8 @@ class ProjectController extends Controller
     public function update(Request $request, string $id)
     {
         $project = Project::findOrFail($id);
+
+        $this->authorizeWrite($project, $request);
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -143,14 +151,47 @@ class ProjectController extends Controller
      * @urlParam id integer required The project ID. Example: 1
      * @response 200 {"message": "Project deleted successfully"}
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $project = Project::findOrFail($id);
+
+        // Deleting cascades to every task and comment in the project, so it is
+        // held to a higher bar than editing: editors can change a project but
+        // only its owner (or an admin) can destroy it.
+        $user = $request->user();
+
+        if (!$project->isVisibleTo($user)) {
+            abort(404);
+        }
+
+        if (!$user->isAdmin() && $project->owner_id !== $user->id) {
+            abort(403, 'Only the project owner can delete this project.');
+        }
+
         $project->delete();
 
         return response()->json([
             'message' => 'Project deleted successfully'
         ]);
+    }
+
+    /**
+     * Reject writes from users who can see a project but may not change it.
+     *
+     * A user who cannot see the project at all gets a 404 rather than a 403, so
+     * this endpoint cannot be used to probe which project IDs exist.
+     */
+    private function authorizeWrite(Project $project, Request $request): void
+    {
+        $user = $request->user();
+
+        if (!$project->isVisibleTo($user)) {
+            abort(404);
+        }
+
+        if (!$project->isWritableBy($user)) {
+            abort(403, 'You do not have permission to modify this project.');
+        }
     }
 
     /**
@@ -162,39 +203,41 @@ class ProjectController extends Controller
      * @group Dashboard
      * @response 200 {"total_projects": 3, "active_projects": 2, "completed_projects": 1, "total_tasks": 12, "pending_tasks": 4, "in_progress_tasks": 3, "completed_tasks": 5, "overdue_tasks": 1, "recent_projects": [], "upcoming_tasks": [], "recent_tasks": []}
      */
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        $userId = Auth::id();
+        $user = $request->user();
+        $userId = $user->id;
 
-        // Projects table has no ownership column; scope "my projects" to the
-        // projects this user is involved in (created or assigned a task there).
-        $projectIds = Task::where('created_by', $userId)
-            ->orWhere('assigned_to', $userId)
-            ->distinct()
-            ->pluck('project_id');
+        // "My projects" now means the projects this user owns or belongs to.
+        $projectIds = Project::visibleTo($user)->pluck('id');
+
+        // Today's date computed in PHP against the app timezone rather than with
+        // CURDATE(), which would resolve in the database server's local timezone
+        // and mark tasks overdue up to a day early.
+        $today = now()->toDateString();
 
         // Get project statistics
         $projectStats = Project::whereIn('id', $projectIds)
-            ->selectRaw('
+            ->selectRaw("
                 COUNT(*) as total_projects,
-                SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active_projects,
-                SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed_projects
-            ')
+                SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_projects,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_projects
+            ")
             ->first();
-        
+
         // Get task statistics
         $taskStats = Task::where('created_by', $userId)
             ->orWhere('assigned_to', $userId)
-            ->selectRaw('
+            ->selectRaw("
                 COUNT(*) as total_tasks,
-                SUM(CASE WHEN status = "todo" THEN 1 ELSE 0 END) as pending_tasks,
-                SUM(CASE WHEN status = "in_progress" THEN 1 ELSE 0 END) as in_progress_tasks,
-                SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed_tasks,
-                SUM(CASE WHEN due_date < CURDATE() AND status != "completed" THEN 1 ELSE 0 END) as overdue_tasks
-            ')
+                SUM(CASE WHEN status = 'todo' THEN 1 ELSE 0 END) as pending_tasks,
+                SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress_tasks,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_tasks,
+                SUM(CASE WHEN due_date < ? AND status != 'completed' THEN 1 ELSE 0 END) as overdue_tasks
+            ", [$today])
             ->first();
-        
-        // Get recent projects (same "involved in" scope as the stats above)
+
+        // Get recent projects (same visibility scope as the stats above)
         $recentProjects = Project::whereIn('id', $projectIds)
             ->orderBy('updated_at', 'desc')
             ->limit(5)
