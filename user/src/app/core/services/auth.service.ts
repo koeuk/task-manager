@@ -83,6 +83,17 @@ export class AuthService {
   }
 
   /**
+   * Drop the stored session without calling the API.
+   *
+   * Used when the token is already known to be dead (a 401 came back), where
+   * POSTing to /auth/logout with it would only produce another 401.
+   */
+  clearSession(): void {
+    this.clearToken();
+    this.currentUserSubject.next(null);
+  }
+
+  /**
    * Clear the session and drop back to guest browsing.
    *
    * Re-establishing the guest session is essential: this app is designed to be
