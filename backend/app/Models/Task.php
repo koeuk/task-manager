@@ -56,4 +56,19 @@ class Task extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    /**
+     * Limit a query to tasks living in a project the user can see.
+     *
+     * Task visibility is entirely derived from project visibility — being the
+     * assignee of a task in a project you were removed from does not grant access.
+     */
+    public function scopeVisibleTo($query, User $user)
+    {
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        return $query->whereHas('project', fn ($p) => $p->visibleTo($user));
+    }
 }

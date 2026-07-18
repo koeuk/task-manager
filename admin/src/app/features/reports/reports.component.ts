@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DashboardService, ReportData } from '../../core/services/dashboard.service';
+import { toDateString } from '../../shared/date-utils';
 
 @Component({
   selector: 'app-reports',
@@ -85,8 +86,6 @@ export class ReportsComponent implements OnInit {
   }
 
   private toDate(value: any): string | undefined {
-    if (!value) return undefined;
-    const d = new Date(value);
-    return isNaN(d.getTime()) ? undefined : d.toISOString().split('T')[0];
+    return toDateString(value) ?? undefined;
   }
 }

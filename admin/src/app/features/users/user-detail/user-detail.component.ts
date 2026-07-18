@@ -12,6 +12,7 @@ import { UserService } from '../../../core/services/user.service';
 import { TaskService } from '../../../core/services/task.service';
 import { User } from '../../../core/models/user.model';
 import { Task } from '../../../core/models/project.model';
+import { parseApiDate } from '../../../shared/date-utils';
 
 @Component({
   selector: 'app-user-detail',
@@ -71,14 +72,20 @@ export class UserDetailComponent implements OnInit {
   }
 
   private computeStats(): void {
-    const now = Date.now();
+    // Compare calendar days rather than instants — see parseApiDate.
+    const midnight = new Date();
+    midnight.setHours(0, 0, 0, 0);
+    const startOfToday = midnight.getTime();
+
     this.stats = {
       total: this.tasks.length,
       completed: this.tasks.filter(t => t.status === 'completed').length,
       in_progress: this.tasks.filter(t => t.status === 'in_progress').length,
-      overdue: this.tasks.filter(t =>
-        t.status !== 'completed' && t.due_date && new Date(t.due_date).getTime() < now
-      ).length
+      overdue: this.tasks.filter(t => {
+        if (t.status === 'completed') return false;
+        const due = parseApiDate(t.due_date);
+        return !!due && due.getTime() < startOfToday;
+      }).length
     };
   }
 

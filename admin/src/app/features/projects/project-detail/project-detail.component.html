@@ -27,8 +27,8 @@
         </div>
       </div>
       <div class="header-meta">
-        <div class="meta-item"><span class="meta-label">Start</span><span>{{ project.start_date ? (project.start_date | date:'mediumDate') : '-' }}</span></div>
-        <div class="meta-item"><span class="meta-label">Due</span><span>{{ project.due_date ? (project.due_date | date:'mediumDate') : '-' }}</span></div>
+        <div class="meta-item"><span class="meta-label">Start</span><span>{{ project.start_date ? (project.start_date | date:'mediumDate':'UTC') : '-' }}</span></div>
+        <div class="meta-item"><span class="meta-label">Due</span><span>{{ project.due_date ? (project.due_date | date:'mediumDate':'UTC') : '-' }}</span></div>
       </div>
     </mat-card>
 
@@ -91,7 +91,7 @@
           </ng-container>
           <ng-container matColumnDef="due_date">
             <th mat-header-cell *matHeaderCellDef>Due</th>
-            <td mat-cell *matCellDef="let t">{{ t.due_date ? (t.due_date | date:'mediumDate') : '-' }}</td>
+            <td mat-cell *matCellDef="let t">{{ t.due_date ? (t.due_date | date:'mediumDate':'UTC') : '-' }}</td>
           </ng-container>
           <tr mat-header-row *matHeaderRowDef="taskColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: taskColumns;"></tr>

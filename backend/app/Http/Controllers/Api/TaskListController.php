@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\Models\TaskList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,10 @@ class TaskListController extends Controller
      */
     public function index(Request $request)
     {
-        $query = TaskList::with(['tasks']);
+        $user = $request->user();
+
+        $query = TaskList::with(['tasks'])
+            ->whereHas('project', fn ($p) => $p->visibleTo($user));
 
         // Filter by project
         if ($request->has('project_id')) {
@@ -51,9 +55,14 @@ class TaskListController extends Controller
             'position' => 'nullable|integer'
         ]);
 
-        // Default position to the end of the list within the project
+        $this->authorizeProject($validated['project_id'], $request);
+
+        // Default position to the end of the list within the project. The null
+        // coalesce matters on an empty project: max() returns null there, and
+        // null + 1 would start the first column at position 1 instead of 0.
         if (!isset($validated['position'])) {
-            $validated['position'] = TaskList::where('project_id', $validated['project_id'])->max('position') + 1;
+            $max = TaskList::where('project_id', $validated['project_id'])->max('position');
+            $validated['position'] = ($max ?? -1) + 1;
         }
 
         $taskList = TaskList::create($validated);
@@ -69,13 +78,17 @@ class TaskListController extends Controller
      *
      * @urlParam id integer required The task list ID. Example: 1
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         $taskList = TaskList::with([
             'project',
             'tasks.assignee',
             'tasks.creator'
         ])->findOrFail($id);
+
+        if (!$taskList->project || !$taskList->project->isVisibleTo($request->user())) {
+            abort(404);
+        }
 
         return response()->json($taskList);
     }
@@ -90,6 +103,8 @@ class TaskListController extends Controller
     public function update(Request $request, string $id)
     {
         $taskList = TaskList::findOrFail($id);
+
+        $this->authorizeProject($taskList->project_id, $request);
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -110,14 +125,36 @@ class TaskListController extends Controller
      * @urlParam id integer required The task list ID. Example: 1
      * @response 200 {"message": "Task list deleted successfully"}
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $taskList = TaskList::findOrFail($id);
+
+        $this->authorizeProject($taskList->project_id, $request);
+
         $taskList->delete();
 
         return response()->json([
             'message' => 'Task list deleted successfully'
         ]);
+    }
+
+    /**
+     * Reject writes to a list in a project the user may not modify.
+     *
+     * Invisible projects yield a 404 rather than a 403 so IDs cannot be probed.
+     */
+    private function authorizeProject(?int $projectId, Request $request): void
+    {
+        $user = $request->user();
+        $project = Project::find($projectId);
+
+        if (!$project || !$project->isVisibleTo($user)) {
+            abort(404);
+        }
+
+        if (!$project->isWritableBy($user)) {
+            abort(403, 'You do not have permission to modify this project.');
+        }
     }
 
     /**
@@ -137,6 +174,16 @@ class TaskListController extends Controller
             'task_lists.*.id' => 'required|exists:task_lists,id',
             'task_lists.*.position' => 'required|integer'
         ]);
+
+        // Authorize every list before writing any of them, so a payload mixing
+        // owned and foreign lists cannot reorder the owned ones before aborting.
+        $projectIds = TaskList::whereIn('id', collect($validated['task_lists'])->pluck('id'))
+            ->pluck('project_id')
+            ->unique();
+
+        foreach ($projectIds as $projectId) {
+            $this->authorizeProject($projectId, $request);
+        }
 
         // One transaction so a mid-loop failure cannot leave half the board at new
         // positions and half at old ones.

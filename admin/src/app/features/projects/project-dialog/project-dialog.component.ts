@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
+import { toDateString } from '../../../shared/date-utils';
 
 @Component({
   selector: 'app-project-dialog',
@@ -152,9 +153,7 @@ export class ProjectDialogComponent implements OnInit {
   }
 
   private toDate(value: any): string | null {
-    if (!value) return null;
-    const d = new Date(value);
-    return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+    return toDateString(value);
   }
 
   private extractError(error: any): string {

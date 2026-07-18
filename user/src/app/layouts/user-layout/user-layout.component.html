@@ -100,7 +100,7 @@
           <div class="notif-item-text">
             <span class="notif-item-title">{{ n.title }}</span>
             <span class="notif-item-sub" [class.overdue]="n.overdue">
-              {{ n.subtitle }}<ng-container *ngIf="n.dueDate"> · {{ n.dueDate | date:'MMM d' }}</ng-container>
+              {{ n.subtitle }}<ng-container *ngIf="n.dueDate"> · {{ n.dueDate | date:'MMM d':'UTC' }}</ng-container>
             </span>
           </div>
         </button>

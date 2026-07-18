@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\Task;
 use Illuminate\Http\Request;
 
 /**
@@ -22,7 +23,13 @@ class CommentController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Comment::with(['user', 'task']);
+        $user = $request->user();
+
+        // Comments inherit visibility from the project their task lives in —
+        // otherwise this endpoint would leak discussion (and author names and
+        // emails) from every project in the system.
+        $query = Comment::with(['user', 'task'])
+            ->whereHas('task.project', fn ($p) => $p->visibleTo($user));
 
         // Filter by task
         if ($request->has('task_id')) {
@@ -50,6 +57,10 @@ class CommentController extends Controller
             'comment' => 'required|string'
         ]);
 
+        // exists:tasks,id only proves the task exists — check the caller can
+        // actually reach the project it belongs to before letting them post.
+        $this->authorizeTask($validated['task_id'], $request);
+
         $validated['user_id'] = $request->user()->id;
 
         $comment = Comment::create($validated);
@@ -65,11 +76,28 @@ class CommentController extends Controller
      *
      * @urlParam id integer required The comment ID. Example: 1
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         $comment = Comment::with(['user', 'task'])->findOrFail($id);
 
+        $this->authorizeTask($comment->task_id, $request);
+
         return response()->json($comment);
+    }
+
+    /**
+     * Reject access to a comment on a task the user cannot see.
+     *
+     * Read access is enough here: commenting is a normal member activity, so it
+     * does not require the 'editor' role that structural edits do.
+     */
+    private function authorizeTask(?int $taskId, Request $request): void
+    {
+        $task = Task::with('project')->find($taskId);
+
+        if (!$task || !$task->project || !$task->project->isVisibleTo($request->user())) {
+            abort(404);
+        }
     }
 
     /**
@@ -138,8 +166,10 @@ class CommentController extends Controller
      *
      * @urlParam task integer required The task ID. Example: 1
      */
-    public function byTask(string $task)
+    public function byTask(Request $request, string $task)
     {
+        $this->authorizeTask((int) $task, $request);
+
         $comments = Comment::with('user')
             ->where('task_id', $task)
             ->orderBy('created_at', 'desc')

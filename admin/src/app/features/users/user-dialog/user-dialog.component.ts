@@ -53,10 +53,19 @@ export class UserDialogComponent implements OnInit {
     this.userForm = this.fb.group({
       name: [this.data?.name || '', [Validators.required]],
       email: [this.data?.email || '', [Validators.required, Validators.email]],
-      password: ['', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]],
       role: [this.data?.role || 'user', [Validators.required]],
       phone: [this.data?.phone || '']
     });
+
+    // Password is only set at creation time. The update endpoint does not accept
+    // a password, so offering one here would silently discard it — changing an
+    // existing user's password goes through the reset-password dialog instead.
+    if (!this.isEditMode) {
+      this.userForm.addControl(
+        'password',
+        this.fb.control('', [Validators.required, Validators.minLength(8)])
+      );
+    }
   }
 
   onSubmit(): void {
@@ -64,11 +73,6 @@ export class UserDialogComponent implements OnInit {
 
     this.loading = true;
     const formData = this.userForm.value;
-
-    // Remove password if empty in edit mode
-    if (this.isEditMode && !formData.password) {
-      delete formData.password;
-    }
 
     const request = this.isEditMode
       ? this.userService.updateUser(this.data!.id, formData)

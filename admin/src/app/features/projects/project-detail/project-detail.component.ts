@@ -10,6 +10,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project, Task } from '../../../core/models/project.model';
+import { parseApiDate } from '../../../shared/date-utils';
 
 interface Segment { label: string; key: string; count: number; pct: number; }
 
@@ -88,10 +89,17 @@ export class ProjectDetailComponent implements OnInit {
     const completed = this.tasks.filter(t => t.status === 'completed').length;
     this.completion = total ? Math.round((completed / total) * 100) : 0;
 
-    const now = Date.now();
-    this.overdue = this.tasks.filter(t =>
-      t.status !== 'completed' && t.due_date && new Date(t.due_date).getTime() < now
-    ).length;
+    // Compare calendar days, not instants: the API sends due dates as UTC
+    // midnight, so a raw `new Date(due_date) < Date.now()` marks a task due
+    // today as overdue and, west of UTC, one due tomorrow as overdue too.
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    this.overdue = this.tasks.filter(t => {
+      if (t.status === 'completed') return false;
+      const due = parseApiDate(t.due_date);
+      return !!due && due.getTime() < startOfToday.getTime();
+    }).length;
 
     this.statusSegments = this.statusDefs.map(d => {
       const count = this.tasks.filter(t => t.status === d.key).length;

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -31,8 +33,9 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Task::with(['project', 'taskList', 'creator', 'assignee', 'comments']);
-        
+        $query = Task::visibleTo($request->user())
+            ->with(['project', 'taskList', 'creator', 'assignee', 'comments']);
+
         // Filter by project
         if ($request->has('project_id')) {
             $query->where('project_id', $request->project_id);
@@ -108,6 +111,10 @@ class TaskController extends Controller
             'position' => 'nullable|integer'
         ]);
 
+        // exists:projects,id only proves the project exists, not that this user
+        // may add to it — without this check anyone could plant tasks in any project.
+        $this->authorizeProject($validated['project_id'], $request);
+
         $validated['created_by'] = $request->user()->id;
 
         $task = Task::create($validated);
@@ -125,7 +132,7 @@ class TaskController extends Controller
      *
      * @urlParam id integer required The task ID. Example: 1
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         $task = Task::with([
             'project',
@@ -134,6 +141,10 @@ class TaskController extends Controller
             'assignee',
             'comments.user'
         ])->findOrFail($id);
+
+        if (!$task->project || !$task->project->isVisibleTo($request->user())) {
+            abort(404);
+        }
 
         return response()->json($task);
     }
@@ -160,6 +171,8 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
 
+        $this->authorizeTask($task, $request);
+
         $validated = $request->validate([
             'task_list_id' => 'nullable|exists:task_lists,id',
             'title' => 'sometimes|string|max:255',
@@ -168,7 +181,9 @@ class TaskController extends Controller
             'status' => 'nullable|in:todo,in_progress,review,completed',
             'assigned_to' => 'nullable|exists:users,id',
             'start_date' => 'nullable|date',
-            'due_date' => 'nullable|date',
+            // Mirrors the rule in store(); without it an update could set a due
+            // date earlier than the task's own start date.
+            'due_date' => 'nullable|date|after_or_equal:start_date',
             'estimated_hours' => 'nullable|numeric|min:0',
             'position' => 'nullable|integer'
         ]);
@@ -194,14 +209,42 @@ class TaskController extends Controller
      * @urlParam id integer required The task ID. Example: 1
      * @response 200 {"message": "Task deleted successfully"}
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $task = Task::findOrFail($id);
+
+        $this->authorizeTask($task, $request);
+
         $task->delete();
 
         return response()->json([
             'message' => 'Task deleted successfully'
         ]);
+    }
+
+    /**
+     * Reject writes to a task in a project the user may not modify.
+     *
+     * Invisible projects yield a 404 rather than a 403 so task IDs cannot be probed.
+     */
+    private function authorizeTask(Task $task, Request $request): void
+    {
+        $this->authorizeProject($task->project_id, $request);
+    }
+
+    /** Same check, for when only the project ID is known (create, reorder). */
+    private function authorizeProject(?int $projectId, Request $request): void
+    {
+        $user = $request->user();
+        $project = Project::find($projectId);
+
+        if (!$project || !$project->isVisibleTo($user)) {
+            abort(404);
+        }
+
+        if (!$project->isWritableBy($user)) {
+            abort(403, 'You do not have permission to modify this project.');
+        }
     }
 
     /**
@@ -224,6 +267,39 @@ class TaskController extends Controller
             'tasks.*.position' => 'required|integer',
             'tasks.*.task_list_id' => 'nullable|exists:task_lists,id'
         ]);
+
+        // Authorize every task up front. Doing this inside the write loop would
+        // let a payload mixing owned and foreign tasks reorder the owned ones
+        // before aborting.
+        $tasks = Task::with('project')
+            ->whereIn('id', collect($validated['tasks'])->pluck('id'))
+            ->get()
+            ->keyBy('id');
+
+        $user = $request->user();
+
+        foreach ($tasks as $task) {
+            if (!$task->project || !$task->project->isVisibleTo($user)) {
+                abort(404);
+            }
+
+            if (!$task->project->isWritableBy($user)) {
+                abort(403, 'You do not have permission to modify this project.');
+            }
+        }
+
+        // A task may only move into a list belonging to its own project.
+        foreach ($validated['tasks'] as $taskData) {
+            if (!array_key_exists('task_list_id', $taskData) || $taskData['task_list_id'] === null) {
+                continue;
+            }
+
+            $targetList = TaskList::find($taskData['task_list_id']);
+
+            if (!$targetList || $targetList->project_id !== $tasks[$taskData['id']]->project_id) {
+                abort(422, 'Cannot move a task into a list from another project.');
+            }
+        }
 
         DB::transaction(function () use ($validated) {
             foreach ($validated['tasks'] as $taskData) {

@@ -16,6 +16,7 @@ import { ProjectService } from '../../../core/services/project.service';
 import { UserService } from '../../../core/services/user.service';
 import { Task, Project } from '../../../core/models/project.model';
 import { User } from '../../../core/models/user.model';
+import { toDateString } from '../../../shared/date-utils';
 
 @Component({
   selector: 'app-task-dialog',
@@ -44,7 +45,7 @@ import { User } from '../../../core/models/user.model';
           <mat-error>Title is required</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width" *ngIf="!isEditMode">
           <mat-label>Project</mat-label>
           <mat-select formControlName="project_id">
             <mat-option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</mat-option>
@@ -136,7 +137,6 @@ export class TaskDialogComponent implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group({
       title: [this.data?.title || '', [Validators.required]],
-      project_id: [this.data?.project_id || null, [Validators.required]],
       description: [this.data?.description || ''],
       status: [this.data?.status || 'todo'],
       priority: [this.data?.priority || 'medium'],
@@ -144,9 +144,17 @@ export class TaskDialogComponent implements OnInit {
       due_date: [this.data?.due_date || null]
     });
 
-    this.projectService.getProjects({ per_page: 100 }).subscribe({
-      next: (res) => (this.projects = res.data)
-    });
+    // A task's project is fixed once created: the update endpoint ignores
+    // project_id, and moving a task across projects would strand it in a
+    // task list belonging to the old project.
+    if (!this.isEditMode) {
+      this.form.addControl('project_id', this.fb.control(null, [Validators.required]));
+
+      this.projectService.getProjects({ per_page: 100 }).subscribe({
+        next: (res) => (this.projects = res.data)
+      });
+    }
+
     this.userService.getUsers({ per_page: 100 }).subscribe({
       next: (res) => (this.users = res.data)
     });
@@ -158,8 +166,7 @@ export class TaskDialogComponent implements OnInit {
 
     const value = { ...this.form.value };
     if (value.due_date) {
-      const d = new Date(value.due_date);
-      value.due_date = isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+      value.due_date = toDateString(value.due_date);
     }
 
     const request = this.isEditMode
