@@ -4,9 +4,9 @@
       <mat-card-title>
         <span>User Management</span>
         <span class="header-actions">
-          <button mat-stroked-button (click)="exportCsv()">
+          <button mat-stroked-button (click)="exportCsv()" [disabled]="exporting">
             <mat-icon>download</mat-icon>
-            Export CSV
+            {{ exporting ? 'Exporting…' : 'Export CSV' }}
           </button>
           <button mat-flat-button color="primary" (click)="openUserDialog()">
             <mat-icon>add</mat-icon>
@@ -42,7 +42,7 @@
 
       <!-- Table -->
       <div class="table-container" *ngIf="!loading">
-        <table mat-table [dataSource]="dataSource" matSort>
+        <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSortChange($event)">
           <!-- Name Column -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>

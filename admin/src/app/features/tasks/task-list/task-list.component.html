@@ -4,7 +4,7 @@
       <mat-card-title>
         <span>Tasks</span>
         <span class="header-actions">
-          <button mat-stroked-button (click)="exportCsv()">
+          <button mat-stroked-button (click)="exportCsv()" [disabled]="exporting">
             <mat-icon>download</mat-icon>
             Export CSV
           </button>

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -58,8 +58,12 @@ export class UserListComponent implements OnInit {
   displayedColumns: string[] = ['name', 'email', 'role', 'phone', 'created_at', 'actions'];
   dataSource = new MatTableDataSource<User>();
   loading = false;
+  exporting = false;
   filterForm!: FormGroup;
   totalUsers = 0;
+  sortBy = 'created_at';
+  sortDir: 'asc' | 'desc' = 'desc';
+  private latestRequestId = 0;
 
   constructor(
     private userService: UserService,
@@ -79,16 +83,36 @@ export class UserListComponent implements OnInit {
       role: ['']
     });
 
-    // Debounce search input
+    // Debounce search input. Both filters reset to the first page: changing a
+    // filter while on page 5 would otherwise request page 5 of a much shorter
+    // result set and render an empty table.
     this.filterForm.get('search')?.valueChanges
       .pipe(
         debounceTime(300),
         distinctUntilChanged()
       )
-      .subscribe(() => this.loadUsers());
+      .subscribe(() => this.onFilterChange());
 
     this.filterForm.get('role')?.valueChanges
-      .subscribe(() => this.loadUsers());
+      .subscribe(() => this.onFilterChange());
+  }
+
+  onFilterChange(): void {
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.loadUsers();
+  }
+
+  /** Sorting is server-side, so it covers the whole result set, not just this page. */
+  onSortChange(sort: Sort): void {
+    this.sortBy = sort.active || 'created_at';
+    this.sortDir = sort.direction || 'desc';
+
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.loadUsers();
   }
 
   loadUsers(): void {
@@ -97,16 +121,25 @@ export class UserListComponent implements OnInit {
       search: this.filterForm.get('search')?.value,
       role: this.filterForm.get('role')?.value,
       page: this.paginator?.pageIndex + 1 || 1,
-      per_page: this.paginator?.pageSize || 10
+      per_page: this.paginator?.pageSize || 10,
+      sort_by: this.sortBy,
+      sort_dir: this.sortDir
     };
+
+    // Requests can overlap (debounced search vs. an immediate filter or page
+    // change) and may resolve out of order. Only the newest one may write to
+    // the table, otherwise a slow earlier response overwrites fresher results.
+    const requestId = ++this.latestRequestId;
 
     this.userService.getUsers(filters).subscribe({
       next: (response) => {
+        if (requestId !== this.latestRequestId) return;
         this.dataSource.data = response.data;
         this.totalUsers = response.total;
         this.loading = false;
       },
       error: (error) => {
+        if (requestId !== this.latestRequestId) return;
         this.snackBar.open('Failed to load users', 'Close', { duration: 3000 });
         this.loading = false;
         console.error('Load users error:', error);
@@ -209,17 +242,36 @@ export class UserListComponent implements OnInit {
   }
 
   exportCsv(): void {
-    const rows = this.dataSource.data;
-    if (!rows.length) {
+    if (!this.dataSource.data.length) {
       this.snackBar.open('No users to export', 'Close', { duration: 3000 });
       return;
     }
-    exportToCsv('users', rows, [
-      { header: 'Name', value: u => u.name },
-      { header: 'Email', value: u => u.email },
-      { header: 'Role', value: u => u.role },
-      { header: 'Phone', value: u => u.phone ?? '' },
-      { header: 'Created', value: u => u.created_at ?? '' }
-    ]);
+
+    // Pagination is server-side, so this.dataSource.data holds only the page on
+    // screen. Re-fetch every row matching the current filters, otherwise the
+    // export silently contains just the visible 10.
+    this.exporting = true;
+
+    this.userService.getUsers({
+      search: this.filterForm.get('search')?.value,
+      role: this.filterForm.get('role')?.value,
+      page: 1,
+      per_page: this.totalUsers || 1000
+    }).subscribe({
+      next: (response) => {
+        this.exporting = false;
+        exportToCsv('users', response.data, [
+          { header: 'Name', value: u => u.name },
+          { header: 'Email', value: u => u.email },
+          { header: 'Role', value: u => u.role },
+          { header: 'Phone', value: u => u.phone ?? '' },
+          { header: 'Created', value: u => u.created_at ?? '' }
+        ]);
+      },
+      error: () => {
+        this.exporting = false;
+        this.snackBar.open('Failed to export users', 'Close', { duration: 4000 });
+      }
+    });
   }
 }

@@ -9,6 +9,8 @@ export interface UserFilters {
   search?: string;
   page?: number;
   per_page?: number;
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
 }
 
 export interface PaginatedResponse<T> {
@@ -50,6 +52,8 @@ export class UserService {
       if (filters.search) params = params.set('search', filters.search);
       if (filters.page) params = params.set('page', filters.page.toString());
       if (filters.per_page) params = params.set('per_page', filters.per_page.toString());
+      if (filters.sort_by) params = params.set('sort_by', filters.sort_by);
+      if (filters.sort_dir) params = params.set('sort_dir', filters.sort_dir);
     }
 
     return this.http.get<PaginatedResponse<User>>(this.apiUrl, { params });

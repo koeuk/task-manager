@@ -51,6 +51,7 @@ export class TaskListComponent implements OnInit {
   displayedColumns: string[] = ['title', 'status', 'priority', 'assignee', 'due_date', 'actions'];
   dataSource = new MatTableDataSource<Task>();
   loading = false;
+  exporting = false;
   filterForm!: FormGroup;
   total = 0;
   pageIndex = 0;
@@ -143,19 +144,38 @@ export class TaskListComponent implements OnInit {
   }
 
   exportCsv(): void {
-    const rows = this.dataSource.data;
-    if (!rows.length) {
+    if (!this.dataSource.data.length) {
       this.snackBar.open('No tasks to export', 'Close', { duration: 3000 });
       return;
     }
-    exportToCsv('tasks', rows, [
-      { header: 'Title', value: t => t.title },
-      { header: 'Status', value: t => this.statusLabel(t.status) },
-      { header: 'Priority', value: t => t.priority },
-      { header: 'Assignee', value: t => t.assignee?.name ?? 'Unassigned' },
-      { header: 'Project', value: t => t.project?.name ?? '' },
-      { header: 'Due Date', value: t => t.due_date ?? '' },
-      { header: 'Created', value: t => t.created_at ?? '' }
-    ]);
+
+    // Pagination is server-side, so re-fetch every row matching the current
+    // filters — this.dataSource.data is only the page currently on screen.
+    this.exporting = true;
+
+    this.taskService.getTasks({
+      search: this.filterForm.get('search')?.value,
+      status: this.filterForm.get('status')?.value,
+      priority: this.filterForm.get('priority')?.value,
+      page: 1,
+      per_page: this.total || 1000
+    }).subscribe({
+      next: (res) => {
+        this.exporting = false;
+        exportToCsv('tasks', res.data, [
+          { header: 'Title', value: t => t.title },
+          { header: 'Status', value: t => this.statusLabel(t.status) },
+          { header: 'Priority', value: t => t.priority },
+          { header: 'Assignee', value: t => t.assignee?.name ?? 'Unassigned' },
+          { header: 'Project', value: t => t.project?.name ?? '' },
+          { header: 'Due Date', value: t => t.due_date ?? '' },
+          { header: 'Created', value: t => t.created_at ?? '' }
+        ]);
+      },
+      error: () => {
+        this.exporting = false;
+        this.snackBar.open('Failed to export tasks', 'Close', { duration: 4000 });
+      }
+    });
   }
 }

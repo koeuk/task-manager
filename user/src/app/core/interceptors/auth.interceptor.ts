@@ -7,6 +7,9 @@ import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  /** Set while a guest session is being re-established, to collapse parallel 401s. */
+  private recovering = false;
+
   // Inject Injector (not AuthService) to avoid a circular dependency: AuthService
   // issues an HTTP request in its constructor, which re-enters this interceptor.
   constructor(
@@ -41,13 +44,34 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 && !isAuthRequest) {
-          // Resolve AuthService lazily so it is not required while it is still
-          // being constructed.
-          this.injector.get(AuthService).logout();
-          this.router.navigate(['/dashboard']);
+          this.handleExpiredSession();
         }
         return throwError(() => error);
       })
     );
+  }
+
+  /**
+   * Recover from an expired session by dropping back to guest browsing.
+   *
+   * Guarded because a single page load fires several requests in parallel: when
+   * the token expires they all 401 at once, and without this flag each one would
+   * independently tear down the session and race to rebuild it.
+   */
+  private handleExpiredSession(): void {
+    if (this.recovering) {
+      return;
+    }
+    this.recovering = true;
+
+    // Resolve AuthService lazily so it is not required while it is still
+    // being constructed.
+    const auth = this.injector.get(AuthService);
+
+    auth.clearSession();
+    auth.ensureGuestSession().then(() => {
+      this.recovering = false;
+      this.router.navigate(['/dashboard']);
+    });
   }
 }

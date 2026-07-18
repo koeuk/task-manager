@@ -71,24 +71,33 @@ export class AuthService {
 
   logout(): void {
     const token = this.getToken();
+
     if (token) {
       this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
-        complete: () => {
-          this.clearToken();
-          this.currentUserSubject.next(null);
-          this.router.navigate(['/dashboard']);
-        },
-        error: () => {
-          this.clearToken();
-          this.currentUserSubject.next(null);
-          this.router.navigate(['/dashboard']);
-        }
+        complete: () => this.finishLogout(),
+        error: () => this.finishLogout()
       });
     } else {
-      this.clearToken();
-      this.currentUserSubject.next(null);
-      this.router.navigate(['/dashboard']);
+      this.finishLogout();
     }
+  }
+
+  /**
+   * Clear the session and drop back to guest browsing.
+   *
+   * Re-establishing the guest session is essential: this app is designed to be
+   * usable without logging in, but the guest session is otherwise only created
+   * once at bootstrap. Without this, signing out leaves the app with no token
+   * and every request 401s until a full page reload. Navigation happens after
+   * the guest session resolves so the dashboard loads with a usable token.
+   */
+  private finishLogout(): void {
+    this.clearToken();
+    this.currentUserSubject.next(null);
+
+    this.ensureGuestSession().then(() => {
+      this.router.navigate(['/dashboard']);
+    });
   }
 
   getCurrentUser(): Observable<User> {

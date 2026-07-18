@@ -22,6 +22,8 @@ class UserController extends Controller
      *
      * @queryParam role string Filter by role: admin, user. Example: user
      * @queryParam search string Search by name or email. Example: jane
+     * @queryParam sort_by string Column to sort by: name, email, role, created_at. Example: name
+     * @queryParam sort_dir string Sort direction: asc, desc. Example: asc
      * @queryParam per_page integer Results per page (default 15). Example: 15
      */
     public function index(Request $request)
@@ -42,7 +44,13 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->orderBy('created_at', 'desc')
+        // Whitelist the sortable columns — sort_by goes into the SQL directly,
+        // so anything outside this list must fall back to the default.
+        $sortable = ['name', 'email', 'role', 'created_at'];
+        $sortBy = in_array($request->sort_by, $sortable, true) ? $request->sort_by : 'created_at';
+        $sortDir = strtolower($request->sort_dir) === 'asc' ? 'asc' : 'desc';
+
+        $users = $query->orderBy($sortBy, $sortDir)
                        ->paginate($request->per_page ?? 15);
 
         return response()->json($users);
