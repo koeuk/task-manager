@@ -38,18 +38,39 @@ npm run build
 
 ```
 User ──< Project ──< TaskList ──< Task ──< Comment
-         (created_by / assigned_to both point at User)
+         (owner_id; created_by / assigned_to point at User)
+         (project_user pivot = members, role member|editor)
 ```
 
 - **Task** — priority `low|medium|high|critical`, status `todo|in_progress|review|completed`,
   plus `position` for drag-ordering and `completed_at`.
-- **Project** — status `planning|active|on_hold|completed|archived`. Carries a nullable
-  `workspace_id` that nothing uses; it's a placeholder, not a live feature.
+- **Project** — status `planning|active|on_hold|completed|archived`. Has an `owner_id` and a
+  `project_user` member pivot (see Authorization). Also carries a nullable `workspace_id`
+  that nothing uses; it's a placeholder, not a live feature.
 - **User** — role `user|admin`, `isAdmin()` helper. Note this model configures itself with
   PHP attributes (`#[Fillable]`, `#[Hidden]`) rather than the usual `$fillable` properties.
 
 Cascade behavior lives in `backend/database/migrations/2026_06_28_*`: task_lists and tasks
 cascade with their project; `task_list_id` and `assigned_to` null out.
+
+## Authorization — the project is the boundary
+
+Everything hangs off `Project`, in `backend/app/Models/Project.php`:
+
+- `scopeVisibleTo($user)` — filters a query to owned + member projects. **Admins are
+  deliberately unscoped**, because the admin panel calls these same controllers.
+- `isVisibleTo($user)` — read check.
+- `isWritableBy($user)` — write check. Owner, `editor` pivot role, or admin. Plain
+  `member` is read-only.
+
+Every controller routes through these rather than checking `Auth::id()` directly, including
+nested resources (`TaskListController` and `TaskController` check `$task->project`, and
+`CommentController` reaches through `task.project`). Follow that when adding endpoints.
+
+One firm convention: **an invisible resource returns 404, not 403**, so IDs can't be probed.
+403 is only for "you can see this but may not change it." Reorder endpoints validate every
+ID in the batch *before* mutating anything, so a mixed owned/foreign payload can't partially
+apply. Project delete is owner-only, stricter than `isWritableBy`.
 
 ## API
 
@@ -95,8 +116,10 @@ The two apps authenticate very differently.
 `user/src/app/core/services/auth.service.ts`. `authGuard` never blocks. Write actions are
 gated only by `user/src/app/core/services/write-guard.service.ts`, which pops a login dialog.
 
-That gate is **UI-only** — the guest token carries full API privileges and the backend has no
-concept of a guest. Don't treat the write-guard as a security boundary.
+That gate is **UI-only**. The backend has no concept of a guest — the guest token is an
+ordinary `user` account, so the API happily accepts writes that the dialog appears to block.
+What limits it is project visibility (see Authorization), not the write-guard. Don't treat
+the write-guard as a security boundary.
 
 Both apps store the Sanctum bearer token in `localStorage` under `auth_token`. The
 `AuthInterceptor` injects `Injector` rather than `AuthService` to break a construction cycle,
@@ -106,11 +129,10 @@ and skips 401-logout for `/auth/*` URLs — both intentional.
 
 Worth knowing before you trust something, and fair game to fix if asked:
 
-- **Projects have no owner column.** `ProjectController::index` doesn't scope by user, so every
-  authenticated account sees every project. Only the dashboard and comment edit/delete check `Auth::id()`.
 - **Prod env files are byte-identical to dev** in both frontends — a production build still calls localhost.
-- `POST /tasks/reorder` and `/task-lists/reorder` are registered *after* their `apiResource`, so
-  `tasks/{task}` can shadow them.
+- **Pre-existing projects are shared with everyone.** The ownership migration backfilled every
+  old project as `editor` for every existing user, to avoid yanking access at migration time.
+  Only projects created after `2026_07_19` get the tighter default.
 - **No real tests.** `backend/tests/` holds the untouched Laravel stubs; the Angular apps have
   Karma configured but no specs. Only `DatabaseSeeder` and `UserFactory` exist — no domain seeders.
 - `README.md` says Laravel 11 (it's 13.8) and `.env.example` still ships sqlite (it's MySQL).

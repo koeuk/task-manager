@@ -154,8 +154,8 @@ class AuthController extends Controller
     /**
      * Change password
      *
-     * The user portal sends `current_password` (required there); the admin panel may omit it.
-     * When supplied, the current password is verified.
+     * Requires the current password. All other sessions are signed out on success;
+     * the session making the request stays active.
      *
      * @authenticated
      * @bodyParam current_password string required The current password. Example: oldpass123
@@ -185,6 +185,13 @@ class AuthController extends Controller
         $user->update([
             'password' => Hash::make($validated['password'])
         ]);
+
+        // Sign out every other session. Changing a password is how someone locks
+        // out a thief who already has a token — without this the old token keeps
+        // working and the change achieves nothing against them. The current
+        // session is spared so the user is not logged out of the device they are
+        // sitting at.
+        $user->tokens()->where('id', '!=', $request->user()->currentAccessToken()->id)->delete();
 
         return response()->json([
             'message' => 'Password changed successfully'
@@ -285,9 +292,25 @@ class AuthController extends Controller
             ], 422);
         }
 
-        User::where('email', $validated['email'])->update([
+        $user = User::where('email', $validated['email'])->first();
+
+        // The account can be deleted between issuing the token and using it.
+        if (!$user) {
+            DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+
+            return response()->json([
+                'message' => 'Invalid password reset token.'
+            ], 422);
+        }
+
+        $user->update([
             'password' => Hash::make($validated['password'])
         ]);
+
+        // Sign out every existing session. A password reset is the standard way to
+        // recover a compromised account, so any session opened with the old
+        // password must stop working.
+        $user->tokens()->delete();
 
         DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
 

@@ -189,6 +189,7 @@ class UserController extends Controller
      * Reset a user's password
      *
      * Admin sets a new password for the user (no current password needed).
+     * All of that user's sessions are signed out.
      *
      * @urlParam id integer required The user ID. Example: 2
      * @bodyParam password string required New password, at least 8 characters. Example: newpass123
@@ -205,6 +206,11 @@ class UserController extends Controller
         $user->update([
             'password' => Hash::make($validated['password'])
         ]);
+
+        // Sign out all of that user's sessions. An admin resetting a password is
+        // usually responding to a compromised account, so leaving the existing
+        // tokens alive would leave the intruder logged in.
+        $user->tokens()->delete();
 
         return response()->json([
             'message' => 'Password reset successfully'

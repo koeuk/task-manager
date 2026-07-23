@@ -138,13 +138,25 @@ mat-card.mat-mdc-card {
   border: 1px solid #edeff2;
   border-radius: 12px;
   box-shadow: none !important;
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.28s ease;
   // `backwards` holds the start frame during any delay but releases after, so
   // the entrance transform never blocks the :hover lift.
   animation: card-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 
   &:hover {
     transform: translateY(-3px);
+    // Two layers: a tight contact shadow to anchor the card, plus a wide, very
+    // diffuse one for the lift. Both are tinted with the slate used across the
+    // UI rather than pure black, which would read as grey haze on this canvas.
+    // `!important` matches the resting rule above, which needs it to beat
+    // Material's own elevation.
+    box-shadow:
+      0 2px 4px rgba(15, 23, 42, 0.04),
+      0 12px 28px -6px rgba(15, 23, 42, 0.10) !important;
+    border-color: #e3e6ea;
   }
 }
 
@@ -159,6 +171,9 @@ mat-card.mat-mdc-card {
     animation: none;
     transition: none;
 
+    // Drop the lift, but keep the hover shadow: it is not motion, and without
+    // it there would be no hover affordance left at all. It simply appears
+    // instantly rather than fading in.
     &:hover { transform: none; }
   }
 }
@@ -265,6 +280,15 @@ body.dark-theme {
   mat-card.mat-mdc-card {
     background: #171d2e;
     border-color: #262c40;
+
+    // On a dark surface a soft grey shadow is invisible, so the hover state
+    // leans on a deeper shadow plus a lifted border instead.
+    &:hover {
+      box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.28),
+        0 12px 28px -6px rgba(0, 0, 0, 0.45) !important;
+      border-color: #354061;
+    }
   }
 
   // Let tables & paginator inherit the dark card surface instead of their own lighter one
