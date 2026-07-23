@@ -24,6 +24,32 @@ body {
   @include mat.form-field-density(-4);
 }
 
+// Uniform 24px padding on every dialog. Material spaces title/content/actions
+// unevenly, so their padding is zeroed and applied once on the surface instead.
+// Content keeps its default max-height so long forms still scroll.
+.mat-mdc-dialog-surface {
+  padding: 24px;
+}
+
+.mat-mdc-dialog-title {
+  padding: 0;
+
+  &::before {
+    display: none;
+  }
+}
+
+.mat-mdc-dialog-content {
+  padding: 0;
+  margin: 0;
+}
+
+.mat-mdc-dialog-actions {
+  padding: 8px 0 0;
+  margin: 0;
+  min-height: auto;
+}
+
 // Dark silver
 $dark-primary: mat.m2-define-palette(mat.$m2-blue-gray-palette, 300, 100, 500);
 $dark-accent: mat.m2-define-palette(mat.$m2-blue-gray-palette, 200, 50, 400);
@@ -171,14 +197,11 @@ body.dark-theme .notif-menu {
   .notif-empty mat-icon { color: #94a3b8; }
 }
 
-// Auth dialog: single uniform 24px padding (reset Material's uneven title/
-// content/actions padding so nothing floats in empty white bands).
+// Auth dialog: inherits the global 24px dialog padding above, and adds a softer
+// corner plus an uncapped height (it is short enough never to need scrolling).
 .auth-dialog {
-  .mat-mdc-dialog-surface { padding: 24px; border-radius: 16px; }
-  .mat-mdc-dialog-title { padding: 0; }
-  .mat-mdc-dialog-title::before { display: none; }
-  .mat-mdc-dialog-content { padding: 0; margin: 0; max-height: none; }
-  .mat-mdc-dialog-actions { padding: 8px 0 0; margin: 0; min-height: auto; }
+  .mat-mdc-dialog-surface { border-radius: 16px; }
+  .mat-mdc-dialog-content { max-height: none; }
 }
 
 // Soft, rounded white cards with a whisper-soft shadow (Bankio-style layout)

@@ -24,6 +24,32 @@ body {
   @include mat.form-field-density(-4);
 }
 
+// Uniform 24px padding on every dialog. Material spaces title/content/actions
+// unevenly, so their padding is zeroed and applied once on the surface instead.
+// Content keeps its default max-height so long forms still scroll.
+.mat-mdc-dialog-surface {
+  padding: 24px;
+}
+
+.mat-mdc-dialog-title {
+  padding: 0;
+
+  &::before {
+    display: none;
+  }
+}
+
+.mat-mdc-dialog-content {
+  padding: 0;
+  margin: 0;
+}
+
+.mat-mdc-dialog-actions {
+  padding: 8px 0 0;
+  margin: 0;
+  min-height: auto;
+}
+
 // Dark silver
 $dark-primary: mat.m2-define-palette(mat.$m2-blue-gray-palette, 300, 100, 500);
 $dark-accent: mat.m2-define-palette(mat.$m2-blue-gray-palette, 200, 50, 400);
@@ -326,6 +352,15 @@ body.dark-theme {
   .stat-value,
   .summary-value {
     color: #e5e7eb;
+  }
+
+  // The dashboard stat card nests these three levels deep
+  // (`.stat-card .stat-details .stat-value`), which outweighs the two-class
+  // rules above — leaving dark navy text on a dark card at 1.02:1 contrast,
+  // i.e. invisible. Matching that depth here so the override actually applies.
+  .stat-card .stat-details {
+    .stat-value { color: #e5e7eb; }
+    .stat-title { color: #9ca3af; }
   }
 
   .stat-title,

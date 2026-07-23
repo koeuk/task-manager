@@ -7,20 +7,19 @@ There is no workspace tooling — each app has its own manifest and is installed
 
 | Path | What | Runs on |
 |---|---|---|
-| `backend/` | Laravel 13.8 API (PHP 8.3, Sanctum, MySQL) | `:8000` |
-| `admin/` | Angular 18 admin panel (adds chart.js) | `:4201`, calls `:8000` |
+| `backend/` | Laravel 13.8 API (PHP 8.3, Sanctum, MySQL) | `:8001` |
+| `admin/` | Angular 18 admin panel (adds chart.js) | `:4201`, calls `:8001` |
 | `user/` | Angular 18 end-user app | `:4200`, calls `:8001` |
 
-Note the two frontends target **different backend ports** (see `src/environments/`). Running
-both against one API means overriding one of the environment files.
+Both frontends point at the same API (`:8001`) — see `src/environments/`. One backend
+process serves both.
 
 ## Commands
 
 ```bash
 # backend
 cd backend
-php artisan serve                 # :8000
-php artisan serve --port=8001     # what the user app expects
+php artisan serve --port=8001     # what both frontends expect
 php artisan migrate
 composer test                     # clears config, then artisan test
 ./vendor/bin/pint                 # formatter — run before committing PHP
