@@ -1,6 +1,7 @@
+// Full width, matching the list pages. The layout's .content-wrapper supplies
+// the 24px page gutters.
 .detail-container {
-  max-width: 1000px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .detail-topbar {
