@@ -347,25 +347,23 @@ body.dark-theme {
     background: rgba(255, 255, 255, 0.03);
   }
 
-  // Hardcoded dark-navy headings/values need to flip to light
+  // Hardcoded dark-navy headings/values need to flip to light.
+  //
+  // These need `!important`. Angular's view encapsulation rewrites a component
+  // rule like `.stat-card .stat-details .stat-value` into
+  // `.stat-card[_ngcontent-x] .stat-details[_ngcontent-x] .stat-value[_ngcontent-x]`
+  // — three classes *and* three attributes — which outweighs anything a global
+  // stylesheet can reasonably write. Without this the dashboard's stat numbers
+  // rendered dark navy on the dark card at 1.02:1 contrast, i.e. invisible.
   .page-title,
   .stat-value,
   .summary-value {
-    color: #e5e7eb;
-  }
-
-  // The dashboard stat card nests these three levels deep
-  // (`.stat-card .stat-details .stat-value`), which outweighs the two-class
-  // rules above — leaving dark navy text on a dark card at 1.02:1 contrast,
-  // i.e. invisible. Matching that depth here so the override actually applies.
-  .stat-card .stat-details {
-    .stat-value { color: #e5e7eb; }
-    .stat-title { color: #9ca3af; }
+    color: #e5e7eb !important;
   }
 
   .stat-title,
   .summary-title {
-    color: #9ca3af;
+    color: #9ca3af !important;
   }
 
   // Settings system-info rows

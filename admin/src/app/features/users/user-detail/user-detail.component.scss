@@ -23,8 +23,11 @@
   mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.4; }
 }
 
+// Bare mat-card (no mat-card-content wrapper) gets no padding from Material,
+// so it is set here to match the 20px used by the stat cards alongside it.
 .profile-card {
   margin-bottom: 20px;
+  padding: 20px;
 }
 
 .profile-head {

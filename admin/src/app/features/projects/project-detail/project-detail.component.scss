@@ -17,8 +17,11 @@
   mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.4; }
 }
 
+// Bare mat-cards (no mat-card-content wrapper) get no padding from Material,
+// so it is set here to match the 20px the wrapped cards end up with.
 .header-card {
   margin-bottom: 20px;
+  padding: 20px;
 
   .header-main {
     display: flex;
@@ -51,6 +54,7 @@
 
 .completion-card {
   margin-bottom: 20px;
+  padding: 20px;
 
   .completion-head {
     display: flex;
