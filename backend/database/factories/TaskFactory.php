@@ -23,6 +23,14 @@ class TaskFactory extends Factory
         $start = fake()->dateTimeBetween('2026-01-01', '2026-12-15');
         $due = (clone $start)->modify('+' . fake()->numberBetween(1, 45) . ' days');
 
+        // Keep everything inside the year. A start date in late December plus a
+        // six-week lead time would otherwise land the due date in 2027 and leak
+        // rows outside the seeded range.
+        $endOfYear = new \DateTime('2026-12-31 23:59:59');
+        if ($due > $endOfYear) {
+            $due = $endOfYear;
+        }
+
         $status = $this->plausibleStatus(Carbon::instance($due));
 
         return [
