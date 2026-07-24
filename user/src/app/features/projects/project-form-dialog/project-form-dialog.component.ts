@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Project, ProjectStatus } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
-import { toDateString, parseApiDate } from '../../../shared/date-utils';
+import { toDateString, parseApiDate } from '../../../core/utils/date-utils';
 
 @Component({
   selector: 'app-project-form-dialog',

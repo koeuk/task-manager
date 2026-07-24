@@ -13,7 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DashboardService, ReportData } from '../../core/services/dashboard.service';
-import { toDateString } from '../../shared/date-utils';
+import { toDateString } from '../../core/utils/date-utils';
 
 @Component({
   selector: 'app-reports',

@@ -24,8 +24,8 @@ import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-
 import { TaskFormDialogComponent } from '../../tasks/task-form-dialog/task-form-dialog.component';
 import { TaskDetailDialogComponent } from '../../tasks/task-detail-dialog/task-detail-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { statusLabel, priorityLabel, statusColor, priorityColor, projectStatusColor } from '../../../shared/task-meta';
-import { parseApiDate } from '../../../shared/date-utils';
+import { statusLabel, priorityLabel, statusColor, priorityColor, projectStatusColor } from '../../../core/utils/task-meta';
+import { parseApiDate } from '../../../core/utils/date-utils';
 
 interface BoardColumn {
   id: number | null; // task list id, or null for the "Unassigned" column

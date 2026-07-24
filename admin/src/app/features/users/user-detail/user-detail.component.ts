@@ -12,7 +12,7 @@ import { UserService } from '../../../core/services/user.service';
 import { TaskService } from '../../../core/services/task.service';
 import { User } from '../../../core/models/user.model';
 import { Task } from '../../../core/models/project.model';
-import { parseApiDate } from '../../../shared/date-utils';
+import { parseApiDate } from '../../../core/utils/date-utils';
 
 @Component({
   selector: 'app-user-detail',

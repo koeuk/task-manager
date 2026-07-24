@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
 import { TaskService, TaskPayload } from '../../../core/services/task.service';
-import { toDateString, parseApiDate } from '../../../shared/date-utils';
+import { toDateString, parseApiDate } from '../../../core/utils/date-utils';
 
 export interface TaskFormData {
   task?: Task;

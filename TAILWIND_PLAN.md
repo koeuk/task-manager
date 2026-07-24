@@ -9,8 +9,9 @@ required reading before touching styles, because two of those constraints fail
 
 ## 1. Result
 
-**4,169 → 1,198 lines of component SCSS (−71%)**, plus **148 → 80 lines** of inline
-`styles: [...]` across nine more components. Six stylesheets deleted outright.
+**4,169 → 1,198 lines of component SCSS (−71%)**, plus **148 lines of inline
+`styles: [...]` removed entirely** across nine more components. Fifteen stylesheets
+deleted outright, and no component holds inline `template:`/`styles:` any more.
 
 | | Before | After |
 |---|---:|---:|
@@ -136,35 +137,57 @@ Tailwind *and* SCSS side by side, permanently.
 When a stylesheet was deleted, its `styleUrls` entry was removed from the
 component decorator too.
 
-### Inline `styles: [...]` components
+### Formerly inline-`styles` components — now fully Tailwind
 
-These have no `.scss` file, so a `find -name '*.scss'` inventory misses them
-entirely — which is exactly what happened on the first pass. All nine are now
-converted; each keeps a small `styles` block for what utilities cannot reach.
+Nine components kept their UI inside the `.ts` file (`template:` + `styles: [...]`),
+so a `find -name '*.scss'` inventory missed them entirely — which is exactly what
+happened on the first pass. They are now consistent with the rest of the codebase:
+markup extracted to `.component.html`, and **all styling as Tailwind utilities with
+no stylesheet at all**.
 
-| Component | Before | After |
-|---|---:|---:|
-| `admin/forgot-password` | 29 | 8 |
-| `user/forgot-password` | 29 | 9 |
-| `admin/confirm-dialog` | 22 | 9 |
-| `user/calendar` | 21 | 26 |
-| `user/settings` | 18 | 8 |
-| `admin/project-dialog` | 10 | 5 |
-| `admin/task-dialog` | 7 | 5 |
-| `admin/reset-password-dialog` | 7 | 6 |
-| `user/confirm-dialog` | 5 | 4 |
+| Component | Before (inline CSS) | After |
+|---|---:|---|
+| `admin/forgot-password` | 29 | no stylesheet |
+| `user/forgot-password` | 29 | no stylesheet |
+| `admin/confirm-dialog` | 22 | no stylesheet |
+| `user/calendar` | 21 | no stylesheet |
+| `user/settings` | 18 | no stylesheet |
+| `admin/project-dialog` | 10 | no stylesheet |
+| `admin/task-dialog` | 7 | no stylesheet |
+| `admin/reset-password-dialog` | 7 | no stylesheet |
+| `user/confirm-dialog` | 5 | no stylesheet |
 
-`user/calendar` grew slightly: its grid-hairline trick, `.today`/`.other-month`
-cell states and `[ngClass]` priority colours all had to stay, and they now carry
-explanatory comments.
+**148 lines of CSS removed outright.** No component in either app now has inline
+`template:` or `styles:` — every one uses `templateUrl`, and only the eleven
+stylesheets in §3 remain.
 
-**When auditing styles, search for both**:
+The state-dependent rules survived by moving to `[ngClass]` with **literal**
+utility strings, which the JIT can see (§2.3):
+
+```html
+<!-- confirm-dialog: danger vs neutral, each with its own dark variant -->
+[ngClass]="data.danger
+  ? 'bg-[#fee2e2] text-[#dc2626] dark:bg-[#3a1d1d] dark:text-[#f87171]'
+  : 'bg-[#e2e8f0] text-[#475569] dark:bg-[#262c40] dark:text-[#cbd5e1]'"
+
+<!-- calendar: priority colours, previously `[ngClass]="'p-' + t.priority"` -->
+[ngClass]="{ 'bg-[#10b981]': t.priority === 'low', ... }"
+```
+
+Two things still needed a class hook rather than a utility:
+
+- `user/calendar` keeps `cal-cell`, because the global `body.dark-theme .cal-cell`
+  rule swaps `--cal-cell-bg` for the dark surface.
+- `:last-child` became `last:border-b-0`, and the grid hairlines are `gap-px` over
+  a tinted background — both expressible, but non-obvious.
+
+**When auditing styles, search for all three**:
 
 ```bash
 find src -name '*.scss'
 grep -rl "styles:\s*\[" --include=*.ts src
+grep -rl "template:\s*\`" --include=*.ts src
 ```
-
 
 Still worth doing: `user/shared/task-meta.ts` already centralises status and
 priority labels/colours. The chip colour maps that stayed in SCSS could likely be

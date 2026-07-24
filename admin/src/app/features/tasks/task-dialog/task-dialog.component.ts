@@ -16,7 +16,7 @@ import { ProjectService } from '../../../core/services/project.service';
 import { UserService } from '../../../core/services/user.service';
 import { Task, Project } from '../../../core/models/project.model';
 import { User } from '../../../core/models/user.model';
-import { toDateString } from '../../../shared/date-utils';
+import { toDateString } from '../../../core/utils/date-utils';
 
 @Component({
   selector: 'app-task-dialog',

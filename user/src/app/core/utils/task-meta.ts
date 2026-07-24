@@ -1,4 +1,4 @@
-import { TaskStatus, TaskPriority, ProjectStatus } from '../core/models/project.model';
+import { TaskStatus, TaskPriority, ProjectStatus } from '../models/project.model';
 
 export const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
   { value: 'todo', label: 'To Do' },

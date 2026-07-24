@@ -19,7 +19,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { TaskFormDialogComponent } from '../task-form-dialog/task-form-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { STATUS_OPTIONS, statusLabel, priorityLabel, statusColor, priorityColor } from '../../../shared/task-meta';
+import { STATUS_OPTIONS, statusLabel, priorityLabel, statusColor, priorityColor } from '../../../core/utils/task-meta';
 
 @Component({
   selector: 'app-task-detail-dialog',

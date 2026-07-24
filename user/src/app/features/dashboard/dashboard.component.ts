@@ -18,8 +18,8 @@ import { ProjectService } from '../../core/services/project.service';
 import { Task, Project } from '../../core/models/project.model';
 import { TaskFormDialogComponent } from '../tasks/task-form-dialog/task-form-dialog.component';
 import { TaskDetailDialogComponent } from '../tasks/task-detail-dialog/task-detail-dialog.component';
-import { priorityColor, priorityLabel, projectStatusColor } from '../../shared/task-meta';
-import { parseApiDate } from '../../shared/date-utils';
+import { priorityColor, priorityLabel, projectStatusColor } from '../../core/utils/task-meta';
+import { parseApiDate } from '../../core/utils/date-utils';
 import { environment } from '../../../environments/environment';
 
 interface DashboardStats {

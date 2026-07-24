@@ -10,7 +10,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project, Task } from '../../../core/models/project.model';
-import { parseApiDate } from '../../../shared/date-utils';
+import { parseApiDate } from '../../../core/utils/date-utils';
 
 interface Segment { label: string; key: string; count: number; pct: number; }
 

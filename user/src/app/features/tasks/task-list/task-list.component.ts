@@ -24,8 +24,8 @@ import { TaskDetailDialogComponent } from '../task-detail-dialog/task-detail-dia
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   STATUS_OPTIONS, PRIORITY_OPTIONS, statusLabel, priorityLabel, statusColor, priorityColor
-} from '../../../shared/task-meta';
-import { parseApiDate } from '../../../shared/date-utils';
+} from '../../../core/utils/task-meta';
+import { parseApiDate } from '../../../core/utils/date-utils';
 
 @Component({
   selector: 'app-task-list',

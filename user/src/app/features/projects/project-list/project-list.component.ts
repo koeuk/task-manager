@@ -21,8 +21,8 @@ import { ProjectService } from '../../../core/services/project.service';
 import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { PROJECT_STATUS_OPTIONS, statusLabel, projectStatusColor } from '../../../shared/task-meta';
-import { parseApiDate } from '../../../shared/date-utils';
+import { PROJECT_STATUS_OPTIONS, statusLabel, projectStatusColor } from '../../../core/utils/task-meta';
+import { parseApiDate } from '../../../core/utils/date-utils';
 
 @Component({
   selector: 'app-project-list',

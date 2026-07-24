@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { TaskService } from './task.service';
 import { Task } from '../models/project.model';
-import { parseApiDate } from '../../shared/date-utils';
+import { parseApiDate } from '../utils/date-utils';
 
 export interface AppNotification {
   id: number;
