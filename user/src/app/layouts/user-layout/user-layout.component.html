@@ -1,16 +1,16 @@
 <mat-sidenav-container class="sidenav-container" [class.collapsed]="collapsed">
   <mat-sidenav #sidenav mode="side" [opened]="true" class="sidenav" [class.collapsed]="collapsed">
-    <div class="sidenav-header">
-      <div class="logo-badge">
-        <mat-icon>task_alt</mat-icon>
+    <div class="sidenav-header flex items-center gap-3 border-b border-white/[0.08] px-5 py-[22px]">
+      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#94a3b8] to-[#cbd5e1] shadow-[0_6px_16px_rgba(100,116,139,0.45)]">
+        <mat-icon class="!h-6 !w-6 !text-2xl text-white">task_alt</mat-icon>
       </div>
-      <div class="brand-text">
-        <h2 class="app-title">Task Manager</h2>
-        <span class="app-subtitle">Stay on top of your work</span>
+      <div class="brand-text min-w-0 leading-[1.2]">
+        <h2 class="m-0 whitespace-nowrap text-[17px] font-bold tracking-[-0.01em]">Task Manager</h2>
+        <span class="whitespace-nowrap text-xs font-normal text-white/50">Stay on top of your work</span>
       </div>
     </div>
 
-    <p class="nav-section-label">Menu</p>
+    <p class="nav-section-label mx-4 mb-1.5 mt-[18px] text-[11px] font-semibold uppercase tracking-[0.08em] text-white/35">Menu</p>
 
     <mat-nav-list class="nav-list">
       <a mat-list-item
@@ -24,20 +24,20 @@
       </a>
     </mat-nav-list>
 
-    <div class="sidenav-footer">
+    <div class="sidenav-footer border-t border-white/[0.08] p-3">
       <button class="user-info" *ngIf="currentUser$ | async as user"
               [matMenuTriggerFor]="userMenu"
               type="button">
-        <span class="user-avatar">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#94a3b8] to-[#cbd5e1] text-base font-semibold text-white">
           <img *ngIf="user.avatar && !avatarBroken" [src]="user.avatar"
-               (error)="avatarBroken = true" alt="">
+               (error)="avatarBroken = true" alt="" class="h-full w-full object-cover">
           <span *ngIf="!user.avatar || avatarBroken">{{ (user.name || 'U').charAt(0) | uppercase }}</span>
         </span>
-        <span class="user-details">
-          <span class="user-name">{{ user.name }}</span>
-          <span class="user-role">{{ isGuest ? 'Guest' : user.email }}</span>
+        <span class="user-details flex min-w-0 flex-col leading-[1.3]">
+          <span class="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold">{{ user.name }}</span>
+          <span class="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-white/50">{{ isGuest ? 'Guest' : user.email }}</span>
         </span>
-        <mat-icon class="user-caret">expand_less</mat-icon>
+        <mat-icon class="user-caret !ml-auto !h-5 !w-5 !text-xl text-white/50">expand_less</mat-icon>
       </button>
     </div>
 
@@ -68,7 +68,7 @@
         <mat-icon>menu</mat-icon>
       </button>
 
-      <span class="spacer"></span>
+      <span class="flex-[1_1_auto]"></span>
 
       <button mat-icon-button (click)="toggleTheme()"
               [matTooltip]="(themeService.isDark$ | async) ? 'Switch to light mode' : 'Switch to dark mode'">
@@ -113,7 +113,7 @@
       </mat-menu>
     </mat-toolbar>
 
-    <div class="content">
+    <div class="content min-h-[calc(100vh-64px)] p-6 max-[768px]:!p-4">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>

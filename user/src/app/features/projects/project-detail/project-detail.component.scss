@@ -1,109 +1,14 @@
-.loading {
-  display: flex;
-  justify-content: center;
-  padding: 80px;
-}
-
-// The layout's `.content` already supplies the page padding — don't double it.
-.page {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.detail-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 20px;
-
-  .header-main { flex: 1; min-width: 0; }
-
-  .title-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #1e293b;
-    }
-    .proj-icon { flex-shrink: 0; }
-  }
-
-  .status-chip {
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .description {
-    margin: 6px 0 10px;
-    font-size: 13.5px;
-    color: #6b7280;
-    max-width: 720px;
-  }
-
-  .progress-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    max-width: 420px;
-
-    mat-progress-bar { flex: 1; border-radius: 4px; }
-    .progress-text { font-size: 12px; color: #6b7280; white-space: nowrap; }
-  }
-}
-
-.board {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  flex: 1;
-}
+// Layout, spacing and colour live as Tailwind utilities in the template.
+// What remains is what utilities cannot express:
+//   * CDK drag-and-drop classes, which the CDK adds at runtime
+//   * `.virtual` / `.overdue` state and the card hover border
+//   * surface colours shared between light and dark, kept together so the
+//     kanban columns and cards stay in sync
 
 .column {
   background: #f1f3f5;
-  border-radius: 12px;
-  width: 288px;
-  min-width: 288px;
-  display: flex;
-  flex-direction: column;
-  max-height: 100%;
 
   &.virtual { background: #eceff1; }
-}
-
-.column-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 12px 8px;
-
-  .col-name { font-weight: 600; font-size: 14px; }
-  .col-count {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    padding: 0 8px;
-    font-size: 12px;
-    color: rgba(0, 0, 0, 0.6);
-  }
-  .spacer { flex: 1; }
-  .mini { width: 30px; height: 30px; line-height: 30px; }
-  .mini mat-icon { font-size: 18px; height: 18px; width: 18px; }
-}
-
-.rename-box {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
 }
 
 .rename-input {
@@ -115,122 +20,37 @@
   outline: none;
 }
 
-.task-list {
-  padding: 4px 8px 8px;
-  overflow-y: auto;
-  min-height: 40px;
+.mini {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+
+  mat-icon { font-size: 18px; height: 18px; width: 18px; }
 }
 
 .task-card {
   background: #fff;
-  border: 1px solid #edeff2;
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  cursor: pointer;
+  border-color: #edeff2;
   // No shadow (flat) and no transform hover (cdkDrag-draggable) — use a border
   // for separation and animate its color for drag-safe hover feedback.
   transition: border-color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover {
-    border-color: #cbd5e1;
-  }
-
-  // Left accent bar reads priority at a glance — same idiom as the task list.
-  display: flex;
-  gap: 10px;
-
-  .prio-bar {
-    width: 3px;
-    align-self: stretch;
-    min-height: 28px;
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
-
-  .card-body { flex: 1; min-width: 0; }
-
-  .task-title {
-    display: block;
-    font-size: 14px;
-    line-height: 1.35;
-    color: #1e293b;
-  }
-
-  .card-meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-
-    .spacer { flex: 1; }
-
-    // Tinted pill, matching the project card / task list chips.
-    .status-tag {
-      font-size: 11px;
-      font-weight: 600;
-      border-radius: 999px;
-      padding: 1px 8px;
-    }
-
-    .due {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 12px;
-      color: #64748b;
-      mat-icon { font-size: 14px; height: 14px; width: 14px; }
-
-      &.overdue { color: #ef4444; font-weight: 600; }
-    }
-
-    .assignee {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
+  &:hover { border-color: #cbd5e1; }
 }
 
-.empty-col {
-  color: rgba(0, 0, 0, 0.35);
-  font-size: 13px;
-  text-align: center;
-  padding: 16px 0;
+.due {
+  mat-icon { font-size: 14px; height: 14px; width: 14px; }
+
+  &.overdue { color: #ef4444; font-weight: 600; }
 }
 
-.add-task-btn {
-  margin: 0 8px 8px;
-  color: rgba(0, 0, 0, 0.6);
-  justify-content: flex-start;
-}
+.add-task-btn { color: rgba(0, 0, 0, 0.6); }
 
-.add-list-column {
-  width: 288px;
-  min-width: 288px;
-}
+.add-list-btn { background: rgba(255, 255, 255, 0.6); }
 
-.add-list-btn {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.6);
-}
+.new-list-box { background: #f1f3f5; }
 
-.new-list-box {
-  background: #f1f3f5;
-  border-radius: 12px;
-  padding: 12px;
-
-  .new-list-actions { display: flex; gap: 8px; margin-top: 8px; }
-}
-
-// CDK drag styling
+// CDK drag styling — these classes are applied by the CDK at runtime
 .cdk-drag-preview {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
   border-radius: 8px;
@@ -246,19 +66,11 @@
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-
 // ---- Dark theme ----
 :host-context(.dark-theme) {
-  .detail-header .title-row h1,
-  .column-header .col-name,
-  .task-card .task-title { color: #e5e7eb; }
-
-  .detail-header .description,
-  .progress-wrap .progress-text,
   .add-task-btn { color: #9ca3af; }
 
-  .card-meta .due { color: #94a3b8; }
-  .card-meta .due.overdue { color: #f87171; }
+  .due.overdue { color: #f87171; }
 
   .column { background: #161c2b; }
   .column.virtual { background: #12182a; }
@@ -267,6 +79,7 @@
   .task-card {
     background: #212a44;
     border-color: #2b3352;
+
     &:hover { border-color: #3a4570; }
   }
 

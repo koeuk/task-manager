@@ -1,24 +1,42 @@
-# Tailwind Migration Plan
+# Tailwind Migration — Done
 
-Moving `admin/` and `user/` from hand-written SCSS to Tailwind utilities.
-
-Everything in the "Constraints" section below was **measured on a working pilot**
-(the admin login page), not assumed. Read that section before writing any code —
-two of the three constraints fail *silently*, which is how you lose an afternoon.
+Both `admin/` and `user/` are migrated. This document is now a record of what was
+done and the rules that make the result work; the "Constraints" section is still
+required reading before touching styles, because two of those constraints fail
+*silently*.
 
 ---
 
-## 1. Current status
+## 1. Result
 
-| | State |
-|---|---|
-| `admin/` toolchain | **Installed.** `tailwindcss@3.4`, `postcss`, `autoprefixer`, `tailwind.config.js`, `.postcssrc.json`, directives wired into `styles.scss` |
-| `admin/` login page | **Converted and verified** — pixel-identical light + dark, SCSS 258 → 98 lines (−62%) |
-| Everything else in `admin/` | Not started |
-| `user/` | Not started — no Tailwind installed |
+**4,169 → 1,198 lines of component SCSS (−71%).** Six stylesheets deleted outright.
 
-Uncommitted at time of writing: `admin/package.json`, `package-lock.json`,
-`src/styles.scss`, `login.component.{html,scss}`, plus the two new config files.
+| | Before | After |
+|---|---:|---:|
+| `admin/` component SCSS | 1,915 | **659** |
+| `user/` component SCSS | 2,254 | **539** |
+
+Both `styles.scss` files stay Sass and are unchanged apart from the three
+`@tailwind` directives — see §2.1 for why they can never be `.css`.
+
+**Every page was verified in the running app, light and dark**, by comparing
+`getBoundingClientRect()` and `getComputedStyle()` against a pre-conversion
+baseline plus a screenshot. All pages match their baseline exactly, except two
+1px sub-pixel rounding differences on the admin detail headers. The collapsed
+sidebar rail was verified separately in both apps (264px → 76px, content margin
+follows, brand text hides, active-link marker survives).
+
+Where the remaining SCSS went — it is no longer layout:
+
+| Stylesheet | Lines | What's left |
+|---|---:|---|
+| `admin-layout` / `user-layout` | 199 / 190 | `::ng-deep` Material internals, MDC custom properties, the `.collapsed` rail state |
+| `user/dashboard` | 135 | `.alert` / `.late` / `.overdue-bucket` state + dark counterparts |
+| `admin/login` | 98 | pseudo-element glows, keyframes, Material overrides |
+| `user/project-detail` | 90 | CDK drag-and-drop classes, kanban surfaces |
+| `admin/settings` | 84 | `[class.active]` nav/swatch state + dark counterparts |
+| `admin/dashboard` | 77 | stagger delays, `::before` accent strip, `[ngClass]` variants |
+| the rest | 7–61 each | `[ngClass]` chip/bar colour maps, one Sass mixin, one `::ng-deep` |
 
 ---
 
@@ -80,57 +98,53 @@ Tailwind *and* SCSS side by side, permanently.
 
 ---
 
-## 3. Inventory
+## 3. Per-file outcome
 
-### admin/ — 2,297 SCSS lines, 141 Material-coupled (6%)
+### admin/ — 1,915 → 659
 
-| File | Lines | Notes |
-|---|---:|---|
-| `styles.scss` | 382 | **Stays SCSS** (§2.1) |
-| `admin-layout.component.scss` | 336 | Highest risk — on every page. Do last |
-| `settings.component.scss` | 300 | |
-| `dashboard.component.scss` | 286 | Has `[ngClass]` colour maps |
-| `project-detail.component.scss` | 138 | Has `[ngClass]` colour maps |
-| `reports.component.scss` | 125 | |
-| `user-list.component.scss` | 120 | Has `[ngClass]` colour maps |
-| `user-detail.component.scss` | 115 | |
-| `project-list.component.scss` | 100 | Has `[ngClass]` colour maps |
-| `task-list.component.scss` | 95 | Has `[ngClass]` colour maps |
-| `user-dialog.component.scss` | 42 | |
-| `login.component.scss` | ~~258~~ 98 | **Done** |
+| File | Before | After |
+|---|---:|---:|
+| `admin-layout.component.scss` | 336 | 199 |
+| `settings.component.scss` | 300 | 84 |
+| `dashboard.component.scss` | 286 | 77 |
+| `login.component.scss` | 258 | 98 |
+| `project-detail.component.scss` | 138 | 40 |
+| `reports.component.scss` | 125 | 30 |
+| `user-list.component.scss` | 120 | 40 |
+| `user-detail.component.scss` | 115 | 21 |
+| `project-list.component.scss` | 100 | 33 |
+| `task-list.component.scss` | 95 | 37 |
+| `user-dialog.component.scss` | 42 | **deleted** |
 
-### user/ — 2,254 SCSS lines, 102 Material-coupled (5%)
+### user/ — 2,254 → 539
 
-| File | Lines | Notes |
-|---|---:|---|
-| `styles.scss` | 353 | **Stays SCSS** (§2.1) |
-| `dashboard.component.scss` | 336 | Has `[ngClass]` colour maps |
-| `user-layout.component.scss` | 286 | Highest risk — on every page. Do last |
-| `project-detail.component.scss` | 277 | Has `[ngClass]` colour maps |
-| `project-list.component.scss` | 245 | Has `[ngClass]` colour maps |
-| `task-list.component.scss` | 223 | Has `[ngClass]` colour maps |
-| `task-detail-dialog.component.scss` | 167 | Has `[ngClass]` colour maps |
-| `profile.component.scss` | 123 | |
-| `login-dialog.component.scss` | 86 | |
-| `register.component.scss` | 81 | |
-| `project-form-dialog.component.scss` | 44 | |
-| `task-form-dialog.component.scss` | 33 | |
+| File | Before | After |
+|---|---:|---:|
+| `dashboard.component.scss` | 336 | 135 |
+| `user-layout.component.scss` | 286 | 190 |
+| `project-detail.component.scss` | 277 | 90 |
+| `project-list.component.scss` | 245 | 34 |
+| `task-list.component.scss` | 223 | 61 |
+| `task-detail-dialog.component.scss` | 167 | 22 |
+| `profile.component.scss` | 123 | **deleted** |
+| `login-dialog.component.scss` | 86 | **deleted** |
+| `register.component.scss` | 81 | **deleted** |
+| `project-form-dialog.component.scss` | 44 | 7 |
+| `task-form-dialog.component.scss` | 33 | **deleted** |
 
-`user/` additionally has `shared/task-meta.ts`, which centralises status/priority
-labels and colours. **Check whether it can feed the chip colours** before
-hand-writing another SCSS colour map — it may already be the right home for them.
+When a stylesheet was deleted, its `styleUrls` entry was removed from the
+component decorator too.
+
+Still worth doing: `user/shared/task-meta.ts` already centralises status and
+priority labels/colours. The chip colour maps that stayed in SCSS could likely be
+driven from it instead — that would remove most of the remaining `[ngClass]` maps.
 
 ---
 
-## 4. Setup for `user/` (admin is already done)
+## 4. Toolchain (both apps, already installed)
 
-```bash
-cd user
-npm install -D tailwindcss@^3 postcss autoprefixer
-```
-
-Copy `admin/tailwind.config.js` and `admin/.postcssrc.json` verbatim. Both config
-values matter:
+`tailwindcss@3.4`, `postcss`, `autoprefixer`, plus `tailwind.config.js` and
+`.postcssrc.json` in each app. Two config values are load-bearing:
 
 ```js
 corePlugins: { preflight: false },     // preflight breaks Material's buttons/inputs
@@ -141,8 +155,8 @@ Without the second line every `dark:` utility silently does nothing. Both apps'
 `ThemeService` puts the class on `document.body`, so `dark:` works from any
 component.
 
-Then in `user/src/styles.scss`, after the existing `@use`/`@import` (Sass requires
-`@use` first):
+In each `styles.scss`, after the existing `@use`/`@import` (Sass requires `@use`
+first):
 
 ```scss
 @tailwind base;
@@ -155,39 +169,36 @@ and at the **very bottom of the file**:
 @tailwind utilities;
 ```
 
-Utilities go last so they beat equal-specificity rules declared above them. This
-is the arrangement already working in `admin/src/styles.scss`.
+Utilities go last so they beat equal-specificity rules declared above them.
 
 ---
 
-## 5. Order of work
+## 5. Gotchas found during the migration
 
-Convert **leaf pages first, shared layout last** — a mistake in a layout breaks
-every screen at once and is much harder to attribute.
+Beyond the constraints in §2, these cost real time and will bite the next change:
 
-**admin/** (login done)
-1. `user-dialog` (42) — smallest, confirms the dialog pattern
-2. `project-list` → `user-list` → `task-list` (95–120) — these three are near-identical; whatever works on the first applies to the other two
-3. `user-detail` → `project-detail` (115–138)
-4. `reports` (125)
-5. `dashboard` (286)
-6. `settings` (300)
-7. `admin-layout` (336) — last
-
-**user/** — same shape
-1. `task-form-dialog` (33) → `project-form-dialog` (44)
-2. `register` (81) → `login-dialog` (86)
-3. `profile` (123)
-4. `task-detail-dialog` (167)
-5. `task-list` → `project-list` → `project-detail` (223–277)
-6. `dashboard` (336)
-7. `user-layout` (286) — last
+- **`text-*` utilities bundle a line-height.** `text-2xl` is `font-size: 1.5rem`
+  *plus* `line-height: 2rem`; a bare `font-size: 24px` had neither. This silently
+  grew two admin cards by 5px and a user dashboard card by 4px. Where the original
+  set only `font-size`, use an arbitrary value (`text-[24px]`, `text-[14px]`) —
+  those set font-size alone.
+- **Converting a class to utilities deletes that selector.** `.theme-toggle`
+  became utilities and broke a test script that clicked it. Anything a test or
+  script targets needs a `data-*` hook instead.
+- **`[class.x]` state is usually better left in SCSS.** `.active`, `.done`,
+  `.overdue`, `.collapsed` each restyle several descendants at once; expressing
+  that as a conditional utility string is worse in every way. `[ngClass]` with a
+  *literal* utility string (`{ 'text-[#ef4444]': overdue > 0 }`) is fine and
+  visible to the JIT — a *computed* one is not (§2.3).
+- **Verify with geometry, not just screenshots.** The 4–5px line-height drift was
+  invisible by eye and obvious in `getBoundingClientRect()`.
 
 ---
 
-## 6. Per-file checklist
+## 6. Checklist for future style changes
 
-For each component:
+The same loop that was used for the migration, and the one to use when adding or
+restyling a component:
 
 1. **Screenshot first** — light *and* dark, before touching anything. Without a
    baseline you cannot tell a regression from a pre-existing quirk.
@@ -204,39 +215,39 @@ For each component:
 
 ---
 
-## 7. Environment issue to clear first
+## 7. Outstanding environment issue
 
 `admin/.angular/cache` is owned by `root` (from a `sudo` run on 2026-07-14), so
 `ng serve` dies with `EACCES` whenever the lockfile changes — which installing
-Tailwind does:
+Tailwind did:
 
 ```
 EACCES: permission denied, rmdir '.../admin/.angular/cache/18.2.21/admin/vite/deps'
 ```
 
-Fix before starting:
+Still unfixed, because it needs sudo:
 
 ```bash
 sudo rm -rf admin/.angular
 ```
 
-`ng build` is unaffected. The pilot was verified by building and serving `dist/`
-through a static server with SPA fallback, which is a usable fallback if the cache
-problem recurs.
+`ng build` is unaffected. The whole migration was therefore verified by building
+and serving `dist/` through a static server with SPA fallback — a usable fallback
+if the problem recurs.
 
 ---
 
-## 8. Open decisions
+## 8. Follow-ups worth doing
 
-- **Design tokens.** The palette is currently hex literals scattered across SCSS
-  (`#64748b`, `#6b7280`, `#e6e9ee`…). Converting verbatim moves them into
-  `bg-[#64748b]` arbitrary values, which is no better. Worth lifting the recurring
-  ones into `theme.extend.colors` first so the conversion produces `bg-slate-500`
-  rather than arbitrary hex.
-- **Shared config.** There is no workspace tooling, so the two apps get two copies
-  of `tailwind.config.js`. Fine for now; revisit if they drift.
-- **Is this worth doing for `user/`?** The pilot returned −62% on one file. If that
-  holds, both apps together shed roughly 3,000 lines. If the answer is "not worth
-  it," stopping after `admin/` is a coherent place to stop — the two apps already
-  duplicate their models and services, so a styling split changes nothing
-  structurally.
+- **Design tokens.** The palette is hex literals, so the conversion produced
+  arbitrary values (`bg-[#64748b]`, `text-[#6b7280]`, `border-[#edeff2]`) rather
+  than named ones. Lifting the recurring colours into `theme.extend.colors` and
+  sweeping the arbitrary values into names would make the utilities readable and
+  the palette editable in one place. This is the single biggest remaining cleanup.
+- **Chip colours from `task-meta.ts`.** `user/shared/task-meta.ts` already owns
+  status/priority labels and colours. Most of the surviving `[ngClass]` colour
+  maps could be driven from it instead of hand-written SCSS.
+- **Shared config.** No workspace tooling, so the two apps have two copies of
+  `tailwind.config.js`. Fine for now; they will drift eventually.
+- **`admin/` has no `shared/` equivalents.** The migration did not change this —
+  the two frontends still duplicate models, services, and now Tailwind config.

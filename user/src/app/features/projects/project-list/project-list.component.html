@@ -1,16 +1,16 @@
-<div class="page">
-  <div class="page-header">
+<div class="w-full">
+  <div class="mb-5 flex items-start justify-between gap-4">
     <div>
-      <h1>Projects</h1>
-      <p class="subtitle">{{ total }} project{{ total === 1 ? '' : 's' }}</p>
+      <h1 class="m-0 text-[26px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb]">Projects</h1>
+      <p class="mt-1 text-[13.5px] text-[#6b7280] dark:text-[#9ca3af]">{{ total }} project{{ total === 1 ? '' : 's' }}</p>
     </div>
     <button mat-flat-button color="primary" (click)="openCreate()">
       <mat-icon>add</mat-icon> New Project
     </button>
   </div>
 
-  <div class="filters">
-    <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+  <div class="filters mb-4 flex flex-wrap items-center gap-3 text-[13px]">
+    <mat-form-field appearance="outline" class="min-w-[220px] max-w-[380px] flex-1 max-[600px]:!max-w-none" subscriptSizing="dynamic">
       <mat-icon matPrefix>search</mat-icon>
       <mat-label>Search projects</mat-label>
       <input matInput [formControl]="searchControl" placeholder="Search by name">
@@ -19,7 +19,7 @@
       </button>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="status" subscriptSizing="dynamic">
+    <mat-form-field appearance="outline" class="w-[180px]" subscriptSizing="dynamic">
       <mat-label>Status</mat-label>
       <mat-select [(value)]="statusFilter" (selectionChange)="onStatusChange()">
         <mat-option [value]="''">All statuses</mat-option>
@@ -28,38 +28,38 @@
     </mat-form-field>
   </div>
 
-  <div class="loading" *ngIf="loading">
+  <div class="flex justify-center p-14" *ngIf="loading">
     <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
   </div>
 
-  <div class="empty" *ngIf="!loading && projects.length === 0">
-    <mat-icon>folder_open</mat-icon>
-    <h3>No projects found</h3>
-    <p>Create your first project to get started.</p>
+  <div class="rounded-xl border border-[#edeff2] bg-white px-5 py-14 text-center text-[#9ca3af] dark:border-[#262c40] dark:bg-[#171d2e]" *ngIf="!loading && projects.length === 0">
+    <mat-icon class="!h-11 !w-11 !text-[44px] opacity-45">folder_open</mat-icon>
+    <h3 class="mb-1 mt-3 text-[17px] text-[#1e293b] dark:text-[#e5e7eb]">No projects found</h3>
+    <p class="mb-4 mt-0 text-[13.5px]">Create your first project to get started.</p>
     <button mat-flat-button color="primary" (click)="openCreate()">
       <mat-icon>add</mat-icon> New Project
     </button>
   </div>
 
-  <div class="grid" *ngIf="!loading && projects.length > 0">
-    <mat-card class="project-card" *ngFor="let p of projects" (click)="openProject(p)">
-      <div class="card-head">
-        <span class="proj-tile"
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 max-[600px]:grid-cols-1" *ngIf="!loading && projects.length > 0">
+    <mat-card class="project-card flex cursor-pointer flex-col gap-3.5 p-4" *ngFor="let p of projects" (click)="openProject(p)">
+      <div class="flex items-start gap-3">
+        <span class="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[11px] [&>mat-icon]:!h-5 [&>mat-icon]:!w-5 [&>mat-icon]:!text-xl"
               [style.color]="p.color || '#64748b'"
               [style.background]="'color-mix(in srgb, ' + (p.color || '#64748b') + ' 14%, transparent)'">
           <mat-icon>folder</mat-icon>
         </span>
 
-        <div class="head-text">
-          <h3 [matTooltip]="p.name">{{ p.name }}</h3>
-          <span class="status-chip"
+        <div class="flex min-w-0 flex-1 flex-col items-start gap-[5px]">
+          <h3 class="m-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-[15.5px] font-semibold text-[#1e293b] dark:text-[#e5e7eb]" [matTooltip]="p.name">{{ p.name }}</h3>
+          <span class="rounded-full px-[9px] py-0.5 text-[11.5px] font-semibold leading-normal"
                 [style.color]="projectStatusColor(p.status)"
                 [style.background]="'color-mix(in srgb, ' + projectStatusColor(p.status) + ' 14%, transparent)'">
             {{ statusLabel(p.status) }}
           </span>
         </div>
 
-        <button mat-icon-button class="card-menu" (click)="$event.stopPropagation()"
+        <button mat-icon-button class="-mr-2 -mt-1.5 shrink-0" (click)="$event.stopPropagation()"
                 [matMenuTriggerFor]="menu" aria-label="Project actions">
           <mat-icon>more_vert</mat-icon>
         </button>
@@ -73,29 +73,29 @@
         </mat-menu>
       </div>
 
-      <p class="description">{{ p.description || 'No description' }}</p>
+      <p class="m-0 line-clamp-2 min-h-[39px] text-[13.5px] leading-[1.45] text-[#6b7280] dark:text-[#9ca3af]">{{ p.description || 'No description' }}</p>
 
-      <div class="progress-block">
-        <div class="progress-row">
+      <div>
+        <div class="mb-[7px] flex items-baseline justify-between text-xs text-[#6b7280] dark:text-[#9ca3af]">
           <span class="progress-label">{{ completedCount(p) }} of {{ taskCount(p) }} tasks</span>
-          <span class="progress-pct">{{ progress(p) }}%</span>
+          <span class="text-[12.5px] font-bold text-[#475569] dark:text-[#cbd5e1]">{{ progress(p) }}%</span>
         </div>
-        <div class="bar">
-          <span class="bar-fill"
+        <div class="bar h-1.5 overflow-hidden rounded-full bg-[#eef1f5] dark:bg-[#2b3352]">
+          <span class="block h-full rounded-full transition-[width] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
                 [style.width.%]="progress(p)"
                 [style.background]="p.color || '#64748b'"></span>
         </div>
       </div>
 
-      <div class="card-footer">
-        <span class="due" *ngIf="p.due_date" [class.overdue]="isOverdue(p)">
+      <div class="card-footer flex items-center justify-between border-t border-[#f1f3f6] pt-3 dark:border-[#262c40]">
+        <span class="due flex items-center gap-[5px] text-[12.5px] text-[#64748b] dark:text-[#94a3b8]" *ngIf="p.due_date" [class.overdue]="isOverdue(p)">
           <mat-icon>{{ isOverdue(p) ? 'event_busy' : 'event' }}</mat-icon>
           {{ p.due_date | date:dueFormat(p):'UTC' }}
         </span>
-        <span class="due muted" *ngIf="!p.due_date">
+        <span class="due flex items-center gap-[5px] text-[12.5px] text-[#cbd5e1] dark:text-[#4b5563]" *ngIf="!p.due_date">
           <mat-icon>event</mat-icon> No due date
         </span>
-        <mat-icon class="go">arrow_forward</mat-icon>
+        <mat-icon class="go !h-[18px] !w-[18px] !text-[18px] text-[#cbd5e1] transition-[transform,color] duration-[250ms] dark:text-[#4b5563]">arrow_forward</mat-icon>
       </div>
     </mat-card>
   </div>

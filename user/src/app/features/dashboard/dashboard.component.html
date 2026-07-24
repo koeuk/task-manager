@@ -1,9 +1,9 @@
-<div class="dashboard">
+<div class="w-full">
   <!-- Header -->
-  <div class="page-head">
+  <div class="mb-5 flex items-start justify-between gap-4 max-[640px]:flex-col max-[640px]:items-stretch">
     <div>
-      <h1 class="page-title">{{ greeting }}, {{ userName || 'there' }}</h1>
-      <p class="page-sub">{{ today | date:'EEEE, MMMM d' }}</p>
+      <h1 class="m-0 text-[26px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb]">{{ greeting }}, {{ userName || 'there' }}</h1>
+      <p class="mt-1 text-[13.5px] text-[#6b7280] dark:text-[#9ca3af]">{{ today | date:'EEEE, MMMM d' }}</p>
     </div>
     <button mat-flat-button color="primary" (click)="quickAddTask()">
       <mat-icon>add</mat-icon>
@@ -12,39 +12,39 @@
   </div>
 
   <!-- Focus strip -->
-  <div class="focus-strip">
-    <div class="focus-tile" [class.alert]="overdueTasks.length">
-      <span class="ft-value">{{ overdueTasks.length }}</span>
-      <span class="ft-label">Overdue</span>
+  <div class="focus-strip mb-5 grid grid-cols-4 gap-3 max-[640px]:grid-cols-2">
+    <div class="focus-tile flex flex-col gap-0.5 rounded-xl border px-4 py-3.5" [class.alert]="overdueTasks.length">
+      <span class="ft-value text-2xl font-bold leading-[1.1]">{{ overdueTasks.length }}</span>
+      <span class="ft-label text-[12.5px]">Overdue</span>
     </div>
-    <div class="focus-tile">
-      <span class="ft-value">{{ todayTasks.length }}</span>
-      <span class="ft-label">Due today</span>
+    <div class="focus-tile flex flex-col gap-0.5 rounded-xl border px-4 py-3.5">
+      <span class="ft-value text-2xl font-bold leading-[1.1]">{{ todayTasks.length }}</span>
+      <span class="ft-label text-[12.5px]">Due today</span>
     </div>
-    <div class="focus-tile">
-      <span class="ft-value">{{ upcomingTasks.length }}</span>
-      <span class="ft-label">Next 7 days</span>
+    <div class="focus-tile flex flex-col gap-0.5 rounded-xl border px-4 py-3.5">
+      <span class="ft-value text-2xl font-bold leading-[1.1]">{{ upcomingTasks.length }}</span>
+      <span class="ft-label text-[12.5px]">Next 7 days</span>
     </div>
-    <div class="focus-tile">
-      <span class="ft-value">{{ stats?.completed_tasks ?? 0 }}</span>
-      <span class="ft-label">Completed</span>
+    <div class="focus-tile flex flex-col gap-0.5 rounded-xl border px-4 py-3.5">
+      <span class="ft-value text-2xl font-bold leading-[1.1]">{{ stats?.completed_tasks ?? 0 }}</span>
+      <span class="ft-label text-[12.5px]">Completed</span>
     </div>
   </div>
 
-  <div class="dash-grid">
+  <div class="grid grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] items-start gap-5 max-[1000px]:grid-cols-1">
     <!-- ===== Main: my work ===== -->
-    <div class="col-main">
-      <div class="loading-box" *ngIf="loadingTasks">
+    <div class="flex min-w-0 flex-col gap-4">
+      <div class="flex justify-center p-12" *ngIf="loadingTasks">
         <mat-progress-spinner mode="indeterminate" diameter="34"></mat-progress-spinner>
       </div>
 
       <ng-container *ngIf="!loadingTasks">
         <!-- All clear -->
-        <mat-card class="all-clear" *ngIf="hasNothingDue">
+        <mat-card class="all-clear text-center" *ngIf="hasNothingDue">
           <mat-card-content>
-            <mat-icon>check_circle</mat-icon>
-            <h3>Nothing due right now</h3>
-            <p>You have no overdue tasks and nothing due in the next 7 days.</p>
+            <mat-icon class="!h-11 !w-11 !text-[44px] !text-[#10b981]">check_circle</mat-icon>
+            <h3 class="mb-1 mt-3 text-[17px] text-[#1e293b] dark:text-[#e5e7eb]">Nothing due right now</h3>
+            <p class="mb-4 mt-0 text-[13.5px] text-[#6b7280] dark:text-[#9ca3af]">You have no overdue tasks and nothing due in the next 7 days.</p>
             <button mat-stroked-button color="primary" (click)="quickAddTask()">
               <mat-icon>add</mat-icon> Add a task
             </button>
@@ -54,9 +54,9 @@
         <!-- Overdue -->
         <mat-card class="bucket overdue-bucket" *ngIf="overdueTasks.length">
           <mat-card-content>
-            <div class="bucket-head">
-              <span class="bucket-title"><mat-icon>error_outline</mat-icon> Overdue</span>
-              <span class="bucket-count">{{ overdueTasks.length }}</span>
+            <div class="mb-1.5 flex items-center justify-between">
+              <span class="bucket-title inline-flex items-center gap-2 text-[15px] font-semibold"><mat-icon>error_outline</mat-icon> Overdue</span>
+              <span class="bucket-count rounded-[10px] px-2 py-px text-xs font-semibold">{{ overdueTasks.length }}</span>
             </div>
             <ng-container *ngTemplateOutlet="taskRows; context: { $implicit: overdueTasks, late: true }"></ng-container>
           </mat-card-content>
@@ -65,9 +65,9 @@
         <!-- Today -->
         <mat-card class="bucket" *ngIf="todayTasks.length">
           <mat-card-content>
-            <div class="bucket-head">
-              <span class="bucket-title"><mat-icon>today</mat-icon> Today</span>
-              <span class="bucket-count">{{ todayTasks.length }}</span>
+            <div class="mb-1.5 flex items-center justify-between">
+              <span class="bucket-title inline-flex items-center gap-2 text-[15px] font-semibold"><mat-icon>today</mat-icon> Today</span>
+              <span class="bucket-count rounded-[10px] px-2 py-px text-xs font-semibold">{{ todayTasks.length }}</span>
             </div>
             <ng-container *ngTemplateOutlet="taskRows; context: { $implicit: todayTasks, late: false }"></ng-container>
           </mat-card-content>
@@ -76,9 +76,9 @@
         <!-- Upcoming -->
         <mat-card class="bucket" *ngIf="upcomingTasks.length">
           <mat-card-content>
-            <div class="bucket-head">
-              <span class="bucket-title"><mat-icon>event</mat-icon> Next 7 days</span>
-              <span class="bucket-count">{{ upcomingTasks.length }}</span>
+            <div class="mb-1.5 flex items-center justify-between">
+              <span class="bucket-title inline-flex items-center gap-2 text-[15px] font-semibold"><mat-icon>event</mat-icon> Next 7 days</span>
+              <span class="bucket-count rounded-[10px] px-2 py-px text-xs font-semibold">{{ upcomingTasks.length }}</span>
             </div>
             <ng-container *ngTemplateOutlet="taskRows; context: { $implicit: upcomingTasks, late: false }"></ng-container>
           </mat-card-content>
@@ -87,19 +87,19 @@
     </div>
 
     <!-- ===== Side ===== -->
-    <div class="col-side">
+    <div class="flex min-w-0 flex-col gap-4">
       <!-- Progress -->
       <mat-card class="side-card" *ngIf="stats">
         <mat-card-content>
-          <div class="side-head">Overall progress</div>
-          <div class="progress-value">{{ calculateProgress() }}%</div>
+          <div class="side-head mb-2 text-[14px] font-semibold">Overall progress</div>
+          <div class="progress-value mb-2 text-[28px] font-bold leading-[1.1]">{{ calculateProgress() }}%</div>
           <mat-progress-bar mode="determinate" [value]="calculateProgress()"></mat-progress-bar>
-          <p class="progress-sub">{{ stats.completed_tasks }} of {{ stats.total_tasks }} tasks completed</p>
+          <p class="progress-sub mt-2 text-[12.5px]">{{ stats.completed_tasks }} of {{ stats.total_tasks }} tasks completed</p>
 
-          <div class="mini-stats">
-            <div class="mini"><span class="dot todo"></span> {{ stats.pending_tasks }} To do</div>
-            <div class="mini"><span class="dot prog"></span> {{ stats.in_progress_tasks }} In progress</div>
-            <div class="mini"><span class="dot done"></span> {{ stats.completed_tasks }} Done</div>
+          <div class="mt-3.5 flex flex-col gap-1.5">
+            <div class="mini flex items-center gap-2 text-[13px]"><span class="dot todo"></span> {{ stats.pending_tasks }} To do</div>
+            <div class="mini flex items-center gap-2 text-[13px]"><span class="dot prog"></span> {{ stats.in_progress_tasks }} In progress</div>
+            <div class="mini flex items-center gap-2 text-[13px]"><span class="dot done"></span> {{ stats.completed_tasks }} Done</div>
           </div>
         </mat-card-content>
       </mat-card>
@@ -107,23 +107,23 @@
       <!-- Projects -->
       <mat-card class="side-card">
         <mat-card-content>
-          <div class="side-head row">
+          <div class="side-head mb-2 flex items-center justify-between text-[14px] font-semibold">
             <span>Projects</span>
             <a mat-button color="primary" routerLink="/projects">View all</a>
           </div>
 
-          <div class="proj-list" *ngIf="stats && stats.recent_projects.length; else noProjects">
+          <div class="flex flex-col" *ngIf="stats && stats.recent_projects.length; else noProjects">
             <a class="proj-row" *ngFor="let p of stats.recent_projects" [routerLink]="['/projects', p.id]">
-              <span class="proj-dot" [style.background]="projectStatusColor(p.status)"></span>
-              <span class="proj-name">{{ p.name }}</span>
-              <mat-icon class="proj-chevron">chevron_right</mat-icon>
+              <span class="h-2 w-2 shrink-0 rounded-full" [style.background]="projectStatusColor(p.status)"></span>
+              <span class="proj-name min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[13.5px] font-medium text-[#1e293b] dark:text-[#e5e7eb]">{{ p.name }}</span>
+              <mat-icon class="!h-5 !w-5 !text-xl !text-[#cbd5e1]">chevron_right</mat-icon>
             </a>
           </div>
 
           <ng-template #noProjects>
-            <div class="empty-mini">
-              <mat-icon>folder_open</mat-icon>
-              <p>No projects yet</p>
+            <div class="px-2 py-6 text-center text-[#9ca3af]">
+              <mat-icon class="!h-[34px] !w-[34px] !text-[34px] opacity-50">folder_open</mat-icon>
+              <p class="mb-3 mt-2 text-[13px]">No projects yet</p>
               <button mat-stroked-button color="primary" (click)="createProject()">Create project</button>
             </div>
           </ng-template>
@@ -135,22 +135,22 @@
 
 <!-- ===== Reusable task rows ===== -->
 <ng-template #taskRows let-tasks let-late="late">
-  <div class="task-row" *ngFor="let t of tasks" (click)="openTask(t)">
-    <mat-checkbox class="task-check"
+  <div class="task-row flex cursor-pointer items-center gap-2.5 rounded-lg px-1.5 py-2.5" *ngFor="let t of tasks" (click)="openTask(t)">
+    <mat-checkbox class="shrink-0"
                   (click)="completeTask(t, $event)"
                   matTooltip="Mark complete"></mat-checkbox>
 
-    <span class="prio-bar" [style.background]="priorityColor(t.priority)"
+    <span class="min-h-[26px] w-[3px] shrink-0 self-stretch rounded-sm" [style.background]="priorityColor(t.priority)"
           [matTooltip]="priorityLabel(t.priority) + ' priority'"></span>
 
-    <div class="task-main">
-      <span class="task-title">{{ t.title }}</span>
-      <span class="task-meta">
+    <div class="flex min-w-0 flex-1 flex-col leading-[1.35]">
+      <span class="task-title overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium text-[#1e293b] dark:text-[#e5e7eb]">{{ t.title }}</span>
+      <span class="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#94a3b8]">
         <ng-container *ngIf="t.project?.name">{{ t.project?.name }} · </ng-container>
         <span [class.late]="late">{{ dueHint(t) }}</span>
       </span>
     </div>
 
-    <span class="task-date" [class.late]="late">{{ t.due_date | date:'MMM d':'UTC' }}</span>
+    <span class="task-date shrink-0 whitespace-nowrap text-xs text-[#94a3b8]" [class.late]="late">{{ t.due_date | date:'MMM d':'UTC' }}</span>
   </div>
 </ng-template>
