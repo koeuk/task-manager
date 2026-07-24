@@ -11,8 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DashboardService, ReportData } from '../../core/services/dashboard.service';
+import { ToastService } from '../../core/services/toast.service';
 import { toDateString } from '../../core/utils/date-utils';
 
 @Component({
@@ -31,7 +31,6 @@ import { toDateString } from '../../core/utils/date-utils';
     MatTableModule,
     MatProgressSpinnerModule,
     MatProgressBarModule,
-    MatSnackBarModule
   ],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss']
@@ -52,7 +51,7 @@ export class ReportsComponent implements OnInit {
   constructor(
     private dashboardService: DashboardService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -74,7 +73,7 @@ export class ReportsComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.snackBar.open('Failed to load report', 'Close', { duration: 3000 });
+        this.toast.error('Failed to load report');
         this.loading = false;
       }
     });

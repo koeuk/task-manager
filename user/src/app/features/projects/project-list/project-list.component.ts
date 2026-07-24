@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,15 +16,19 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { ComponentType } from '@angular/cdk/portal';
 import { Project, ProjectStatus } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
 import { WriteGuardService } from '../../../core/services/write-guard.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PROJECT_STATUS_OPTIONS, statusLabel, projectStatusColor } from '../../../core/utils/task-meta';
-import { parseApiDate } from '../../../core/utils/date-utils';
+import { parseApiDate, isPastDay } from '../../../core/utils/date-utils';
+
+/** How long to wait after the last keystroke before re-querying. */
+const SEARCH_DEBOUNCE_MS = 350;
 
 @Component({
   selector: 'app-project-list',
@@ -51,19 +57,22 @@ export class ProjectListComponent implements OnInit {
   constructor(
     private projectService: ProjectService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private router: Router,
-    private writeGuard: WriteGuardService
+    private writeGuard: WriteGuardService,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
     this.loadProjects();
+
     this.searchControl.valueChanges
-      .pipe(debounceTime(350), distinctUntilChanged())
-      .subscribe(() => {
-        this.pageIndex = 0;
-        this.loadProjects();
-      });
+      .pipe(
+        debounceTime(SEARCH_DEBOUNCE_MS),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => this.reloadFromFirstPage());
   }
 
   loadProjects(): void {
@@ -80,15 +89,14 @@ export class ProjectListComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.snackBar.open('Failed to load projects', 'Close', { duration: 4000 });
+        this.toast.error('Failed to load projects');
         this.loading = false;
       }
     });
   }
 
   onStatusChange(): void {
-    this.pageIndex = 0;
-    this.loadProjects();
+    this.reloadFromFirstPage();
   }
 
   onPage(event: PageEvent): void {
@@ -98,31 +106,24 @@ export class ProjectListComponent implements OnInit {
   }
 
   openCreate(): void {
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
-      const ref = this.dialog.open(ProjectFormDialogComponent, { width: '520px', data: {} });
-      ref.afterClosed().subscribe((result) => {
-        if (result) this.loadProjects();
-      });
+    this.ifWritable(() => {
+      this.openDialog(ProjectFormDialogComponent, { width: '520px', data: {} })
+        .subscribe(() => this.loadProjects());
     });
   }
 
   openEdit(project: Project, event: Event): void {
     event.stopPropagation();
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
-      const ref = this.dialog.open(ProjectFormDialogComponent, { width: '520px', data: { project } });
-      ref.afterClosed().subscribe((result) => {
-        if (result) this.loadProjects();
-      });
+    this.ifWritable(() => {
+      this.openDialog(ProjectFormDialogComponent, { width: '520px', data: { project } })
+        .subscribe(() => this.loadProjects());
     });
   }
 
   confirmDelete(project: Project, event: Event): void {
     event.stopPropagation();
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
-      const ref = this.dialog.open(ConfirmDialogComponent, {
+    this.ifWritable(() => {
+      this.openDialog(ConfirmDialogComponent, {
         width: '420px',
         data: {
           title: 'Delete project',
@@ -130,18 +131,7 @@ export class ProjectListComponent implements OnInit {
           confirmText: 'Delete',
           danger: true
         }
-      });
-      ref.afterClosed().subscribe((confirmed) => {
-        if (confirmed) {
-          this.projectService.deleteProject(project.id).subscribe({
-            next: () => {
-              this.snackBar.open('Project deleted', 'Close', { duration: 3000 });
-              this.loadProjects();
-            },
-            error: () => this.snackBar.open('Failed to delete project', 'Close', { duration: 4000 })
-          });
-        }
-      });
+      }).subscribe(() => this.deleteProject(project));
     });
   }
 
@@ -169,11 +159,7 @@ export class ProjectListComponent implements OnInit {
   /** Past its due date and still open — surfaced in red on the card footer. */
   isOverdue(p: Project): boolean {
     if (p.status === 'completed' || p.status === 'archived') return false;
-    const due = parseApiDate(p.due_date);
-    if (!due) return false;
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    return due < startOfToday;
+    return isPastDay(p.due_date);
   }
 
   progress(p: Project): number {
@@ -183,5 +169,35 @@ export class ProjectListComponent implements OnInit {
 
   clearSearch(): void {
     this.searchControl.setValue('');
+  }
+
+  // -------------------------------------------------------------- internals
+
+  private reloadFromFirstPage(): void {
+    this.pageIndex = 0;
+    this.loadProjects();
+  }
+
+  /** Run `action` only once the write guard grants access. */
+  private ifWritable(action: () => void): void {
+    this.writeGuard.requireWrite().subscribe(allowed => {
+      if (allowed) action();
+    });
+  }
+
+  /** Open a dialog and emit only when it closes with a truthy result. */
+  private openDialog<T>(component: ComponentType<T>, config: MatDialogConfig): Observable<unknown> {
+    const ref: MatDialogRef<T> = this.dialog.open(component, config);
+    return ref.afterClosed().pipe(filter(Boolean));
+  }
+
+  private deleteProject(project: Project): void {
+    this.projectService.deleteProject(project.id).subscribe({
+      next: () => {
+        this.toast.success('Project deleted');
+        this.loadProjects();
+      },
+      error: () => this.toast.error('Failed to delete project')
+    });
   }
 }

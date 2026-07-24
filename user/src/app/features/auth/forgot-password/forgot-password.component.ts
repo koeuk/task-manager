@@ -7,8 +7,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -22,7 +22,6 @@ import { AuthService } from '../../../core/services/auth.service';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
   ],
   templateUrl: './forgot-password.component.html'
 })
@@ -37,7 +36,7 @@ export class ForgotPasswordComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -62,15 +61,15 @@ export class ForgotPasswordComponent implements OnInit {
         this.emailValue = email;
         if (res.token) {
           this.resetForm.patchValue({ token: res.token });
-          this.snackBar.open('Reset token generated — enter a new password.', 'Close', { duration: 4000 });
+          this.toast.info('Reset token generated — enter a new password.');
         } else {
-          this.snackBar.open(res.message, 'Close', { duration: 4000 });
+          this.toast.info(res.message);
         }
         this.step = 2;
       },
       error: (error) => {
         this.loading = false;
-        this.snackBar.open(error.error?.message || 'Request failed. Please try again.', 'Close', { duration: 5000 });
+        this.toast.error(error);
       }
     });
   }
@@ -87,12 +86,12 @@ export class ForgotPasswordComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.loading = false;
-        this.snackBar.open(res.message || 'Password reset successfully.', 'Close', { duration: 4000 });
+        this.toast.success(res.message || 'Password reset successfully.');
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.loading = false;
-        this.snackBar.open(error.error?.message || 'Reset failed. Please try again.', 'Close', { duration: 5000 });
+        this.toast.error(error);
       }
     });
   }

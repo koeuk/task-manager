@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../../core/services/toast.service';
 import { Project, ProjectStatus } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
 import { toDateString, parseApiDate } from '../../../core/utils/date-utils';
@@ -41,7 +41,7 @@ export class ProjectFormDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private projectService: ProjectService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private dialogRef: MatDialogRef<ProjectFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { project?: Project }
   ) {}
@@ -81,12 +81,12 @@ export class ProjectFormDialogComponent implements OnInit {
 
     request$.subscribe({
       next: (res) => {
-        this.snackBar.open(res.message || 'Saved', 'Close', { duration: 3000 });
+        this.toast.success(res.message || 'Saved');
         this.dialogRef.close(res.project);
       },
       error: (err) => {
         this.saving = false;
-        this.snackBar.open(err.error?.message || 'Failed to save project', 'Close', { duration: 5000 });
+        this.toast.error(err);
       }
     });
   }

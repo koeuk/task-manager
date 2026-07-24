@@ -16,12 +16,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentType } from '@angular/cdk/portal';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
 import { TaskService } from '../../../core/services/task.service';
 import { ProjectService } from '../../../core/services/project.service';
 import { WriteGuardService } from '../../../core/services/write-guard.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { TaskFormDialogComponent } from '../task-form-dialog/task-form-dialog.component';
 import { TaskDetailDialogComponent } from '../task-detail-dialog/task-detail-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -35,8 +35,6 @@ const SEARCH_DEBOUNCE_MS = 350;
 
 /** Upper bound on the project list used to populate the "new task" dialog. */
 const PROJECT_PICKER_LIMIT = 100;
-
-const TOAST_MS = { info: 3000, error: 4000 } as const;
 
 @Component({
   selector: 'app-task-list',
@@ -77,7 +75,7 @@ export class TaskListComponent implements OnInit {
     private taskService: TaskService,
     private projectService: ProjectService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private writeGuard: WriteGuardService,
     private destroyRef: DestroyRef
   ) {}
@@ -112,7 +110,7 @@ export class TaskListComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.showError('Failed to load tasks');
+        this.toast.error('Failed to load tasks');
         this.loading = false;
       }
     });
@@ -144,7 +142,7 @@ export class TaskListComponent implements OnInit {
   openCreate(): void {
     this.ifWritable(() => {
       if (this.projects.length === 0) {
-        this.showInfo('Create a project first before adding tasks');
+        this.toast.info('Create a project first before adding tasks');
         return;
       }
       this.openDialog(TaskFormDialogComponent, { width: '560px', data: { projects: this.projects } })
@@ -240,25 +238,17 @@ export class TaskListComponent implements OnInit {
   private applyStatus(task: Task, status: TaskStatus): void {
     this.taskService.updateStatus(task.id, status).subscribe({
       next: (res) => (task.status = res.task.status),
-      error: () => this.showError('Failed to update status')
+      error: () => this.toast.error('Failed to update status')
     });
   }
 
   private deleteTask(task: Task): void {
     this.taskService.deleteTask(task.id).subscribe({
       next: () => {
-        this.showInfo('Task deleted');
+        this.toast.success('Task deleted');
         this.loadTasks();
       },
-      error: () => this.showError('Failed to delete task')
+      error: () => this.toast.error('Failed to delete task')
     });
-  }
-
-  private showInfo(message: string): void {
-    this.snackBar.open(message, 'Close', { duration: TOAST_MS.info });
-  }
-
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Close', { duration: TOAST_MS.error });
   }
 }

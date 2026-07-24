@@ -10,8 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TaskService } from '../../../core/services/task.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ProjectService } from '../../../core/services/project.service';
 import { UserService } from '../../../core/services/user.service';
 import { Task, Project } from '../../../core/models/project.model';
@@ -33,7 +33,6 @@ import { toDateString } from '../../../core/utils/date-utils';
     MatDatepickerModule,
     MatNativeDateModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
   ],
   templateUrl: './task-dialog.component.html'
 })
@@ -49,7 +48,7 @@ export class TaskDialogComponent implements OnInit {
     private taskService: TaskService,
     private projectService: ProjectService,
     private userService: UserService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     public dialogRef: MatDialogRef<TaskDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Task | null
   ) {
@@ -97,23 +96,16 @@ export class TaskDialogComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        this.snackBar.open(`Task ${this.isEditMode ? 'updated' : 'created'}`, 'Close', { duration: 3000 });
+        this.toast.success(`Task ${this.isEditMode ? 'updated' : 'created'}`);
         this.dialogRef.close(true);
       },
       error: (error) => {
         this.loading = false;
-        this.snackBar.open(this.extractError(error), 'Close', { duration: 5000 });
+        this.toast.error(error);
       }
     });
   }
 
-  private extractError(error: any): string {
-    if (error.error?.errors) {
-      const first = Object.values(error.error.errors)[0];
-      return Array.isArray(first) ? first[0] : String(first);
-    }
-    return error.error?.message || 'An error occurred';
-  }
 
   onCancel(): void {
     this.dialogRef.close();

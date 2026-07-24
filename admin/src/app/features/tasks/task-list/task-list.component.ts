@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,17 +12,20 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { TaskService } from '../../../core/services/task.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Task } from '../../../core/models/project.model';
 import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { exportToCsv } from '../../../core/utils/csv-export';
 import { ActivatedRoute } from '@angular/router';
+
+/** How long to wait after the last keystroke before re-querying. */
+const SEARCH_DEBOUNCE_MS = 300;
 
 @Component({
   selector: 'app-task-list',
@@ -39,7 +43,6 @@ import { ActivatedRoute } from '@angular/router';
     MatSelectModule,
     MatMenuModule,
     MatDialogModule,
-    MatSnackBarModule,
     MatProgressSpinnerModule,
     MatChipsModule,
     MatDividerModule
@@ -61,8 +64,9 @@ export class TaskListComponent implements OnInit {
     private taskService: TaskService,
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private route: ActivatedRoute
+    private toast: ToastService,
+    private route: ActivatedRoute,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
@@ -71,11 +75,20 @@ export class TaskListComponent implements OnInit {
     this.filterForm = this.fb.group({ search: [initialSearch], status: [''], priority: [''] });
 
     this.filterForm.get('search')?.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => { this.pageIndex = 0; this.loadTasks(); });
+      .pipe(
+        debounceTime(SEARCH_DEBOUNCE_MS),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => this.reloadFromFirstPage());
 
-    this.filterForm.get('status')?.valueChanges.subscribe(() => { this.pageIndex = 0; this.loadTasks(); });
-    this.filterForm.get('priority')?.valueChanges.subscribe(() => { this.pageIndex = 0; this.loadTasks(); });
+    this.filterForm.get('status')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.reloadFromFirstPage());
+
+    this.filterForm.get('priority')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.reloadFromFirstPage());
 
     this.loadTasks();
   }
@@ -95,7 +108,7 @@ export class TaskListComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.snackBar.open('Failed to load tasks', 'Close', { duration: 3000 });
+        this.toast.error('Failed to load tasks');
         this.loading = false;
       }
     });
@@ -107,7 +120,7 @@ export class TaskListComponent implements OnInit {
   }
 
   deleteTask(task: Task): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: 'Delete task?',
@@ -116,26 +129,27 @@ export class TaskListComponent implements OnInit {
         danger: true,
         icon: 'delete'
       }
-    });
-
-    dialogRef.afterClosed().subscribe(confirmed => {
+    }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
 
       this.taskService.deleteTask(task.id).subscribe({
         next: () => {
-          this.snackBar.open('Task deleted', 'Close', { duration: 3000 });
+          this.toast.success('Task deleted');
           this.loadTasks();
         },
-        error: (error) => {
-          this.snackBar.open(error.error?.message || 'Failed to delete task', 'Close', { duration: 5000 });
-        }
+        error: (error) => this.toast.error(error)
       });
     });
   }
 
-  onPageChange(event: any): void {
+  onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
+    this.loadTasks();
+  }
+
+  private reloadFromFirstPage(): void {
+    this.pageIndex = 0;
     this.loadTasks();
   }
 
@@ -145,7 +159,7 @@ export class TaskListComponent implements OnInit {
 
   exportCsv(): void {
     if (!this.dataSource.data.length) {
-      this.snackBar.open('No tasks to export', 'Close', { duration: 3000 });
+      this.toast.info('No tasks to export');
       return;
     }
 
@@ -174,7 +188,7 @@ export class TaskListComponent implements OnInit {
       },
       error: () => {
         this.exporting = false;
-        this.snackBar.open('Failed to export tasks', 'Close', { duration: 4000 });
+        this.toast.error('Failed to export tasks');
       }
     });
   }

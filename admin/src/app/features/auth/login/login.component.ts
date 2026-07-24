@@ -8,9 +8,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AppSettingsService } from '../../../core/services/app-settings.service';
 
@@ -27,7 +27,6 @@ import { AppSettingsService } from '../../../core/services/app-settings.service'
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     MatTooltipModule
   ],
   templateUrl: './login.component.html',
@@ -44,7 +43,7 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     public themeService: ThemeService,
     public appSettings: AppSettingsService
   ) {}
@@ -75,7 +74,7 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
+        this.toast.success('Login successful!');
         this.router.navigate([this.returnUrl]);
       },
       error: (error) => {
@@ -90,10 +89,7 @@ export class LoginComponent implements OnInit {
           message = 'Access denied. Admin privileges required.';
         }
         
-        this.snackBar.open(message, 'Close', { 
-          duration: 5000,
-          panelClass: ['error-snackbar']
-        });
+        this.toast.error(message);
       }
     });
   }

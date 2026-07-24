@@ -8,8 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -24,7 +24,6 @@ import { AuthService } from '../../../core/services/auth.service';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
   ],
   templateUrl: './register.component.html'
 })
@@ -38,7 +37,7 @@ export class RegisterComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -80,7 +79,7 @@ export class RegisterComponent implements OnInit {
     this.loading = true;
     this.authService.register(this.registerForm.value).subscribe({
       next: () => {
-        this.snackBar.open('Registration successful! Welcome!', 'Close', { duration: 3000 });
+        this.toast.success('Registration successful! Welcome!');
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
@@ -96,7 +95,7 @@ export class RegisterComponent implements OnInit {
           message = error.message;
         }
         
-        this.snackBar.open(message, 'Close', { duration: 5000 });
+        this.toast.error(message);
       }
     });
   }

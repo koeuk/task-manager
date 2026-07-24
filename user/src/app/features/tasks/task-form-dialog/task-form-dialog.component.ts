@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../../core/services/toast.service';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
 import { TaskService, TaskPayload } from '../../../core/services/task.service';
 import { toDateString, parseApiDate } from '../../../core/utils/date-utils';
@@ -54,7 +54,7 @@ export class TaskFormDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private taskService: TaskService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private dialogRef: MatDialogRef<TaskFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: TaskFormData
   ) {}
@@ -88,7 +88,7 @@ export class TaskFormDialogComponent implements OnInit {
     const v = this.form.value;
     const projectId = this.isEdit ? this.data.task!.project_id : (v.project_id ?? this.data.projectId);
     if (!projectId) {
-      this.snackBar.open('Please choose a project', 'Close', { duration: 4000 });
+      this.toast.info('Please choose a project');
       return;
     }
 
@@ -112,12 +112,12 @@ export class TaskFormDialogComponent implements OnInit {
 
     request$.subscribe({
       next: (res) => {
-        this.snackBar.open(res.message || 'Saved', 'Close', { duration: 3000 });
+        this.toast.success(res.message || 'Saved');
         this.dialogRef.close(res.task);
       },
       error: (err) => {
         this.saving = false;
-        this.snackBar.open(err.error?.message || 'Failed to save task', 'Close', { duration: 5000 });
+        this.toast.error(err);
       }
     });
   }

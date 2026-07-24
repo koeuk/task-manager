@@ -13,19 +13,22 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { ComponentType } from '@angular/cdk/portal';
+import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { Project, Task } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
 import { TaskService, ReorderItem } from '../../../core/services/task.service';
 import { TaskListService } from '../../../core/services/task-list.service';
 import { WriteGuardService } from '../../../core/services/write-guard.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-dialog.component';
 import { TaskFormDialogComponent } from '../../tasks/task-form-dialog/task-form-dialog.component';
 import { TaskDetailDialogComponent } from '../../tasks/task-detail-dialog/task-detail-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { statusLabel, priorityLabel, statusColor, priorityColor, projectStatusColor } from '../../../core/utils/task-meta';
-import { parseApiDate } from '../../../core/utils/date-utils';
+import { parseApiDate, isPastDay } from '../../../core/utils/date-utils';
 
 interface BoardColumn {
   id: number | null; // task list id, or null for the "Unassigned" column
@@ -70,7 +73,7 @@ export class ProjectDetailComponent implements OnInit {
     private taskService: TaskService,
     private taskListService: TaskListService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private writeGuard: WriteGuardService
   ) {}
 
@@ -93,7 +96,7 @@ export class ProjectDetailComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.snackBar.open('Failed to load project', 'Close', { duration: 4000 });
+        this.toast.error('Failed to load project');
         this.loading = false;
       }
     });
@@ -132,12 +135,7 @@ export class ProjectDetailComponent implements OnInit {
 
   /** Past its due date and still open — surfaced in red on the task card. */
   isOverdue(task: Task): boolean {
-    if (task.status === 'completed') return false;
-    const due = parseApiDate(task.due_date);
-    if (!due) return false;
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    return due < startOfToday;
+    return task.status !== 'completed' && isPastDay(task.due_date);
   }
 
   /** Include the year for dates outside the current year so they aren't ambiguous. */
@@ -172,7 +170,7 @@ export class ProjectDetailComponent implements OnInit {
     if (payload.length === 0) return;
     this.taskService.reorderTasks(payload).subscribe({
       error: () => {
-        this.snackBar.open('Failed to save order — refreshing', 'Close', { duration: 3000 });
+        this.toast.success('Failed to save order — refreshing');
         this.loadProject();
       }
     });
@@ -180,26 +178,17 @@ export class ProjectDetailComponent implements OnInit {
 
   // ---- Tasks ----
   openTask(task: Task): void {
-    const ref = this.dialog.open(TaskDetailDialogComponent, {
-      width: '600px',
-      maxWidth: '95vw',
-      data: { task }
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result) this.loadProject();
-    });
+    // Read-only view — no write guard; the dialog guards its own actions.
+    this.openDialog(TaskDetailDialogComponent, { width: '600px', maxWidth: '95vw', data: { task } })
+      .subscribe(() => this.loadProject());
   }
 
   addTask(column: BoardColumn): void {
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
-      const ref = this.dialog.open(TaskFormDialogComponent, {
+    this.ifWritable(() => {
+      this.openDialog(TaskFormDialogComponent, {
         width: '560px',
         data: { projectId: this.projectId, taskListId: column.id }
-      });
-      ref.afterClosed().subscribe((result) => {
-        if (result) this.loadProject();
-      });
+      }).subscribe(() => this.loadProject());
     });
   }
 
@@ -225,7 +214,7 @@ export class ProjectDetailComponent implements OnInit {
         this.cancelAddList();
         this.loadProject();
       },
-      error: () => this.snackBar.open('Failed to create list', 'Close', { duration: 4000 })
+      error: () => this.toast.error('Failed to create list')
     });
   }
 
@@ -248,14 +237,14 @@ export class ProjectDetailComponent implements OnInit {
         column.name = name;
         this.cancelRenameList();
       },
-      error: () => this.snackBar.open('Failed to rename list', 'Close', { duration: 4000 })
+      error: () => this.toast.error('Failed to rename list')
     });
   }
 
   deleteList(column: BoardColumn): void {
     if (column.id == null) return;
     if (this.writeGuard.blockGuest()) return;
-    const ref = this.dialog.open(ConfirmDialogComponent, {
+    this.openDialog(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: 'Delete list',
@@ -263,14 +252,12 @@ export class ProjectDetailComponent implements OnInit {
         confirmText: 'Delete',
         danger: true
       }
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed && column.id != null) {
-        this.taskListService.deleteTaskList(column.id).subscribe({
-          next: () => this.loadProject(),
-          error: () => this.snackBar.open('Failed to delete list', 'Close', { duration: 4000 })
-        });
-      }
+    }).subscribe(() => {
+      if (column.id == null) return;
+      this.taskListService.deleteTaskList(column.id).subscribe({
+        next: () => this.loadProject(),
+        error: () => this.toast.error('Failed to delete list')
+      });
     });
   }
 
@@ -278,19 +265,14 @@ export class ProjectDetailComponent implements OnInit {
   editProject(): void {
     if (!this.project) return;
     if (this.writeGuard.blockGuest()) return;
-    const ref = this.dialog.open(ProjectFormDialogComponent, {
-      width: '520px',
-      data: { project: this.project }
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result) this.loadProject();
-    });
+    this.openDialog(ProjectFormDialogComponent, { width: '520px', data: { project: this.project } })
+      .subscribe(() => this.loadProject());
   }
 
   deleteProject(): void {
     if (!this.project) return;
     if (this.writeGuard.blockGuest()) return;
-    const ref = this.dialog.open(ConfirmDialogComponent, {
+    this.openDialog(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: 'Delete project',
@@ -298,21 +280,34 @@ export class ProjectDetailComponent implements OnInit {
         confirmText: 'Delete',
         danger: true
       }
-    });
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed && this.project) {
-        this.projectService.deleteProject(this.project.id).subscribe({
-          next: () => {
-            this.snackBar.open('Project deleted', 'Close', { duration: 3000 });
-            this.router.navigate(['/projects']);
-          },
-          error: () => this.snackBar.open('Failed to delete project', 'Close', { duration: 4000 })
-        });
-      }
+    }).subscribe(() => {
+      if (!this.project) return;
+      this.projectService.deleteProject(this.project.id).subscribe({
+        next: () => {
+          this.toast.success('Project deleted');
+          this.router.navigate(['/projects']);
+        },
+        error: () => this.toast.error('Failed to delete project')
+      });
     });
   }
 
   goBack(): void {
     this.router.navigate(['/projects']);
+  }
+
+  // -------------------------------------------------------------- internals
+
+  /** Run `action` only once the write guard grants access (pops login if guest). */
+  private ifWritable(action: () => void): void {
+    this.writeGuard.requireWrite().subscribe(allowed => {
+      if (allowed) action();
+    });
+  }
+
+  /** Open a dialog and emit only when it closes with a truthy result. */
+  private openDialog<T>(component: ComponentType<T>, config: MatDialogConfig): Observable<unknown> {
+    const ref: MatDialogRef<T> = this.dialog.open(component, config);
+    return ref.afterClosed().pipe(filter(Boolean));
   }
 }

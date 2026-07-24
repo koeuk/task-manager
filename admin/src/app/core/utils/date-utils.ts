@@ -22,6 +22,37 @@ export function parseApiDate(value: string | Date | null | undefined): Date | nu
   return isNaN(parsed.getTime()) ? null : parsed;
 }
 
+/** Local midnight today — the reference point for every "is it overdue / how
+ * many days away" comparison, so those all agree on where a day starts. */
+export function startOfToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+/**
+ * Whole calendar days from today to `value`: 0 today, 1 tomorrow, -1 yesterday.
+ * Returns null when there is no parseable date.
+ *
+ * Both sides are normalised to local midnight first, so the result counts
+ * calendar days rather than 24-hour spans (which would be off by one either
+ * side of a daylight-saving change).
+ */
+export function daysFromToday(value: string | Date | null | undefined): number | null {
+  const date = parseApiDate(value);
+  if (!date) return null;
+
+  const due = new Date(date);
+  due.setHours(0, 0, 0, 0);
+  return Math.round((due.getTime() - startOfToday().getTime()) / 86_400_000);
+}
+
+/** True when `value` is a calendar day strictly before today. */
+export function isPastDay(value: string | Date | null | undefined): boolean {
+  const days = daysFromToday(value);
+  return days !== null && days < 0;
+}
+
 /** Convert a Date (or date-like value) to a 'YYYY-MM-DD' string using local
  * calendar parts, avoiding the UTC shift that toISOString() introduces. */
 export function toDateString(d: Date | string | null | undefined): string | null {

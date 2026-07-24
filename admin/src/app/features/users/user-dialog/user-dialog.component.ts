@@ -9,8 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UserService } from '../../../core/services/user.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { User } from '../../../core/models/user.model';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-user-dialog',
@@ -25,7 +25,6 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
   ],
   templateUrl: './user-dialog.component.html'
 })
@@ -37,7 +36,7 @@ export class UserDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     public dialogRef: MatDialogRef<UserDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: User | null
   ) {
@@ -79,11 +78,7 @@ export class UserDialogComponent implements OnInit {
 
     request.subscribe({
       next: (user) => {
-        this.snackBar.open(
-          `User ${this.isEditMode ? 'updated' : 'created'} successfully`,
-          'Close',
-          { duration: 3000 }
-        );
+        this.toast.success(`User ${this.isEditMode ? 'updated' : 'created'} successfully`);
         this.dialogRef.close(user);
       },
       error: (error) => {
@@ -97,7 +92,7 @@ export class UserDialogComponent implements OnInit {
           message = error.error.message;
         }
         
-        this.snackBar.open(message, 'Close', { duration: 5000 });
+        this.toast.error(message);
       }
     });
   }

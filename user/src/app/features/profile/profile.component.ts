@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/services/toast.service';
 import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { WriteGuardService } from '../../core/services/write-guard.service';
@@ -43,7 +43,7 @@ export class ProfileComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private writeGuard: WriteGuardService
   ) {}
 
@@ -83,11 +83,11 @@ export class ProfileComponent implements OnInit {
     if (this.writeGuard.blockGuest()) { input.value = ''; return; }
 
     if (!file.type.startsWith('image/')) {
-      this.snackBar.open('Please choose an image file', 'Close', { duration: 4000 });
+      this.toast.info('Please choose an image file');
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      this.snackBar.open('Image must be 2 MB or smaller', 'Close', { duration: 4000 });
+      this.toast.info('Image must be 2 MB or smaller');
       return;
     }
 
@@ -96,11 +96,11 @@ export class ProfileComponent implements OnInit {
       next: () => {
         this.avatarUploading = false;
         this.avatarBroken = false; // new image — let it try to load again
-        this.snackBar.open('Avatar updated', 'Close', { duration: 3000 });
+        this.toast.success('Avatar updated');
       },
       error: (error) => {
         this.avatarUploading = false;
-        this.snackBar.open(error.error?.message || 'Failed to upload avatar', 'Close', { duration: 5000 });
+        this.toast.error(error);
       }
     });
     input.value = '';
@@ -121,11 +121,11 @@ export class ProfileComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.savingProfile = false;
-        this.snackBar.open('Profile updated', 'Close', { duration: 3000 });
+        this.toast.success('Profile updated');
       },
       error: (err) => {
         this.savingProfile = false;
-        this.snackBar.open(err.error?.message || 'Failed to update profile', 'Close', { duration: 5000 });
+        this.toast.error(err);
       }
     });
   }
@@ -141,11 +141,11 @@ export class ProfileComponent implements OnInit {
       next: () => {
         this.savingPassword = false;
         this.passwordForm.reset();
-        this.snackBar.open('Password changed successfully', 'Close', { duration: 3000 });
+        this.toast.success('Password changed successfully');
       },
       error: (err) => {
         this.savingPassword = false;
-        this.snackBar.open(err.error?.message || 'Failed to change password', 'Close', { duration: 5000 });
+        this.toast.error(err);
       }
     });
   }

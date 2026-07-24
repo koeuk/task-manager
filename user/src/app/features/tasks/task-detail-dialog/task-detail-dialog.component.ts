@@ -11,7 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../../core/services/toast.service';
 import { Task, Comment, TaskStatus } from '../../../core/models/project.model';
 import { TaskService } from '../../../core/services/task.service';
 import { CommentService } from '../../../core/services/comment.service';
@@ -63,7 +63,7 @@ export class TaskDetailDialogComponent implements OnInit {
     private authService: AuthService,
     private writeGuard: WriteGuardService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private dialogRef: MatDialogRef<TaskDetailDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { task: Task }
   ) {}
@@ -81,7 +81,7 @@ export class TaskDetailDialogComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.snackBar.open('Failed to load task', 'Close', { duration: 4000 });
+        this.toast.error('Failed to load task');
         this.loading = false;
       }
     });
@@ -100,7 +100,7 @@ export class TaskDetailDialogComponent implements OnInit {
         this.task = { ...this.task, ...res.task };
         this.changed = true;
       },
-      error: () => this.snackBar.open('Failed to update status', 'Close', { duration: 4000 })
+      error: () => this.toast.error('Failed to update status')
     });
   }
 
@@ -133,10 +133,10 @@ export class TaskDetailDialogComponent implements OnInit {
       if (confirmed) {
         this.taskService.deleteTask(this.task.id).subscribe({
           next: () => {
-            this.snackBar.open('Task deleted', 'Close', { duration: 3000 });
+            this.toast.success('Task deleted');
             this.dialogRef.close({ deleted: true });
           },
-          error: () => this.snackBar.open('Failed to delete task', 'Close', { duration: 4000 })
+          error: () => this.toast.error('Failed to delete task')
         });
       }
     });
@@ -157,7 +157,7 @@ export class TaskDetailDialogComponent implements OnInit {
         },
         error: () => {
           this.postingComment = false;
-          this.snackBar.open('Failed to add comment', 'Close', { duration: 4000 });
+          this.toast.error('Failed to add comment');
         }
       });
     });
@@ -182,7 +182,7 @@ export class TaskDetailDialogComponent implements OnInit {
         this.cancelEditComment();
         this.reloadComments();
       },
-      error: () => this.snackBar.open('Failed to update comment', 'Close', { duration: 4000 })
+      error: () => this.toast.error('Failed to update comment')
     });
   }
 
@@ -196,7 +196,7 @@ export class TaskDetailDialogComponent implements OnInit {
       if (confirmed) {
         this.commentService.deleteComment(c.id).subscribe({
           next: () => this.reloadComments(),
-          error: () => this.snackBar.open('Failed to delete comment', 'Close', { duration: 4000 })
+          error: () => this.toast.error('Failed to delete comment')
         });
       }
     });

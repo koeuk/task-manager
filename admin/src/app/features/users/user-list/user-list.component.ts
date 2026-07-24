@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -13,7 +14,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
@@ -24,6 +24,10 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 import { ResetPasswordDialogComponent } from '../reset-password-dialog/reset-password-dialog.component';
 import { exportToCsv } from '../../../core/utils/csv-export';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { ToastService } from '../../../core/services/toast.service';
+
+/** How long to wait after the last keystroke before re-querying. */
+const SEARCH_DEBOUNCE_MS = 300;
 
 @Component({
   selector: 'app-user-list',
@@ -43,7 +47,6 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
     MatSelectModule,
     MatMenuModule,
     MatDialogModule,
-    MatSnackBarModule,
     MatProgressSpinnerModule,
     MatChipsModule,
     MatDividerModule
@@ -69,7 +72,8 @@ export class UserListComponent implements OnInit {
     private userService: UserService,
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private toast: ToastService,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
@@ -88,12 +92,14 @@ export class UserListComponent implements OnInit {
     // result set and render an empty table.
     this.filterForm.get('search')?.valueChanges
       .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
+        debounceTime(SEARCH_DEBOUNCE_MS),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(() => this.onFilterChange());
 
     this.filterForm.get('role')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.onFilterChange());
   }
 
@@ -140,7 +146,7 @@ export class UserListComponent implements OnInit {
       },
       error: (error) => {
         if (requestId !== this.latestRequestId) return;
-        this.snackBar.open('Failed to load users', 'Close', { duration: 3000 });
+        this.toast.error('Failed to load users');
         this.loading = false;
         console.error('Load users error:', error);
       }
@@ -180,11 +186,11 @@ export class UserListComponent implements OnInit {
 
       this.userService.updateUserRole(user.id, newRole).subscribe({
         next: () => {
-          this.snackBar.open(`User role changed to ${newRole}`, 'Close', { duration: 3000 });
+          this.toast.success(`User role changed to ${newRole}`);
           this.loadUsers();
         },
         error: (error) => {
-          this.snackBar.open(error.error?.message || 'Failed to change role', 'Close', { duration: 5000 });
+          this.toast.error(error);
         }
       });
     });
@@ -201,10 +207,10 @@ export class UserListComponent implements OnInit {
 
       this.userService.resetUserPassword(user.id, password).subscribe({
         next: () => {
-          this.snackBar.open('Password reset successfully', 'Close', { duration: 3000 });
+          this.toast.success('Password reset successfully');
         },
         error: () => {
-          this.snackBar.open('Failed to reset password', 'Close', { duration: 3000 });
+          this.toast.error('Failed to reset password');
         }
       });
     });
@@ -227,11 +233,11 @@ export class UserListComponent implements OnInit {
 
       this.userService.deleteUser(user.id).subscribe({
         next: () => {
-          this.snackBar.open('User deleted successfully', 'Close', { duration: 3000 });
+          this.toast.success('User deleted successfully');
           this.loadUsers();
         },
         error: (error) => {
-          this.snackBar.open(error.error?.message || 'Failed to delete user', 'Close', { duration: 5000 });
+          this.toast.error(error);
         }
       });
     });
@@ -243,7 +249,7 @@ export class UserListComponent implements OnInit {
 
   exportCsv(): void {
     if (!this.dataSource.data.length) {
-      this.snackBar.open('No users to export', 'Close', { duration: 3000 });
+      this.toast.info('No users to export');
       return;
     }
 
@@ -270,7 +276,7 @@ export class UserListComponent implements OnInit {
       },
       error: () => {
         this.exporting = false;
-        this.snackBar.open('Failed to export users', 'Close', { duration: 4000 });
+        this.toast.error('Failed to export users');
       }
     });
   }
