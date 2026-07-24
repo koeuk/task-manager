@@ -1,92 +1,6 @@
-// Full width, matching the list pages. The layout's .content-wrapper supplies
-// the 24px page gutters.
-.detail-container {
-  width: 100%;
-}
-
-.detail-topbar {
-  margin-bottom: 16px;
-
-  a { display: inline-flex; align-items: center; gap: 6px; }
-}
-
-.loading-container {
-  display: flex;
-  justify-content: center;
-  padding: 60px;
-}
-
-.not-found {
-  text-align: center;
-  padding: 60px;
-  color: #999;
-
-  mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.4; }
-}
-
-// Bare mat-card (no mat-card-content wrapper) gets no padding from Material,
-// so it is set here to match the 20px used by the stat cards alongside it.
-.profile-card {
-  margin-bottom: 20px;
-  padding: 20px;
-}
-
-.profile-head {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 8px 0 16px;
-
-  .avatar {
-    width: 72px;
-    height: 72px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    font-weight: 700;
-    color: #fff;
-    background: linear-gradient(135deg, #94a3b8, #cbd5e1);
-  }
-
-  .profile-info {
-    h1 { margin: 0; font-size: 24px; font-weight: 700; }
-    .email { margin: 2px 0 8px; color: #6b7280; }
-  }
-}
-
-.profile-meta {
-  display: flex;
-  gap: 40px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(128,128,128,0.15);
-
-  .meta-item { display: flex; flex-direction: column; gap: 2px; }
-  .meta-label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
-}
-
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-
-  .stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-
-    .num { font-size: 30px; font-weight: 700; }
-    .lbl { font-size: 13px; color: #6b7280; margin-top: 2px; }
-
-    &.danger .num { color: #ef4444; }
-  }
-}
-
-.tasks-card table { width: 100%; }
+// Layout, spacing and colour live as Tailwind utilities in the template.
+// What remains is chip colouring, selected at runtime by [ngClass] — Tailwind's
+// JIT only sees literal class strings, so runtime-built names are invisible to it.
 
 mat-chip {
   font-size: 12px;
@@ -104,12 +18,4 @@ mat-chip {
   &.priority-medium { background: #f59e0b; }
   &.priority-high { background: #f97316; }
   &.priority-critical { background: #ef4444; }
-}
-
-.empty {
-  padding: 40px;
-  text-align: center;
-  color: #999;
-
-  mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.3; }
 }

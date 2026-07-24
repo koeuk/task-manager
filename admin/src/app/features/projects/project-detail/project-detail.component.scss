@@ -1,115 +1,24 @@
-// Full width, matching the list pages. The layout's .content-wrapper supplies
-// the 24px page gutters.
-.detail-container {
-  width: 100%;
-}
+// Layout, spacing and colour live as Tailwind utilities in the template.
+// What remains is what Tailwind cannot generate: classes built at runtime by
+// [ngClass] ('status-' + project.status, 'bar-' + s.key). The JIT scanner only
+// sees literal class strings in the source.
 
-.detail-topbar {
-  margin-bottom: 16px;
-  a { display: inline-flex; align-items: center; gap: 6px; }
-}
-
-.loading-container { display: flex; justify-content: center; padding: 60px; }
-
-.not-found {
-  text-align: center;
-  padding: 60px;
-  color: #999;
-  mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.4; }
-}
-
-// Bare mat-cards (no mat-card-content wrapper) get no padding from Material,
-// so it is set here to match the 20px the wrapped cards end up with.
-.header-card {
-  margin-bottom: 20px;
-  padding: 20px;
-
-  .header-main {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-
-    .color-dot {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 6px;
-    }
-
-    h1 { margin: 0; font-size: 24px; font-weight: 700; }
-    .desc { margin: 4px 0 10px; color: #6b7280; max-width: 640px; }
-  }
-
-  .header-meta {
-    display: flex;
-    gap: 40px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(128,128,128,0.15);
-
-    .meta-item { display: flex; flex-direction: column; gap: 2px; }
-    .meta-label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
-  }
-}
-
-.completion-card {
-  margin-bottom: 20px;
-  padding: 20px;
-
-  .completion-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 10px;
-
-    .completion-pct { font-size: 22px; font-weight: 700; }
-  }
-
-  .completion-sub {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-    font-size: 13px;
-    color: #6b7280;
-
-    .overdue { color: #ef4444; display: inline-flex; align-items: center; gap: 4px; }
-    .overdue mat-icon { font-size: 16px; width: 16px; height: 16px; }
-  }
-}
-
-.breakdown-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
+// Progress-bar colours, selected at runtime
 .seg {
-  margin-bottom: 14px;
-
-  .seg-top {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    margin-bottom: 5px;
-  }
-
-  // status bar colors
-  .bar-todo    { --mdc-linear-progress-active-indicator-color: #64748b; }
+  // status
+  .bar-todo        { --mdc-linear-progress-active-indicator-color: #64748b; }
   .bar-in_progress { --mdc-linear-progress-active-indicator-color: #94a3b8; }
-  .bar-review  { --mdc-linear-progress-active-indicator-color: #f59e0b; }
-  .bar-completed { --mdc-linear-progress-active-indicator-color: #10b981; }
+  .bar-review      { --mdc-linear-progress-active-indicator-color: #f59e0b; }
+  .bar-completed   { --mdc-linear-progress-active-indicator-color: #10b981; }
 
-  // priority bar colors
+  // priority
   .bar-p-low      { --mdc-linear-progress-active-indicator-color: #10b981; }
   .bar-p-medium   { --mdc-linear-progress-active-indicator-color: #f59e0b; }
   .bar-p-high     { --mdc-linear-progress-active-indicator-color: #f97316; }
   .bar-p-critical { --mdc-linear-progress-active-indicator-color: #ef4444; }
 }
 
-.tasks-card table { width: 100%; }
-
+// Chip colours, also selected at runtime
 mat-chip {
   font-size: 12px;
   color: #fff;
@@ -128,11 +37,4 @@ mat-chip {
   &.priority-medium { background: #f59e0b; }
   &.priority-high { background: #f97316; }
   &.priority-critical { background: #ef4444; }
-}
-
-.empty {
-  padding: 40px;
-  text-align: center;
-  color: #999;
-  mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.3; }
 }

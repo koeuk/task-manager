@@ -1,55 +1,58 @@
-<div class="settings">
-  <h1 class="page-title">Settings</h1>
+<div>
+  <h1 class="mb-6 text-[28px] font-bold tracking-[-0.02em] text-[#1e1b3a] dark:text-[#e5e7eb]">Settings</h1>
 
-  <div class="settings-shell">
+  <div class="flex items-start gap-6 max-[768px]:flex-col">
     <!-- Left nav -->
-    <nav class="settings-nav">
+    <nav class="sticky top-[88px] flex w-[220px] shrink-0 flex-col gap-1
+                max-[768px]:static max-[768px]:w-full max-[768px]:flex-row max-[768px]:flex-wrap">
       <button *ngFor="let item of navItems"
-              class="nav-item"
+              class="nav-item flex cursor-pointer items-center gap-3 rounded-[10px] border border-transparent
+                     bg-transparent px-3.5 py-2.5 text-left text-sm font-medium"
               [class.active]="section === item.id"
               (click)="section = item.id">
-        <mat-icon>{{ item.icon }}</mat-icon>
+        <mat-icon class="!h-5 !w-5 !text-xl">{{ item.icon }}</mat-icon>
         <span>{{ item.label }}</span>
       </button>
     </nav>
 
     <!-- Content -->
-    <div class="settings-content" [ngSwitch]="section">
+    <div class="min-w-0 flex-1" [ngSwitch]="section">
 
       <!-- PROFILE -->
-      <mat-card *ngSwitchCase="'profile'" class="form-card">
+      <mat-card *ngSwitchCase="'profile'">
         <mat-card-header><mat-card-title>Profile</mat-card-title></mat-card-header>
         <mat-card-content>
-          <div class="avatar-row">
-            <div class="avatar">
-              <img *ngIf="currentUser?.avatar" [src]="currentUser?.avatar" alt="Avatar">
+          <div class="mb-5 flex items-center gap-4">
+            <div class="flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full
+                        bg-gradient-to-br from-[#94a3b8] to-[#cbd5e1] text-[28px] font-semibold text-white">
+              <img *ngIf="currentUser?.avatar" [src]="currentUser?.avatar" alt="Avatar" class="h-full w-full object-cover">
               <span *ngIf="!currentUser?.avatar">{{ (currentUser?.name || 'A').charAt(0).toUpperCase() }}</span>
             </div>
-            <div class="avatar-actions">
+            <div>
               <button mat-stroked-button type="button" (click)="avatarInput.click()" [disabled]="uploadingAvatar">
                 <mat-icon>photo_camera</mat-icon> Change avatar
               </button>
               <input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelected($event)">
-              <p class="hint">JPG or PNG.</p>
+              <p class="mt-1.5 text-xs text-[#9ca3af]">JPG or PNG.</p>
             </div>
           </div>
 
-          <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()">
-            <mat-form-field appearance="outline" class="full-width">
+          <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="flex flex-col">
+            <mat-form-field appearance="outline" class="w-full">
               <mat-label>Full name</mat-label>
               <input matInput formControlName="name">
             </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
+            <mat-form-field appearance="outline" class="w-full">
               <mat-label>Email</mat-label>
               <input matInput type="email" formControlName="email">
             </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
+            <mat-form-field appearance="outline" class="w-full">
               <mat-label>Phone</mat-label>
               <input matInput formControlName="phone">
             </mat-form-field>
-            <div class="actions">
+            <div class="flex">
               <button mat-flat-button color="primary" type="submit" [disabled]="profileForm.invalid || savingProfile">
-                <mat-progress-spinner *ngIf="savingProfile" diameter="18" mode="indeterminate"></mat-progress-spinner>
+                <mat-progress-spinner *ngIf="savingProfile" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
                 <span>Save changes</span>
               </button>
             </div>
@@ -58,91 +61,94 @@
       </mat-card>
 
       <!-- APPEARANCE -->
-      <mat-card *ngSwitchCase="'appearance'" class="form-card">
+      <mat-card *ngSwitchCase="'appearance'">
         <mat-card-header><mat-card-title>Appearance</mat-card-title></mat-card-header>
         <mat-card-content>
           <!-- App name -->
-          <form [formGroup]="appNameControl" (ngSubmit)="saveAppName()" class="inline-form">
-            <mat-form-field appearance="outline" class="full-width">
+          <form [formGroup]="appNameControl" (ngSubmit)="saveAppName()" class="flex flex-row items-start gap-3">
+            <mat-form-field appearance="outline" class="w-full">
               <mat-label>App name</mat-label>
               <input matInput formControlName="appName">
             </mat-form-field>
-            <button mat-flat-button color="primary" type="submit" [disabled]="appNameControl.invalid">Save</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="appNameControl.invalid"
+                    class="!mt-1.5 !h-10">Save</button>
           </form>
 
-          <mat-divider></mat-divider>
+          <mat-divider class="!my-5"></mat-divider>
 
           <!-- App logo -->
-          <div class="setting-block">
-            <div class="setting-label">
-              <span class="title">App logo</span>
-              <span class="desc">Shown in the sidebar header.</span>
+          <div>
+            <div class="flex flex-col">
+              <span class="text-[15px] font-semibold text-[#1e293b] dark:text-[#e5e7eb]">App logo</span>
+              <span class="mt-0.5 text-[12.5px] text-[#6b7280] dark:text-[#9ca3af]">Shown in the sidebar header.</span>
             </div>
-            <div class="logo-row">
-              <div class="logo-preview">
+            <div class="mt-3 flex items-center gap-4">
+              <div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f1f5f9] dark:bg-[#171d2e]">
                 <ng-container *ngIf="(appSettings.settings$ | async)?.appLogo as logo; else defaultLogo">
-                  <img [src]="logo" alt="Logo">
+                  <img [src]="logo" alt="Logo" class="h-full w-full object-contain">
                 </ng-container>
-                <ng-template #defaultLogo><mat-icon>admin_panel_settings</mat-icon></ng-template>
+                <ng-template #defaultLogo><mat-icon class="!text-[#94a3b8]">admin_panel_settings</mat-icon></ng-template>
               </div>
               <div>
                 <button mat-stroked-button type="button" (click)="logoInput.click()"><mat-icon>upload</mat-icon> Upload</button>
                 <button mat-button type="button" *ngIf="(appSettings.settings$ | async)?.appLogo" (click)="removeLogo()">Remove</button>
                 <input #logoInput type="file" accept="image/*" hidden (change)="onLogoSelected($event)">
-                <p class="hint">PNG/SVG, under 512 KB.</p>
+                <p class="mt-1 text-xs text-[#9ca3af]">PNG/SVG, under 512 KB.</p>
               </div>
             </div>
           </div>
 
-          <mat-divider></mat-divider>
+          <mat-divider class="!my-5"></mat-divider>
 
           <!-- Accent color -->
-          <div class="setting-block">
-            <div class="setting-label">
-              <span class="title">Accent color</span>
-              <span class="desc">Used for primary buttons and highlights.</span>
+          <div>
+            <div class="flex flex-col">
+              <span class="text-[15px] font-semibold text-[#1e293b] dark:text-[#e5e7eb]">Accent color</span>
+              <span class="mt-0.5 text-[12.5px] text-[#6b7280] dark:text-[#9ca3af]">Used for primary buttons and highlights.</span>
             </div>
-            <div class="swatches">
+            <div class="mt-3 flex flex-wrap gap-2.5">
               <button *ngFor="let p of appSettings.accentPresets"
                       type="button"
-                      class="swatch"
+                      class="swatch flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full border-2 border-transparent"
                       [class.active]="(appSettings.settings$ | async)?.accent === p.value"
                       [style.background]="p.value"
                       [matTooltip]="p.name"
                       (click)="setAccent(p.value)">
-                <mat-icon *ngIf="(appSettings.settings$ | async)?.accent === p.value">check</mat-icon>
+                <mat-icon *ngIf="(appSettings.settings$ | async)?.accent === p.value"
+                          class="!h-[18px] !w-[18px] !text-[18px] !text-white">check</mat-icon>
               </button>
             </div>
           </div>
 
-          <mat-divider></mat-divider>
+          <mat-divider class="!my-5"></mat-divider>
 
           <!-- Background color -->
-          <div class="setting-block">
-            <div class="setting-label">
-              <span class="title">Background color</span>
-              <span class="desc">Page background for the app (light mode).</span>
+          <div>
+            <div class="flex flex-col">
+              <span class="text-[15px] font-semibold text-[#1e293b] dark:text-[#e5e7eb]">Background color</span>
+              <span class="mt-0.5 text-[12.5px] text-[#6b7280] dark:text-[#9ca3af]">Page background for the app (light mode).</span>
             </div>
-            <div class="bg-swatches">
+            <div class="mt-3 flex flex-wrap gap-2.5">
               <button *ngFor="let b of appSettings.backgroundPresets"
                       type="button"
-                      class="bg-swatch"
+                      class="bg-swatch flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-[9px] border border-[#d7dbe2]"
                       [class.active]="(appSettings.settings$ | async)?.background === b.value"
                       [style.background]="b.value"
                       [matTooltip]="b.name"
                       (click)="setBackground(b.value)">
-                <mat-icon *ngIf="(appSettings.settings$ | async)?.background === b.value">check</mat-icon>
+                <mat-icon *ngIf="(appSettings.settings$ | async)?.background === b.value"
+                          class="!h-[18px] !w-[18px] !text-[18px] !text-[#334155]">check</mat-icon>
               </button>
             </div>
           </div>
 
-          <mat-divider></mat-divider>
+          <mat-divider class="!my-5"></mat-divider>
 
           <!-- Theme mode -->
-          <div class="setting-block row">
-            <div class="setting-label">
-              <span class="title">Dark mode</span>
-              <span class="desc">Switch between light and dark themes.</span>
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="text-[15px] font-semibold text-[#1e293b] dark:text-[#e5e7eb]">Dark mode</span>
+              <span class="mt-0.5 text-[12.5px] text-[#6b7280] dark:text-[#9ca3af]">Switch between light and dark themes.</span>
             </div>
             <mat-slide-toggle [checked]="!!(themeService.isDark$ | async)"
                               (change)="toggleTheme($event.checked)"></mat-slide-toggle>
@@ -151,7 +157,7 @@
       </mat-card>
 
       <!-- NOTIFICATIONS -->
-      <mat-card *ngSwitchCase="'notifications'" class="form-card">
+      <mat-card *ngSwitchCase="'notifications'">
         <mat-card-header>
           <mat-card-title>Notifications</mat-card-title>
           <button mat-icon-button (click)="loadNotifications()" matTooltip="Refresh">
@@ -159,52 +165,57 @@
           </button>
         </mat-card-header>
         <mat-card-content>
-          <div *ngIf="loadingNotifications" class="notif-loading">
+          <div *ngIf="loadingNotifications" class="flex justify-center p-8">
             <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
           </div>
 
-          <div *ngIf="!loadingNotifications && !notifications.length" class="notif-empty">
-            <mat-icon>notifications_none</mat-icon>
-            <p>You're all caught up</p>
+          <div *ngIf="!loadingNotifications && !notifications.length" class="px-4 py-10 text-center text-[#9ca3af]">
+            <mat-icon class="!h-[42px] !w-[42px] !text-[42px] opacity-50">notifications_none</mat-icon>
+            <p class="mt-2.5">You're all caught up</p>
           </div>
 
-          <div class="notif-list" *ngIf="!loadingNotifications && notifications.length">
-            <button class="notif-row" type="button" *ngFor="let n of notifications" (click)="openNotification(n)">
-              <div class="notif-icon"><mat-icon>{{ n.icon }}</mat-icon></div>
-              <div class="notif-body">
-                <span class="notif-title">{{ n.title }}</span>
-                <span class="notif-sub">{{ n.subtitle }}</span>
+          <div class="flex flex-col" *ngIf="!loadingNotifications && notifications.length">
+            <button class="notif-row flex w-full cursor-pointer items-center gap-3 rounded-lg border-none
+                           bg-transparent px-2 py-3 text-left"
+                    type="button" *ngFor="let n of notifications" (click)="openNotification(n)">
+              <div class="notif-icon flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full
+                          bg-[rgba(148,163,184,0.16)]">
+                <mat-icon>{{ n.icon }}</mat-icon>
               </div>
-              <span class="notif-time">{{ relativeTime(n.time) }}</span>
-              <mat-icon class="notif-chevron">chevron_right</mat-icon>
+              <div class="flex min-w-0 flex-1 flex-col">
+                <span class="overflow-hidden text-ellipsis whitespace-nowrap font-semibold">{{ n.title }}</span>
+                <span class="text-[12.5px] capitalize text-[#6b7280]">{{ n.subtitle }}</span>
+              </div>
+              <span class="whitespace-nowrap text-xs text-[#9ca3af]">{{ relativeTime(n.time) }}</span>
+              <mat-icon class="shrink-0 !text-[#9ca3af]">chevron_right</mat-icon>
             </button>
           </div>
         </mat-card-content>
       </mat-card>
 
       <!-- SECURITY -->
-      <mat-card *ngSwitchCase="'security'" class="form-card">
+      <mat-card *ngSwitchCase="'security'">
         <mat-card-header><mat-card-title>Change Password</mat-card-title></mat-card-header>
         <mat-card-content>
-          <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
-            <mat-form-field appearance="outline" class="full-width">
+          <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="flex flex-col">
+            <mat-form-field appearance="outline" class="w-full">
               <mat-label>Current password</mat-label>
               <input matInput type="password" formControlName="current_password">
               <mat-error>Current password is required</mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
+            <mat-form-field appearance="outline" class="w-full">
               <mat-label>New password</mat-label>
               <input matInput type="password" formControlName="password">
               <mat-error>Minimum 8 characters</mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
+            <mat-form-field appearance="outline" class="w-full">
               <mat-label>Confirm new password</mat-label>
               <input matInput type="password" formControlName="password_confirmation">
               <mat-error *ngIf="passwordForm.hasError('mismatch')">Passwords do not match</mat-error>
             </mat-form-field>
-            <div class="actions">
+            <div class="flex">
               <button mat-flat-button color="primary" type="submit" [disabled]="passwordForm.invalid || loading">
-                <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate"></mat-progress-spinner>
+                <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
                 <span>Update Password</span>
               </button>
             </div>
@@ -213,12 +224,18 @@
       </mat-card>
 
       <!-- ABOUT -->
-      <mat-card *ngSwitchCase="'about'" class="form-card">
+      <mat-card *ngSwitchCase="'about'">
         <mat-card-header><mat-card-title>System Information</mat-card-title></mat-card-header>
         <mat-card-content>
-          <div class="info-row"><span>Application</span><span>{{ (appSettings.settings$ | async)?.appName || appName }}</span></div>
-          <div class="info-row"><span>Version</span><span>{{ version }}</span></div>
-          <div class="info-row"><span>API URL</span><span>{{ apiUrl }}</span></div>
+          <div class="info-row flex justify-between border-b border-[#eee] py-2.5 text-[#444]">
+            <span class="text-[#6b7280]">Application</span><span>{{ (appSettings.settings$ | async)?.appName || appName }}</span>
+          </div>
+          <div class="info-row flex justify-between border-b border-[#eee] py-2.5 text-[#444]">
+            <span class="text-[#6b7280]">Version</span><span>{{ version }}</span>
+          </div>
+          <div class="info-row flex justify-between border-b border-[#eee] py-2.5 text-[#444]">
+            <span class="text-[#6b7280]">API URL</span><span>{{ apiUrl }}</span>
+          </div>
         </mat-card-content>
       </mat-card>
     </div>

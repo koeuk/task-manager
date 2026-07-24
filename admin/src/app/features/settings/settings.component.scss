@@ -1,268 +1,53 @@
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 24px;
-  color: #1e1b3a;
-}
+// Layout, spacing and colour live as Tailwind utilities in the template.
+// What remains here is interactive state and its dark-mode counterpart:
+// `.active` is driven by [class.active] bindings and each variant changes
+// several properties at once, which reads far better as a rule than as a long
+// conditional utility string.
 
-.settings-shell {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-}
+.nav-item {
+  color: #475569;
+  transition: background 0.18s ease, color 0.18s ease;
 
-// ---- Left nav ----
-.settings-nav {
-  flex-shrink: 0;
-  width: 220px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  position: sticky;
-  top: 88px;
+  mat-icon { color: #94a3b8; }
 
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border: 1px solid transparent;
-    background: transparent;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #475569;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.18s ease, color 0.18s ease;
+  &:hover { background: #eef1f5; color: #1e293b; }
 
-    mat-icon { font-size: 20px; width: 20px; height: 20px; color: #94a3b8; }
-
-    &:hover { background: #eef1f5; color: #1e293b; }
-
-    &.active {
-      background: #fff;
-      border-color: #e6e9ee;
-      color: #1e293b;
-      font-weight: 600;
-
-      mat-icon { color: var(--app-accent, #64748b); }
-    }
-  }
-}
-
-// ---- Content ----
-.settings-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.full-width { width: 100%; }
-form { display: flex; flex-direction: column; }
-.actions { display: flex; }
-button mat-progress-spinner { display: inline-block; margin-right: 8px; }
-
-.avatar-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-
-  .avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #94a3b8, #cbd5e1);
-    color: #fff;
-    font-size: 28px;
+  &.active {
+    background: #fff;
+    border-color: #e6e9ee;
+    color: #1e293b;
     font-weight: 600;
-    overflow: hidden;
-    flex-shrink: 0;
 
-    img { width: 100%; height: 100%; object-fit: cover; }
-  }
-
-  .hint { margin: 6px 0 0; font-size: 12px; color: #9ca3af; }
-}
-
-.inline-form {
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 12px;
-
-  button { margin-top: 6px; height: 40px; }
-}
-
-mat-divider { margin: 20px 0; }
-
-.setting-block {
-  &.row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .setting-label { display: flex; flex-direction: column; }
-  .title { font-size: 15px; font-weight: 600; color: #1e293b; }
-  .desc { font-size: 12.5px; color: #6b7280; margin-top: 2px; }
-}
-
-.logo-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 12px;
-
-  .logo-preview {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f1f5f9;
-    overflow: hidden;
-    flex-shrink: 0;
-
-    img { width: 100%; height: 100%; object-fit: contain; }
-    mat-icon { color: #94a3b8; }
-  }
-
-  .hint { margin: 4px 0 0; font-size: 12px; color: #9ca3af; }
-}
-
-.swatches {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-  flex-wrap: wrap;
-
-  .swatch {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.15s ease;
-
-    mat-icon { color: #fff; font-size: 18px; width: 18px; height: 18px; }
-
-    &:hover { transform: scale(1.08); }
-    &.active {
-      border-color: #fff;
-      box-shadow: 0 0 0 2px #cbd5e1;
-    }
+    mat-icon { color: var(--app-accent, #64748b); }
   }
 }
 
-.bg-swatches {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-  flex-wrap: wrap;
+.swatch {
+  transition: transform 0.15s ease;
 
-  .bg-swatch {
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    border: 1px solid #d7dbe2;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.15s ease;
+  &:hover { transform: scale(1.08); }
 
-    mat-icon { color: #334155; font-size: 18px; width: 18px; height: 18px; }
-
-    &:hover { transform: scale(1.08); }
-    &.active {
-      border-color: var(--app-accent, #64748b);
-      box-shadow: 0 0 0 2px var(--app-accent, #64748b);
-    }
+  &.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px #cbd5e1;
   }
 }
 
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-  color: #444;
+.bg-swatch {
+  transition: transform 0.15s ease;
 
-  &:last-child { border-bottom: none; }
-  span:first-child { color: #6b7280; }
-}
+  &:hover { transform: scale(1.08); }
 
-// ---- Dark mode ----
-:host-context(.dark-theme) {
-  .page-title { color: #e5e7eb; }
-
-  .settings-nav .nav-item {
-    color: #cbd5e1;
-    mat-icon { color: #64748b; }
-
-    &:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
-    &.active {
-      background: #171d2e;
-      border-color: #262c40;
-      color: #fff;
-      mat-icon { color: var(--app-accent, #94a3b8); }
-    }
-  }
-
-  .setting-block .title { color: #e5e7eb; }
-  .setting-block .desc,
-  .hint { color: #9ca3af; }
-  .logo-row .logo-preview { background: #171d2e; }
-  .swatch.active { box-shadow: 0 0 0 2px #3a415c; }
-}
-
-@media (max-width: 768px) {
-  .settings-shell { flex-direction: column; }
-  .settings-nav {
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-    position: static;
+  &.active {
+    border-color: var(--app-accent, #64748b);
+    box-shadow: 0 0 0 2px var(--app-accent, #64748b);
   }
 }
 
-// Notifications list
-.notif-loading { display: flex; justify-content: center; padding: 32px; }
-
-.notif-empty {
-  text-align: center;
-  padding: 40px 16px;
-  color: #9ca3af;
-
-  mat-icon { font-size: 42px; width: 42px; height: 42px; opacity: 0.5; }
-  p { margin: 10px 0 0; }
-}
-
-.notif-list {
-  display: flex;
-  flex-direction: column;
-}
+.info-row:last-child { border-bottom: none; }
 
 .notif-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 8px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
   border-bottom: 1px solid rgba(128, 128, 128, 0.14);
-  border-radius: 8px;
   transition: background 0.15s ease;
   color: inherit;
   font: inherit;
@@ -271,30 +56,29 @@ mat-divider { margin: 20px 0; }
 
   &:last-child { border-bottom: none; }
 
-  .notif-chevron { color: #9ca3af; flex-shrink: 0; }
+  .notif-icon mat-icon {
+    color: var(--app-accent, #94a3b8);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
 
-  .notif-icon {
-    width: 38px;
-    height: 38px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(148, 163, 184, 0.16);
+// ---- Dark mode ----
+:host-context(.dark-theme) {
+  .nav-item {
+    color: #cbd5e1;
+    mat-icon { color: #64748b; }
 
-    mat-icon { color: var(--app-accent, #94a3b8); font-size: 20px; width: 20px; height: 20px; }
+    &:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+
+    &.active {
+      background: #171d2e;
+      border-color: #262c40;
+      color: #fff;
+      mat-icon { color: var(--app-accent, #94a3b8); }
+    }
   }
 
-  .notif-body {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    flex: 1;
-
-    .notif-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .notif-sub { font-size: 12.5px; color: #6b7280; text-transform: capitalize; }
-  }
-
-  .notif-time { font-size: 12px; color: #9ca3af; white-space: nowrap; }
+  .swatch.active { box-shadow: 0 0 0 2px #3a415c; }
 }

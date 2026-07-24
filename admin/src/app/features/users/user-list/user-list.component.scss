@@ -1,94 +1,32 @@
 @use '@angular/material' as mat;
 
-.user-list-container {
-  width: 100%;
-}
+// Layout, spacing and colour live as Tailwind utilities in the template.
+// What remains is what utilities cannot express:
+//   * a Sass mixin (form-field density)
+//   * a ::ng-deep reach into a Material-rendered internal element
+//   * chip colours chosen at runtime by [ngClass]
 
+// Material wraps the title in an internal .mat-mdc-card-header-text div that
+// shrinks to its content; make it fill the header so the title can span full
+// width and push the buttons to the far right.
 mat-card-header {
-  margin-bottom: 20px;
-  width: 100%;
-  display: flex;
-
-  // Material wraps the title in an internal .mat-mdc-card-header-text div that
-  // shrinks to its content; make it fill the header so the title can span full
-  // width and push the button to the far right.
   ::ng-deep .mat-mdc-card-header-text {
     flex: 1;
     width: 100%;
   }
-
-  mat-card-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    flex: 1;
-    margin: 0;
-
-    .header-actions {
-      margin-left: auto;
-      display: flex;
-      gap: 10px;
-    }
-  }
 }
 
+// Compact, smaller filter fields
 .filter-form {
-  // Compact, smaller filter fields
   @include mat.form-field-density(-4);
-
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-  font-size: 13px;
-
-  mat-form-field {
-    flex: 1;
-    max-width: 240px;
-  }
 }
 
-.loading-container {
-  display: flex;
-  justify-content: center;
-  padding: 40px;
-}
-
-.table-container {
-  overflow: auto;
-  
-  table {
-    width: 100%;
-  }
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  .user-avatar {
-    color: #666;
-  }
-}
-
+// Chip colours, selected at runtime by [ngClass]
 mat-chip {
-  &.role-admin {
-    background: #3f51b5;
-    color: white;
-    
-    mat-icon {
-      font-size: 16px;
-      height: 16px;
-      width: 16px;
-      margin-right: 4px;
-    }
-  }
-  
+  &.role-admin,
   &.role-user {
-    background: #4caf50;
     color: white;
-    
+
     mat-icon {
       font-size: 16px;
       height: 16px;
@@ -96,26 +34,7 @@ mat-chip {
       margin-right: 4px;
     }
   }
-}
 
-.delete-action {
-  color: #f44336;
-}
-
-.no-data {
-  padding: 40px;
-  text-align: center;
-  color: #999;
-  
-  mat-icon {
-    font-size: 48px;
-    height: 48px;
-    width: 48px;
-    margin: 0 auto;
-    opacity: 0.3;
-  }
-  
-  p {
-    margin-top: 16px;
-  }
+  &.role-admin { background: #3f51b5; }
+  &.role-user { background: #4caf50; }
 }

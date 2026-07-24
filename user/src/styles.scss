@@ -1,6 +1,13 @@
 @use '@angular/material' as mat;
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
+// Tailwind. `base` sits here (after Sass's @use, which must come first) so the
+// Material theme below can override it; `utilities` is emitted at the very
+// bottom of this file so single-class utilities win over equal-specificity
+// rules declared above them. Preflight is off — see tailwind.config.js.
+@tailwind base;
+@tailwind components;
+
 // ---- Silver theme: neutral blue-gray primary/accent (replaces indigo-pink) ----
 $silver-warn: mat.m2-define-palette(mat.$m2-red-palette);
 

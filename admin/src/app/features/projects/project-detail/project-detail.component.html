@@ -1,67 +1,75 @@
-<div class="detail-container">
-  <div class="detail-topbar">
-    <a mat-stroked-button routerLink="/projects">
+<div class="w-full">
+  <div class="mb-4">
+    <a mat-stroked-button routerLink="/projects" class="!inline-flex !items-center gap-1.5">
       <mat-icon>arrow_back</mat-icon>
       Back to Projects
     </a>
   </div>
 
-  <div *ngIf="loading" class="loading-container">
+  <div *ngIf="loading" class="flex justify-center p-[60px]">
     <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
   </div>
 
-  <div *ngIf="!loading && notFound" class="not-found">
-    <mat-icon>folder_off</mat-icon>
+  <div *ngIf="!loading && notFound" class="p-[60px] text-center text-[#999]">
+    <mat-icon class="!h-12 !w-12 !text-5xl opacity-40">folder_off</mat-icon>
     <p>Project not found.</p>
   </div>
 
   <ng-container *ngIf="!loading && project">
     <!-- Header -->
-    <mat-card class="header-card">
-      <div class="header-main">
-        <span class="color-dot" [style.background]="project.color"></span>
+    <mat-card class="mb-5 p-5">
+      <div class="flex items-start gap-4">
+        <span class="mt-1.5 h-5 w-5 shrink-0 rounded-full" [style.background]="project.color"></span>
         <div>
-          <h1>{{ project.name }}</h1>
-          <p class="desc" *ngIf="project.description">{{ project.description }}</p>
+          <h1 class="m-0 text-[24px] font-bold">{{ project.name }}</h1>
+          <p class="mb-2.5 mt-1 max-w-[640px] text-[#6b7280]" *ngIf="project.description">{{ project.description }}</p>
           <mat-chip [ngClass]="'status-' + project.status">{{ project.status | titlecase }}</mat-chip>
         </div>
       </div>
-      <div class="header-meta">
-        <div class="meta-item"><span class="meta-label">Start</span><span>{{ project.start_date ? (project.start_date | date:'mediumDate':'UTC') : '-' }}</span></div>
-        <div class="meta-item"><span class="meta-label">Due</span><span>{{ project.due_date ? (project.due_date | date:'mediumDate':'UTC') : '-' }}</span></div>
+      <div class="mt-4 flex gap-10 border-t border-[rgba(128,128,128,0.15)] pt-3.5">
+        <div class="flex flex-col gap-0.5">
+          <span class="text-xs uppercase tracking-[.04em] text-[#6b7280]">Start</span>
+          <span>{{ project.start_date ? (project.start_date | date:'mediumDate':'UTC') : '-' }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="text-xs uppercase tracking-[.04em] text-[#6b7280]">Due</span>
+          <span>{{ project.due_date ? (project.due_date | date:'mediumDate':'UTC') : '-' }}</span>
+        </div>
       </div>
     </mat-card>
 
     <!-- Completion -->
-    <mat-card class="completion-card">
-      <div class="completion-head">
+    <mat-card class="mb-5 p-5">
+      <div class="mb-2.5 flex items-baseline justify-between">
         <span>Completion</span>
-        <span class="completion-pct">{{ completion }}%</span>
+        <span class="text-[22px] font-bold">{{ completion }}%</span>
       </div>
       <mat-progress-bar mode="determinate" [value]="completion"></mat-progress-bar>
-      <div class="completion-sub">
+      <div class="mt-2 flex justify-between text-[13px] text-[#6b7280]">
         <span>{{ tasks.length }} tasks total</span>
-        <span *ngIf="overdue > 0" class="overdue"><mat-icon>warning</mat-icon> {{ overdue }} overdue</span>
+        <span *ngIf="overdue > 0" class="inline-flex items-center gap-1 text-[#ef4444]">
+          <mat-icon class="!h-4 !w-4 !text-base">warning</mat-icon> {{ overdue }} overdue
+        </span>
       </div>
     </mat-card>
 
     <!-- Breakdowns -->
-    <div class="breakdown-row">
-      <mat-card class="breakdown-card">
+    <div class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-5">
+      <mat-card>
         <mat-card-header><mat-card-title>By Status</mat-card-title></mat-card-header>
         <mat-card-content>
-          <div class="seg" *ngFor="let s of statusSegments">
-            <div class="seg-top"><span>{{ s.label }}</span><span>{{ s.count }}</span></div>
+          <div class="seg mb-3.5" *ngFor="let s of statusSegments">
+            <div class="mb-[5px] flex justify-between text-[13px]"><span>{{ s.label }}</span><span>{{ s.count }}</span></div>
             <mat-progress-bar mode="determinate" [value]="s.pct" [ngClass]="'bar-' + s.key"></mat-progress-bar>
           </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="breakdown-card">
+      <mat-card>
         <mat-card-header><mat-card-title>By Priority</mat-card-title></mat-card-header>
         <mat-card-content>
-          <div class="seg" *ngFor="let s of prioritySegments">
-            <div class="seg-top"><span>{{ s.label }}</span><span>{{ s.count }}</span></div>
+          <div class="seg mb-3.5" *ngFor="let s of prioritySegments">
+            <div class="mb-[5px] flex justify-between text-[13px]"><span>{{ s.label }}</span><span>{{ s.count }}</span></div>
             <mat-progress-bar mode="determinate" [value]="s.pct" [ngClass]="'bar-p-' + s.key"></mat-progress-bar>
           </div>
         </mat-card-content>
@@ -69,10 +77,10 @@
     </div>
 
     <!-- Task list -->
-    <mat-card class="tasks-card">
+    <mat-card>
       <mat-card-header><mat-card-title>Tasks</mat-card-title></mat-card-header>
       <mat-card-content>
-        <table mat-table [dataSource]="tasks" *ngIf="tasks.length">
+        <table mat-table [dataSource]="tasks" *ngIf="tasks.length" class="w-full">
           <ng-container matColumnDef="title">
             <th mat-header-cell *matHeaderCellDef>Title</th>
             <td mat-cell *matCellDef="let t">{{ t.title }}</td>
@@ -97,8 +105,8 @@
           <tr mat-row *matRowDef="let row; columns: taskColumns;"></tr>
         </table>
 
-        <div class="empty" *ngIf="!tasks.length">
-          <mat-icon>assignment</mat-icon>
+        <div class="p-10 text-center text-[#999]" *ngIf="!tasks.length">
+          <mat-icon class="!h-12 !w-12 !text-5xl opacity-30">assignment</mat-icon>
           <p>No tasks in this project yet.</p>
         </div>
       </mat-card-content>

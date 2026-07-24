@@ -27,8 +27,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatProgressSpinnerModule,
     MatSnackBarModule
   ],
-  templateUrl: './user-dialog.component.html',
-  styleUrls: ['./user-dialog.component.scss']
+  templateUrl: './user-dialog.component.html'
 })
 export class UserDialogComponent implements OnInit {
   userForm!: FormGroup;

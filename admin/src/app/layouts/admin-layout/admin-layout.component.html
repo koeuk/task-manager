@@ -6,19 +6,21 @@
     [mode]="'side'"
     [opened]="true"
     [fixedInViewport]="true">
-    
-    <div class="sidenav-header" *ngIf="appSettings.settings$ | async as s">
-      <div class="logo-badge">
-        <img *ngIf="s.appLogo" [src]="s.appLogo" alt="Logo">
-        <mat-icon *ngIf="!s.appLogo">admin_panel_settings</mat-icon>
+
+    <div class="sidenav-header flex items-center gap-3 border-b border-white/[0.08] px-5 py-[22px]"
+         *ngIf="appSettings.settings$ | async as s">
+      <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl
+                  bg-gradient-to-br from-[#94a3b8] to-[#cbd5e1] shadow-[0_6px_16px_rgba(100,116,139,0.45)]">
+        <img *ngIf="s.appLogo" [src]="s.appLogo" alt="Logo" class="h-full w-full object-cover">
+        <mat-icon *ngIf="!s.appLogo" class="!h-6 !w-6 !text-2xl text-white">admin_panel_settings</mat-icon>
       </div>
-      <div class="brand-text">
-        <h2 class="app-title">{{ s.appName }}</h2>
-        <span class="app-subtitle">Task Management</span>
+      <div class="brand-text leading-[1.2]">
+        <h2 class="m-0 text-[17px] font-bold tracking-[-0.01em]">{{ s.appName }}</h2>
+        <span class="app-subtitle text-xs font-normal text-white/50">Task Management</span>
       </div>
     </div>
 
-    <p class="nav-section-label">Menu</p>
+    <p class="nav-section-label mx-4 mb-1.5 mt-[18px] text-[11px] font-semibold uppercase tracking-[0.08em] text-white/35">Menu</p>
 
     <mat-nav-list class="nav-list">
       <a mat-list-item
@@ -38,19 +40,20 @@
       </a>
     </mat-nav-list>
 
-    <div class="sidenav-footer">
+    <div class="sidenav-footer border-t border-white/[0.08] p-3">
       <button class="user-info" *ngIf="currentUser$ | async as user"
               [matMenuTriggerFor]="userMenu"
               type="button">
-        <div class="user-avatar">
-          <img *ngIf="user.avatar" [src]="user.avatar" alt="Avatar">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full
+                    bg-gradient-to-br from-[#94a3b8] to-[#cbd5e1] text-base font-semibold text-white">
+          <img *ngIf="user.avatar" [src]="user.avatar" alt="Avatar" class="h-full w-full object-cover">
           <span *ngIf="!user.avatar">{{ (user.name || 'A').charAt(0).toUpperCase() }}</span>
         </div>
-        <div class="user-details">
-          <p class="user-name">{{user.name}}</p>
-          <p class="user-role">Administrator</p>
+        <div class="user-details min-w-0">
+          <p class="m-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold">{{user.name}}</p>
+          <p class="m-0 text-xs text-white/50">Administrator</p>
         </div>
-        <mat-icon class="user-caret">expand_less</mat-icon>
+        <mat-icon class="user-caret !ml-auto !h-5 !w-5 !text-xl text-white/50">expand_less</mat-icon>
       </button>
     </div>
   </mat-sidenav>
@@ -60,10 +63,10 @@
       <button mat-icon-button (click)="toggleSidenav()">
         <mat-icon>menu</mat-icon>
       </button>
-      
-      <span class="toolbar-title">Task Management System</span>
-      
-      <span class="spacer"></span>
+
+      <span class="ml-4 text-xl font-semibold tracking-[-0.01em]">Task Management System</span>
+
+      <span class="flex-1"></span>
 
       <!-- Theme toggle -->
       <button mat-icon-button (click)="toggleTheme()"
@@ -112,9 +115,9 @@
 
       <!-- User Menu -->
       <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
-        <div class="user-menu-header" *ngIf="currentUser$ | async as user">
-          <p class="user-email">{{user.email}}</p>
-          <p class="user-role-badge">Admin</p>
+        <div class="min-w-[200px] bg-[#f5f5f5] p-4" *ngIf="currentUser$ | async as user">
+          <p class="m-0 mb-2 text-sm font-medium">{{user.email}}</p>
+          <p class="m-0 text-xs font-medium uppercase text-[#3f51b5]">Admin</p>
         </div>
         <mat-divider></mat-divider>
         <button mat-menu-item routerLink="/settings" [queryParams]="{ section: 'profile' }">
@@ -133,7 +136,7 @@
       </mat-menu>
     </mat-toolbar>
 
-    <div class="content-wrapper">
+    <div class="content-wrapper min-h-[calc(100vh-64px)] bg-[var(--app-bg,#f4f6f8)] p-6">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>

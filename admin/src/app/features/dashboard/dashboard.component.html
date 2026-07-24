@@ -1,16 +1,16 @@
-<div class="dashboard-container">
-  <h1 class="page-title">Admin Dashboard</h1>
+<div class="w-full">
+  <h1 class="mb-6 text-[28px] font-bold tracking-[-0.02em] text-[#1e1b3a]">Admin Dashboard</h1>
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
+  <div *ngIf="loading" class="flex min-h-[400px] flex-col items-center justify-center">
     <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-    <p>Loading dashboard data...</p>
+    <p class="mt-4 text-[#666]">Loading dashboard data...</p>
   </div>
 
   <!-- Error State -->
-  <mat-card *ngIf="error && !loading" class="error-card">
+  <mat-card *ngIf="error && !loading" class="mx-auto max-w-[500px] text-center">
     <mat-card-content>
-      <mat-icon color="warn">error</mat-icon>
+      <mat-icon color="warn" class="!mx-auto !mb-4 !h-12 !w-12 !text-5xl">error</mat-icon>
       <p>{{ error }}</p>
       <button mat-flat-button color="primary" (click)="loadDashboardData()">
         Retry
@@ -19,54 +19,56 @@
   </mat-card>
 
   <!-- Dashboard Content -->
-  <div *ngIf="!loading && !error" class="dashboard-content">
+  <div *ngIf="!loading && !error">
     <!-- Stats Cards -->
-    <div class="stats-grid">
-      <mat-card *ngFor="let card of statsCards" class="stat-card" [ngClass]="'card-' + card.color">
-        <mat-card-content>
-          <div class="stat-icon">
+    <div class="stats-grid mb-6 grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5 max-[768px]:grid-cols-1">
+      <mat-card *ngFor="let card of statsCards"
+                class="stat-card relative overflow-hidden !rounded-xl"
+                [ngClass]="'card-' + card.color">
+        <mat-card-content class="!flex items-center !p-5">
+          <div class="stat-icon mr-4 flex h-[58px] w-[58px] items-center justify-center rounded-2xl">
             <mat-icon>{{ card.icon }}</mat-icon>
           </div>
-          <div class="stat-details">
-            <h2 class="stat-value">{{ card.value }}</h2>
-            <p class="stat-title">{{ card.title }}</p>
+          <div class="flex-1">
+            <h2 class="m-0 text-[32px] font-bold text-[#1e1b3a]">{{ card.value }}</h2>
+            <p class="m-0 text-sm text-[#6b7280]">{{ card.title }}</p>
           </div>
         </mat-card-content>
       </mat-card>
     </div>
 
     <!-- Quick Actions -->
-    <mat-card class="quick-actions-card">
+    <mat-card class="mb-6">
       <mat-card-content>
-        <div class="quick-actions">
-          <span class="qa-label">Quick actions</span>
-          <a mat-stroked-button color="primary" routerLink="/projects"><mat-icon>create_new_folder</mat-icon> New Project</a>
-          <a mat-stroked-button color="primary" routerLink="/tasks"><mat-icon>add_task</mat-icon> New Task</a>
-          <a mat-stroked-button color="primary" routerLink="/users"><mat-icon>person_add</mat-icon> Add User</a>
-          <a mat-stroked-button color="primary" routerLink="/reports"><mat-icon>analytics</mat-icon> View Reports</a>
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="mr-1 text-[13px] font-semibold uppercase tracking-[0.04em] text-[#6b7280]">Quick actions</span>
+          <a mat-stroked-button color="primary" routerLink="/projects" class="!inline-flex !items-center gap-1.5"><mat-icon>create_new_folder</mat-icon> New Project</a>
+          <a mat-stroked-button color="primary" routerLink="/tasks" class="!inline-flex !items-center gap-1.5"><mat-icon>add_task</mat-icon> New Task</a>
+          <a mat-stroked-button color="primary" routerLink="/users" class="!inline-flex !items-center gap-1.5"><mat-icon>person_add</mat-icon> Add User</a>
+          <a mat-stroked-button color="primary" routerLink="/reports" class="!inline-flex !items-center gap-1.5"><mat-icon>analytics</mat-icon> View Reports</a>
         </div>
       </mat-card-content>
     </mat-card>
 
     <!-- Charts Row -->
-    <div class="charts-row" *ngIf="stats">
-      <mat-card class="chart-card">
-        <mat-card-header>
+    <div class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-5 max-[768px]:grid-cols-1" *ngIf="stats">
+      <mat-card>
+        <mat-card-header class="!mb-4">
           <mat-card-title>Task Distribution</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="chart-container">
+          <div class="relative h-[300px]">
             <canvas #statusChart></canvas>
           </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="chart-card">
-        <mat-card-header>
+      <mat-card>
+        <mat-card-header class="!mb-4">
           <mat-card-title>Priority Analysis</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="chart-container">
+          <div class="relative h-[300px]">
             <canvas #priorityChart></canvas>
           </div>
         </mat-card-content>
@@ -74,21 +76,21 @@
     </div>
 
     <!-- Recent Activity Tables -->
-    <div class="tables-row" *ngIf="stats">
+    <div class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(500px,1fr))] gap-5 max-[768px]:grid-cols-1" *ngIf="stats">
       <!-- Recent Projects -->
-      <mat-card class="table-card">
-        <mat-card-header>
+      <mat-card>
+        <mat-card-header class="!mb-4 !flex items-center justify-between">
           <mat-card-title>Recent Projects</mat-card-title>
           <button mat-icon-button routerLink="/projects">
             <mat-icon>arrow_forward</mat-icon>
           </button>
         </mat-card-header>
         <mat-card-content>
-          <div *ngIf="stats.recent_projects.length === 0" class="empty-state">
-            <mat-icon>folder_open</mat-icon>
+          <div *ngIf="stats.recent_projects.length === 0" class="p-10 text-center text-[#999]">
+            <mat-icon class="!mx-auto !mb-4 !h-12 !w-12 !text-5xl opacity-30">folder_open</mat-icon>
             <p>No projects yet</p>
           </div>
-          <table mat-table [dataSource]="stats.recent_projects" *ngIf="stats.recent_projects.length > 0">
+          <table mat-table [dataSource]="stats.recent_projects" *ngIf="stats.recent_projects.length > 0" class="w-full">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
               <td mat-cell *matCellDef="let project">{{ project.name }}</td>
@@ -114,19 +116,19 @@
       </mat-card>
 
       <!-- Recent Tasks -->
-      <mat-card class="table-card">
-        <mat-card-header>
+      <mat-card>
+        <mat-card-header class="!mb-4 !flex items-center justify-between">
           <mat-card-title>Recent Tasks</mat-card-title>
           <button mat-icon-button routerLink="/tasks">
             <mat-icon>arrow_forward</mat-icon>
           </button>
         </mat-card-header>
         <mat-card-content>
-          <div *ngIf="stats.recent_tasks.length === 0" class="empty-state">
-            <mat-icon>assignment</mat-icon>
+          <div *ngIf="stats.recent_tasks.length === 0" class="p-10 text-center text-[#999]">
+            <mat-icon class="!mx-auto !mb-4 !h-12 !w-12 !text-5xl opacity-30">assignment</mat-icon>
             <p>No tasks yet</p>
           </div>
-          <table mat-table [dataSource]="stats.recent_tasks" *ngIf="stats.recent_tasks.length > 0">
+          <table mat-table [dataSource]="stats.recent_tasks" *ngIf="stats.recent_tasks.length > 0" class="w-full">
             <ng-container matColumnDef="title">
               <th mat-header-cell *matHeaderCellDef>Title</th>
               <td mat-cell *matCellDef="let task">{{ task.title }}</td>
@@ -155,17 +157,18 @@
     </div>
 
     <!-- User Statistics -->
-    <mat-card class="user-stats-card" *ngIf="stats">
+    <mat-card *ngIf="stats">
       <mat-card-header>
         <mat-card-title>User Statistics</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="user-stats">
-          <div *ngFor="let stat of stats.user_stats" class="user-stat">
-            <mat-icon>{{ stat.role === 'admin' ? 'admin_panel_settings' : 'person' }}</mat-icon>
-            <div class="stat-info">
-              <p class="stat-label">{{ stat.role | titlecase }}</p>
-              <p class="stat-count">{{ stat.count }}</p>
+        <div class="flex flex-wrap justify-around gap-5">
+          <div *ngFor="let stat of stats.user_stats"
+               class="flex min-w-[150px] items-center rounded-lg bg-[#f5f5f5] p-4">
+            <mat-icon class="!mr-3 !h-9 !w-9 !text-4xl !text-[#3f51b5]">{{ stat.role === 'admin' ? 'admin_panel_settings' : 'person' }}</mat-icon>
+            <div>
+              <p class="m-0 text-xs uppercase text-[#666]">{{ stat.role | titlecase }}</p>
+              <p class="m-0 text-[24px] font-medium text-[#333]">{{ stat.count }}</p>
             </div>
           </div>
         </div>

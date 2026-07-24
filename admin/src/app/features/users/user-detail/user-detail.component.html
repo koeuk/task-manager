@@ -1,50 +1,70 @@
-<div class="detail-container">
-  <div class="detail-topbar">
-    <a mat-stroked-button routerLink="/users">
+<div class="w-full">
+  <div class="mb-4">
+    <a mat-stroked-button routerLink="/users" class="!inline-flex !items-center gap-1.5">
       <mat-icon>arrow_back</mat-icon>
       Back to Users
     </a>
   </div>
 
-  <div *ngIf="loading" class="loading-container">
+  <div *ngIf="loading" class="flex justify-center p-[60px]">
     <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
   </div>
 
-  <div *ngIf="!loading && notFound" class="not-found">
-    <mat-icon>person_off</mat-icon>
+  <div *ngIf="!loading && notFound" class="p-[60px] text-center text-[#999]">
+    <mat-icon class="!h-12 !w-12 !text-5xl opacity-40">person_off</mat-icon>
     <p>User not found.</p>
   </div>
 
   <ng-container *ngIf="!loading && user">
     <!-- Profile header -->
-    <mat-card class="profile-card">
-      <div class="profile-head">
-        <div class="avatar">{{ initials }}</div>
-        <div class="profile-info">
-          <h1>{{ user.name }}</h1>
-          <p class="email">{{ user.email }}</p>
+    <mat-card class="mb-5 p-5">
+      <div class="flex items-center gap-[18px] pb-4 pt-2">
+        <div class="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full
+                    bg-gradient-to-br from-[#94a3b8] to-[#cbd5e1] text-[30px] font-bold text-white">{{ initials }}</div>
+        <div>
+          <h1 class="m-0 text-[24px] font-bold">{{ user.name }}</h1>
+          <p class="mb-2 mt-0.5 text-[#6b7280]">{{ user.email }}</p>
           <mat-chip [ngClass]="'role-' + user.role">{{ user.role | titlecase }}</mat-chip>
         </div>
       </div>
-      <div class="profile-meta">
-        <div class="meta-item"><span class="meta-label">Phone</span><span>{{ user.phone || '-' }}</span></div>
-        <div class="meta-item"><span class="meta-label">Joined</span><span>{{ user.created_at | date:'mediumDate' }}</span></div>
+      <div class="flex gap-10 border-t border-[rgba(128,128,128,0.15)] pt-3">
+        <div class="flex flex-col gap-0.5">
+          <span class="text-xs uppercase tracking-[.04em] text-[#6b7280]">Phone</span>
+          <span>{{ user.phone || '-' }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="text-xs uppercase tracking-[.04em] text-[#6b7280]">Joined</span>
+          <span>{{ user.created_at | date:'mediumDate' }}</span>
+        </div>
       </div>
     </mat-card>
 
     <!-- Task stats -->
-    <div class="stats-row">
-      <mat-card class="stat"><span class="num">{{ stats.total }}</span><span class="lbl">Assigned</span></mat-card>
-      <mat-card class="stat"><span class="num">{{ stats.in_progress }}</span><span class="lbl">In Progress</span></mat-card>
-      <mat-card class="stat"><span class="num">{{ stats.completed }}</span><span class="lbl">Completed</span></mat-card>
-      <mat-card class="stat" [class.danger]="stats.overdue > 0"><span class="num">{{ stats.overdue }}</span><span class="lbl">Overdue</span></mat-card>
+    <div class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
+      <mat-card class="flex flex-col items-center p-5">
+        <span class="text-[30px] font-bold">{{ stats.total }}</span>
+        <span class="mt-0.5 text-[13px] text-[#6b7280]">Assigned</span>
+      </mat-card>
+      <mat-card class="flex flex-col items-center p-5">
+        <span class="text-[30px] font-bold">{{ stats.in_progress }}</span>
+        <span class="mt-0.5 text-[13px] text-[#6b7280]">In Progress</span>
+      </mat-card>
+      <mat-card class="flex flex-col items-center p-5">
+        <span class="text-[30px] font-bold">{{ stats.completed }}</span>
+        <span class="mt-0.5 text-[13px] text-[#6b7280]">Completed</span>
+      </mat-card>
+      <mat-card class="flex flex-col items-center p-5">
+        <span class="text-[30px] font-bold"
+              [ngClass]="{ 'text-[#ef4444]': stats.overdue > 0 }">{{ stats.overdue }}</span>
+        <span class="mt-0.5 text-[13px] text-[#6b7280]">Overdue</span>
+      </mat-card>
     </div>
 
     <!-- Assigned tasks -->
-    <mat-card class="tasks-card">
+    <mat-card>
       <mat-card-header><mat-card-title>Assigned Tasks</mat-card-title></mat-card-header>
       <mat-card-content>
-        <table mat-table [dataSource]="tasks" *ngIf="tasks.length">
+        <table mat-table [dataSource]="tasks" *ngIf="tasks.length" class="w-full">
           <ng-container matColumnDef="title">
             <th mat-header-cell *matHeaderCellDef>Title</th>
             <td mat-cell *matCellDef="let t">{{ t.title }}</td>
@@ -65,8 +85,8 @@
           <tr mat-row *matRowDef="let row; columns: taskColumns;"></tr>
         </table>
 
-        <div class="empty" *ngIf="!tasks.length">
-          <mat-icon>assignment</mat-icon>
+        <div class="p-10 text-center text-[#999]" *ngIf="!tasks.length">
+          <mat-icon class="!h-12 !w-12 !text-5xl opacity-30">assignment</mat-icon>
           <p>No tasks assigned to this user.</p>
         </div>
       </mat-card-content>

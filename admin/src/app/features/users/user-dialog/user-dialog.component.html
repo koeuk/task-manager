@@ -1,11 +1,11 @@
-<h2 mat-dialog-title>
-  <mat-icon>{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+<h2 mat-dialog-title class="!flex items-center gap-2">
+  <mat-icon class="text-[#3f51b5]">{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
   {{ isEditMode ? 'Edit User' : 'Create New User' }}
 </h2>
 
 <mat-dialog-content>
-  <form [formGroup]="userForm">
-    <mat-form-field appearance="outline" class="full-width">
+  <form [formGroup]="userForm" class="flex flex-col gap-2">
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>Name</mat-label>
       <input matInput formControlName="name" placeholder="Enter full name">
       <mat-icon matPrefix>person</mat-icon>
@@ -14,7 +14,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>Email</mat-label>
       <input matInput type="email" formControlName="email" placeholder="user@example.com">
       <mat-icon matPrefix>email</mat-icon>
@@ -26,7 +26,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width" *ngIf="!isEditMode">
+    <mat-form-field appearance="outline" class="w-full" *ngIf="!isEditMode">
       <mat-label>Password</mat-label>
       <input matInput type="password" formControlName="password" placeholder="Minimum 8 characters">
       <mat-icon matPrefix>lock</mat-icon>
@@ -38,15 +38,15 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>Role</mat-label>
       <mat-select formControlName="role">
         <mat-option value="user">
-          <mat-icon>person</mat-icon>
+          <mat-icon class="mr-2 align-middle">person</mat-icon>
           User
         </mat-option>
         <mat-option value="admin">
-          <mat-icon>admin_panel_settings</mat-icon>
+          <mat-icon class="mr-2 align-middle">admin_panel_settings</mat-icon>
           Admin
         </mat-option>
       </mat-select>
@@ -56,7 +56,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>Phone (Optional)</mat-label>
       <input matInput formControlName="phone" placeholder="+1 234 567 8900">
       <mat-icon matPrefix>phone</mat-icon>
@@ -65,16 +65,18 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()" [disabled]="loading">
+  <button mat-button (click)="onCancel()" [disabled]="loading" class="!ml-2">
     Cancel
   </button>
-  <button mat-raised-button 
-          color="primary" 
+  <button mat-raised-button
+          color="primary"
           (click)="onSubmit()"
-          [disabled]="loading || userForm.invalid">
-    <mat-progress-spinner *ngIf="loading" 
-                          diameter="20" 
-                          mode="indeterminate">
+          [disabled]="loading || userForm.invalid"
+          class="!ml-2">
+    <mat-progress-spinner *ngIf="loading"
+                          diameter="20"
+                          mode="indeterminate"
+                          class="mr-2 inline-block">
     </mat-progress-spinner>
     <span *ngIf="!loading">
       {{ isEditMode ? 'Update' : 'Create' }}
