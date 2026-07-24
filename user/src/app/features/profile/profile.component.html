@@ -1,62 +1,62 @@
-<div class="page">
-  <h1>Profile</h1>
+<div class="max-w-[1000px]">
+  <h1 class="mb-5 mt-0 text-[26px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb]">Profile</h1>
 
-  <div class="profile-banner" *ngIf="user">
-    <div class="avatar-wrap">
-      <div class="avatar">
+  <div class="mb-6 flex items-center gap-5 rounded-2xl bg-[linear-gradient(135deg,#94a3b8_0%,#64748b_100%)] p-6 text-white max-[600px]:flex-col max-[600px]:text-center" *ngIf="user">
+    <div class="relative shrink-0">
+      <div class="flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/25 text-[30px] font-bold">
         <img *ngIf="user.avatar && !avatarBroken" [src]="user.avatar"
-             (error)="avatarBroken = true" alt="avatar">
+             (error)="avatarBroken = true" alt="avatar" class="h-full w-full object-cover">
         <span *ngIf="!user.avatar || avatarBroken">{{ initials }}</span>
       </div>
-      <button class="avatar-edit" type="button" (click)="fileInput.click()"
+      <button class="avatar-edit absolute -bottom-0.5 -right-0.5 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-[#475569] p-0 text-white" type="button" (click)="fileInput.click()"
               [disabled]="avatarUploading" title="Change photo">
-        <mat-icon>{{ avatarUploading ? 'hourglass_top' : 'photo_camera' }}</mat-icon>
+        <mat-icon class="!h-[15px] !w-[15px] !text-[15px]">{{ avatarUploading ? 'hourglass_top' : 'photo_camera' }}</mat-icon>
       </button>
       <input #fileInput type="file" accept="image/*" hidden (change)="onAvatarSelected($event)">
     </div>
-    <div class="banner-info">
-      <h2>{{ user.name }}</h2>
-      <p>{{ user.email }}</p>
-      <span class="role-badge">{{ user.role }}</span>
-      <span class="since" *ngIf="user.created_at">Member since {{ user.created_at | date:'mediumDate' }}</span>
+    <div>
+      <h2 class="m-0 text-[22px]">{{ user.name }}</h2>
+      <p class="mb-2 mt-0.5 opacity-90">{{ user.email }}</p>
+      <span class="mr-3 inline-block rounded-xl bg-white/25 px-3 py-0.5 text-xs font-semibold capitalize">{{ user.role }}</span>
+      <span class="text-[13px] opacity-85" *ngIf="user.created_at">Member since {{ user.created_at | date:'mediumDate' }}</span>
     </div>
   </div>
 
-  <div class="cards">
-    <mat-card class="form-card">
-      <h3>Profile Information</h3>
-      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-        <mat-form-field appearance="outline" class="full-width">
+  <div class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-5">
+    <mat-card class="p-6">
+      <h3 class="mb-4 mt-0 text-[17px] font-semibold dark:text-[#e5e7eb]">Profile Information</h3>
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="flex flex-col">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Name</mat-label>
           <input matInput formControlName="name" required>
           <mat-error *ngIf="profileForm.get('name')?.hasError('required')">Name is required</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Email</mat-label>
           <input matInput type="email" formControlName="email" required>
           <mat-error *ngIf="profileForm.get('email')?.hasError('required')">Email is required</mat-error>
           <mat-error *ngIf="profileForm.get('email')?.hasError('email')">Enter a valid email</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Phone</mat-label>
           <input matInput formControlName="phone" placeholder="Optional">
         </mat-form-field>
 
-        <div class="actions">
+        <div class="mt-1 flex justify-end">
           <button mat-flat-button color="primary" type="submit" [disabled]="savingProfile">
-            <mat-progress-spinner *ngIf="savingProfile" diameter="18" mode="indeterminate"></mat-progress-spinner>
+            <mat-progress-spinner *ngIf="savingProfile" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
             <span>Save changes</span>
           </button>
         </div>
       </form>
     </mat-card>
 
-    <mat-card class="form-card">
-      <h3>Change Password</h3>
-      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-        <mat-form-field appearance="outline" class="full-width">
+    <mat-card class="p-6">
+      <h3 class="mb-4 mt-0 text-[17px] font-semibold dark:text-[#e5e7eb]">Change Password</h3>
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="flex flex-col">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Current password</mat-label>
           <input matInput [type]="hideCurrent ? 'password' : 'text'" formControlName="current_password" required>
           <button mat-icon-button matSuffix type="button" (click)="hideCurrent = !hideCurrent">
@@ -65,7 +65,7 @@
           <mat-error *ngIf="passwordForm.get('current_password')?.hasError('required')">Required</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>New password</mat-label>
           <input matInput [type]="hideNew ? 'password' : 'text'" formControlName="password" required>
           <button mat-icon-button matSuffix type="button" (click)="hideNew = !hideNew">
@@ -75,7 +75,7 @@
           <mat-error *ngIf="passwordForm.get('password')?.hasError('minlength')">At least 8 characters</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Confirm new password</mat-label>
           <input matInput [type]="hideConfirm ? 'password' : 'text'" formControlName="password_confirmation" required>
           <button mat-icon-button matSuffix type="button" (click)="hideConfirm = !hideConfirm">
@@ -84,13 +84,13 @@
           <mat-error *ngIf="passwordForm.get('password_confirmation')?.hasError('required')">Required</mat-error>
         </mat-form-field>
 
-        <p class="mismatch" *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('password_confirmation')?.touched">
+        <p class="-mt-2 mb-3 text-[13px] text-[#f44336]" *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('password_confirmation')?.touched">
           Passwords do not match.
         </p>
 
-        <div class="actions">
+        <div class="mt-1 flex justify-end">
           <button mat-flat-button color="primary" type="submit" [disabled]="savingPassword">
-            <mat-progress-spinner *ngIf="savingPassword" diameter="18" mode="indeterminate"></mat-progress-spinner>
+            <mat-progress-spinner *ngIf="savingPassword" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
             <span>Update password</span>
           </button>
         </div>

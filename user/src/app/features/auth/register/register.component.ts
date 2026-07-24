@@ -26,8 +26,7 @@ import { AuthService } from '../../../core/services/auth.service';
     MatProgressSpinnerModule,
     MatSnackBarModule
   ],
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  templateUrl: './register.component.html'
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;

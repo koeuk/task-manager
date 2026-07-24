@@ -1,16 +1,16 @@
-<div class="register-container">
-  <mat-card class="register-card">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>person_add</mat-icon>
+<div class="flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#94a3b8_0%,#64748b_100%)]">
+  <mat-card class="m-5 w-full max-w-[450px] !shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
+    <mat-card-header class="!mb-5 text-center">
+      <mat-card-title class="!mb-2 !flex items-center justify-center gap-2.5 !text-[28px]">
+        <mat-icon class="!h-8 !w-8 !text-[32px] !text-[#94a3b8]">person_add</mat-icon>
         Create Account
       </mat-card-title>
-      <mat-card-subtitle>Join Task Manager today</mat-card-subtitle>
+      <mat-card-subtitle class="!text-base">Join Task Manager today</mat-card-subtitle>
     </mat-card-header>
     
     <mat-card-content>
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-3">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Full Name</mat-label>
           <input matInput formControlName="name" placeholder="John Doe">
           <mat-icon matPrefix>person</mat-icon>
@@ -22,7 +22,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Email</mat-label>
           <input matInput type="email" formControlName="email" placeholder="user@example.com">
           <mat-icon matPrefix>email</mat-icon>
@@ -34,13 +34,13 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Phone (Optional)</mat-label>
           <input matInput formControlName="phone" placeholder="+1 234 567 8900">
           <mat-icon matPrefix>phone</mat-icon>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Password</mat-label>
           <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
           <mat-icon matPrefix>lock</mat-icon>
@@ -55,7 +55,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="w-full">
           <mat-label>Confirm Password</mat-label>
           <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="password_confirmation">
           <mat-icon matPrefix>lock</mat-icon>
@@ -73,19 +73,20 @@
         <button mat-raised-button 
                 color="primary" 
                 type="submit"
-                class="full-width"
+                class="w-full !mt-2 !h-12 !text-base"
                 [disabled]="loading || registerForm.invalid">
           <mat-progress-spinner *ngIf="loading" 
                                 diameter="20" 
-                                mode="indeterminate">
+                                mode="indeterminate"
+                                class="mr-2 inline-block">
           </mat-progress-spinner>
           <span *ngIf="!loading">Create Account</span>
         </button>
       </form>
     </mat-card-content>
 
-    <mat-card-actions>
-      <p>Already have an account? <a routerLink="/dashboard">Sign in here</a></p>
+    <mat-card-actions class="!p-4 text-center">
+      <p class="m-0 text-[#666]">Already have an account? <a routerLink="/dashboard" class="font-medium text-[#94a3b8] no-underline hover:underline">Sign in here</a></p>
     </mat-card-actions>
   </mat-card>
 </div>

@@ -17,8 +17,7 @@ import { AuthService } from '../../../core/services/auth.service';
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
   ],
-  templateUrl: './login-dialog.component.html',
-  styleUrls: ['./login-dialog.component.scss']
+  templateUrl: './login-dialog.component.html'
 })
 export class LoginDialogComponent {
   form: FormGroup;
