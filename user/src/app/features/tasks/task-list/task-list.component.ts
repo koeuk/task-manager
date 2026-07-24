@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,8 +15,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ComponentType } from '@angular/cdk/portal';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
 import { TaskService } from '../../../core/services/task.service';
 import { ProjectService } from '../../../core/services/project.service';
@@ -25,7 +28,15 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 import {
   STATUS_OPTIONS, PRIORITY_OPTIONS, statusLabel, priorityLabel, statusColor, priorityColor
 } from '../../../core/utils/task-meta';
-import { parseApiDate } from '../../../core/utils/date-utils';
+import { daysFromToday, isPastDay } from '../../../core/utils/date-utils';
+
+/** How long to wait after the last keystroke before re-querying. */
+const SEARCH_DEBOUNCE_MS = 350;
+
+/** Upper bound on the project list used to populate the "new task" dialog. */
+const PROJECT_PICKER_LIMIT = 100;
+
+const TOAST_MS = { info: 3000, error: 4000 } as const;
 
 @Component({
   selector: 'app-task-list',
@@ -43,6 +54,7 @@ export class TaskListComponent implements OnInit {
   tasks: Task[] = [];
   projects: Project[] = [];
   loading = true;
+
   total = 0;
   pageSize = 15;
   pageIndex = 0;
@@ -53,6 +65,7 @@ export class TaskListComponent implements OnInit {
   statusFilter: TaskStatus | '' = '';
   priorityFilter: TaskPriority | '' = '';
 
+  // Re-exported for the template.
   statusOptions = STATUS_OPTIONS;
   priorityOptions = PRIORITY_OPTIONS;
   statusLabel = statusLabel;
@@ -65,19 +78,24 @@ export class TaskListComponent implements OnInit {
     private projectService: ProjectService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private writeGuard: WriteGuardService
+    private writeGuard: WriteGuardService,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
     this.loadTasks();
     this.loadProjects();
+
     this.searchControl.valueChanges
-      .pipe(debounceTime(350), distinctUntilChanged())
-      .subscribe(() => {
-        this.pageIndex = 0;
-        this.loadTasks();
-      });
+      .pipe(
+        debounceTime(SEARCH_DEBOUNCE_MS),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => this.reloadFromFirstPage());
   }
+
+  // ---------------------------------------------------------------- loading
 
   loadTasks(): void {
     this.loading = true;
@@ -94,21 +112,21 @@ export class TaskListComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.snackBar.open('Failed to load tasks', 'Close', { duration: 4000 });
+        this.showError('Failed to load tasks');
         this.loading = false;
       }
     });
   }
 
   loadProjects(): void {
-    this.projectService.getProjects({ per_page: 100 }).subscribe({
-      next: (res) => (this.projects = res.data)
-    });
+    this.projectService.getProjects({ per_page: PROJECT_PICKER_LIMIT })
+      .subscribe({ next: (res) => (this.projects = res.data) });
   }
 
+  // ------------------------------------------------------- filters & paging
+
   onFilterChange(): void {
-    this.pageIndex = 0;
-    this.loadTasks();
+    this.reloadFromFirstPage();
   }
 
   onPage(event: PageEvent): void {
@@ -117,60 +135,41 @@ export class TaskListComponent implements OnInit {
     this.loadTasks();
   }
 
-  changeStatus(task: Task, status: TaskStatus): void {
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) { this.loadTasks(); return; } // reset the optimistic select
-      this.taskService.updateStatus(task.id, status).subscribe({
-        next: (res) => (task.status = res.task.status),
-        error: () => this.snackBar.open('Failed to update status', 'Close', { duration: 4000 })
-      });
-    });
+  clearSearch(): void {
+    this.searchControl.setValue('');
   }
 
+  // ------------------------------------------------------------- task edits
+
   openCreate(): void {
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
+    this.ifWritable(() => {
       if (this.projects.length === 0) {
-        this.snackBar.open('Create a project first before adding tasks', 'Close', { duration: 4000 });
+        this.showInfo('Create a project first before adding tasks');
         return;
       }
-      const ref = this.dialog.open(TaskFormDialogComponent, {
-        width: '560px',
-        data: { projects: this.projects }
-      });
-      ref.afterClosed().subscribe((result) => {
-        if (result) this.loadTasks();
-      });
+      this.openDialog(TaskFormDialogComponent, { width: '560px', data: { projects: this.projects } })
+        .subscribe(() => this.loadTasks());
     });
   }
 
   openTask(task: Task): void {
-    const ref = this.dialog.open(TaskDetailDialogComponent, {
-      width: '600px',
-      maxWidth: '95vw',
-      data: { task }
-    });
-    ref.afterClosed().subscribe((result) => {
-      if (result) this.loadTasks();
-    });
+    // Read-only view — no write guard; the dialog guards its own actions.
+    this.openDialog(TaskDetailDialogComponent, { width: '600px', maxWidth: '95vw', data: { task } })
+      .subscribe(() => this.loadTasks());
   }
 
   editTask(task: Task, event: Event): void {
     event.stopPropagation();
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
-      const ref = this.dialog.open(TaskFormDialogComponent, { width: '560px', data: { task } });
-      ref.afterClosed().subscribe((result) => {
-        if (result) this.loadTasks();
-      });
+    this.ifWritable(() => {
+      this.openDialog(TaskFormDialogComponent, { width: '560px', data: { task } })
+        .subscribe(() => this.loadTasks());
     });
   }
 
   confirmDelete(task: Task, event: Event): void {
     event.stopPropagation();
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
-      const ref = this.dialog.open(ConfirmDialogComponent, {
+    this.ifWritable(() => {
+      this.openDialog(ConfirmDialogComponent, {
         width: '420px',
         data: {
           title: 'Delete task',
@@ -178,59 +177,88 @@ export class TaskListComponent implements OnInit {
           confirmText: 'Delete',
           danger: true
         }
-      });
-      ref.afterClosed().subscribe((confirmed) => {
-        if (confirmed) {
-          this.taskService.deleteTask(task.id).subscribe({
-            next: () => {
-              this.snackBar.open('Task deleted', 'Close', { duration: 3000 });
-              this.loadTasks();
-            },
-            error: () => this.snackBar.open('Failed to delete task', 'Close', { duration: 4000 })
-          });
-        }
-      });
+      }).subscribe(() => this.deleteTask(task));
     });
   }
 
-  clearSearch(): void {
-    this.searchControl.setValue('');
-  }
-
-  isOverdue(task: Task): boolean {
-    if (task.status === 'completed') return false;
-    const due = parseApiDate(task.due_date);
-    if (!due) return false;
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    return due < startOfToday;
+  changeStatus(task: Task, status: TaskStatus): void {
+    this.writeGuard.requireWrite().subscribe(allowed => {
+      // The select already moved optimistically; reload to put it back.
+      if (!allowed) {
+        this.loadTasks();
+        return;
+      }
+      this.applyStatus(task, status);
+    });
   }
 
   /** Inline check-off: tick a row to complete (or un-complete) it. */
   toggleComplete(task: Task, event: Event): void {
     event.stopPropagation();
     const next: TaskStatus = task.status === 'completed' ? 'todo' : 'completed';
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
-      this.taskService.updateStatus(task.id, next).subscribe({
-        next: (res) => (task.status = res.task.status),
-        error: () => this.snackBar.open('Failed to update task', 'Close', { duration: 4000 })
-      });
-    });
+    this.ifWritable(() => this.applyStatus(task, next));
   }
 
-  /** "Yesterday" / "in 2 days" style hint for a due date. */
+  // ------------------------------------------------------------ due dates
+
+  isOverdue(task: Task): boolean {
+    return task.status !== 'completed' && isPastDay(task.due_date);
+  }
+
+  /** "Yesterday" / "in 2 days" style hint; empty when it isn't worth showing. */
   dueHint(task: Task): string {
-    const due = parseApiDate(task.due_date);
-    if (!due) return '';
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const days = Math.round((due.setHours(0, 0, 0, 0) - start.getTime()) / 86400000);
+    const days = daysFromToday(task.due_date);
+    if (days === null) return '';
+
     if (days === 0) return 'Today';
     if (days === 1) return 'Tomorrow';
     if (days === -1) return 'Yesterday';
     if (days < 0) return `${Math.abs(days)} days ago`;
-    if (days <= 7) return `in ${days} days`;
-    return '';
+    return days <= 7 ? `in ${days} days` : '';
+  }
+
+  // -------------------------------------------------------------- internals
+
+  private reloadFromFirstPage(): void {
+    this.pageIndex = 0;
+    this.loadTasks();
+  }
+
+  /** Run `action` only once the write guard grants access. */
+  private ifWritable(action: () => void): void {
+    this.writeGuard.requireWrite().subscribe(allowed => {
+      if (allowed) action();
+    });
+  }
+
+  /** Open a dialog and emit only when it closes with a truthy result. */
+  private openDialog<T>(component: ComponentType<T>, config: MatDialogConfig): Observable<unknown> {
+    const ref: MatDialogRef<T> = this.dialog.open(component, config);
+    return ref.afterClosed().pipe(filter(Boolean));
+  }
+
+  private applyStatus(task: Task, status: TaskStatus): void {
+    this.taskService.updateStatus(task.id, status).subscribe({
+      next: (res) => (task.status = res.task.status),
+      error: () => this.showError('Failed to update status')
+    });
+  }
+
+  private deleteTask(task: Task): void {
+    this.taskService.deleteTask(task.id).subscribe({
+      next: () => {
+        this.showInfo('Task deleted');
+        this.loadTasks();
+      },
+      error: () => this.showError('Failed to delete task')
+    });
+  }
+
+  private showInfo(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: TOAST_MS.info });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: TOAST_MS.error });
   }
 }
