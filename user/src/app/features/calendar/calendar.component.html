@@ -1,0 +1,48 @@
+<div class="w-full">
+  <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <h1 class="m-0 text-[26px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb]">Calendar</h1>
+    <div class="flex items-center gap-2">
+      <button mat-stroked-button (click)="today()">Today</button>
+      <button mat-icon-button (click)="prevMonth()" aria-label="Previous month"><mat-icon>chevron_left</mat-icon></button>
+      <span class="min-w-[150px] text-center text-base font-semibold">{{ monthLabel }}</span>
+      <button mat-icon-button (click)="nextMonth()" aria-label="Next month"><mat-icon>chevron_right</mat-icon></button>
+    </div>
+  </div>
+
+  <mat-card class="cal-card">
+    <div *ngIf="loading" class="flex justify-center p-[60px]">
+      <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+    </div>
+
+    <!-- The 1px gap over a tinted background is what draws the grid hairlines. -->
+    <div *ngIf="!loading"
+         class="grid grid-cols-7 gap-px overflow-hidden rounded-lg border
+                border-[rgba(128,128,128,0.18)] bg-[rgba(128,128,128,0.18)]">
+      <div class="bg-[rgba(128,128,128,0.06)] px-2 py-2.5 text-center text-xs font-bold uppercase tracking-[.04em] opacity-70"
+           *ngFor="let d of weekdays">{{ d }}</div>
+
+      <!-- `cal-cell` is kept as a hook: the global `body.dark-theme .cal-cell`
+           rule in styles.scss swaps --cal-cell-bg for the dark surface. -->
+      <div class="cal-cell flex min-h-[104px] flex-col gap-1 bg-[var(--cal-cell-bg,#fff)] p-1.5"
+           *ngFor="let day of days"
+           [ngClass]="{ 'opacity-45': !day.inMonth }">
+        <div class="flex h-[26px] w-[26px] items-center justify-center self-start rounded-full text-[13px] font-semibold"
+             [ngClass]="{ 'bg-[#64748b] text-white': day.isToday }">{{ day.date.getDate() }}</div>
+        <div class="flex flex-col gap-[3px] overflow-hidden">
+          <button class="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded border-none px-1.5 py-0.5 text-left text-[11px] text-white"
+                  *ngFor="let t of day.tasks"
+                  [ngClass]="{
+                    'bg-[#10b981]': t.priority === 'low',
+                    'bg-[#f59e0b]': t.priority === 'medium',
+                    'bg-[#f97316]': t.priority === 'high',
+                    'bg-[#ef4444]': t.priority === 'critical'
+                  }"
+                  [matTooltip]="t.title + ' · ' + t.status"
+                  (click)="openTask(t)">
+            {{ t.title }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</div>

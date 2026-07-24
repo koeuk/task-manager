@@ -1,0 +1,46 @@
+<div class="max-w-[760px]">
+  <h1 class="m-0 mb-5 text-[26px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb]">Settings</h1>
+
+  <mat-card class="mb-4">
+    <mat-card-header><mat-card-title>Appearance</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5 [&>mat-icon]:!text-[#94a3b8]">
+          <mat-icon>{{ (themeService.isDark$ | async) ? 'dark_mode' : 'light_mode' }}</mat-icon>
+          <div>
+            <p class="m-0 font-semibold text-[#1e293b] dark:text-[#e5e7eb]">Dark mode</p>
+            <p class="mt-0.5 text-[13px] text-[#6b7280] dark:text-[#9ca3af]">Use a darker color scheme across the app</p>
+          </div>
+        </div>
+        <mat-slide-toggle
+          [checked]="(themeService.isDark$ | async) ?? false"
+          (change)="onToggleTheme($event.checked)">
+        </mat-slide-toggle>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="mb-4">
+    <mat-card-header><mat-card-title>Account</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5 [&>mat-icon]:!text-[#94a3b8]">
+          <mat-icon>person</mat-icon>
+          <div>
+            <p class="m-0 font-semibold text-[#1e293b] dark:text-[#e5e7eb]">Profile & password</p>
+            <p class="mt-0.5 text-[13px] text-[#6b7280] dark:text-[#9ca3af]">Update your personal information or change your password</p>
+          </div>
+        </div>
+        <a mat-stroked-button color="primary" routerLink="/profile">Open Profile</a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="mb-4">
+    <mat-card-header><mat-card-title>About</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <div class="flex justify-between border-b border-[#eee] py-2.5 last:border-b-0 dark:border-[#262c40]"><span>Application</span><span>Task Manager</span></div>
+      <div class="flex justify-between border-b border-[#eee] py-2.5 last:border-b-0 dark:border-[#262c40]"><span>Version</span><span>1.0.0</span></div>
+    </mat-card-content>
+  </mat-card>
+</div>

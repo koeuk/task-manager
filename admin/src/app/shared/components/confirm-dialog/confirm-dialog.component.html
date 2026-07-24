@@ -1,0 +1,21 @@
+<div class="px-2 pb-1 pt-2 text-center">
+  <div class="mx-auto mb-2 mt-1 flex h-14 w-14 items-center justify-center rounded-full"
+           [ngClass]="data.danger
+             ? 'bg-[#fee2e2] text-[#dc2626] dark:bg-[#3a1d1d] dark:text-[#f87171]'
+             : 'bg-[#e2e8f0] text-[#475569] dark:bg-[#262c40] dark:text-[#cbd5e1]'">
+    <mat-icon class="!h-[30px] !w-[30px] !text-[30px]">{{ data.icon || (data.danger ? 'warning' : 'help_outline') }}</mat-icon>
+  </div>
+  <h2 mat-dialog-title class="!justify-center !px-2 !py-0 !text-[20px]">{{ data.title }}</h2>
+  <mat-dialog-content>
+    <p class="mt-1 leading-[1.55] text-black/[0.65] dark:text-[#cbd0da]">{{ data.message }}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end" class="!gap-2 !px-2 !pb-1 !pt-3">
+    <button mat-button [mat-dialog-close]="false">{{ data.cancelText || 'Cancel' }}</button>
+    <button mat-flat-button
+            [color]="data.danger ? 'warn' : 'primary'"
+            [mat-dialog-close]="true"
+            cdkFocusInitial>
+      {{ data.confirmText || 'Confirm' }}
+    </button>
+  </mat-dialog-actions>
+</div>

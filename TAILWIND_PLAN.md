@@ -9,7 +9,8 @@ required reading before touching styles, because two of those constraints fail
 
 ## 1. Result
 
-**4,169 → 1,198 lines of component SCSS (−71%).** Six stylesheets deleted outright.
+**4,169 → 1,198 lines of component SCSS (−71%)**, plus **148 → 80 lines** of inline
+`styles: [...]` across nine more components. Six stylesheets deleted outright.
 
 | | Before | After |
 |---|---:|---:|
@@ -135,6 +136,36 @@ Tailwind *and* SCSS side by side, permanently.
 When a stylesheet was deleted, its `styleUrls` entry was removed from the
 component decorator too.
 
+### Inline `styles: [...]` components
+
+These have no `.scss` file, so a `find -name '*.scss'` inventory misses them
+entirely — which is exactly what happened on the first pass. All nine are now
+converted; each keeps a small `styles` block for what utilities cannot reach.
+
+| Component | Before | After |
+|---|---:|---:|
+| `admin/forgot-password` | 29 | 8 |
+| `user/forgot-password` | 29 | 9 |
+| `admin/confirm-dialog` | 22 | 9 |
+| `user/calendar` | 21 | 26 |
+| `user/settings` | 18 | 8 |
+| `admin/project-dialog` | 10 | 5 |
+| `admin/task-dialog` | 7 | 5 |
+| `admin/reset-password-dialog` | 7 | 6 |
+| `user/confirm-dialog` | 5 | 4 |
+
+`user/calendar` grew slightly: its grid-hairline trick, `.today`/`.other-month`
+cell states and `[ngClass]` priority colours all had to stay, and they now carry
+explanatory comments.
+
+**When auditing styles, search for both**:
+
+```bash
+find src -name '*.scss'
+grep -rl "styles:\s*\[" --include=*.ts src
+```
+
+
 Still worth doing: `user/shared/task-meta.ts` already centralises status and
 priority labels/colours. The chip colour maps that stayed in SCSS could likely be
 driven from it instead — that would remove most of the remaining `[ngClass]` maps.
@@ -192,6 +223,21 @@ Beyond the constraints in §2, these cost real time and will bite the next chang
   visible to the JIT — a *computed* one is not (§2.3).
 - **Verify with geometry, not just screenshots.** The 4–5px line-height drift was
   invisible by eye and obvious in `getBoundingClientRect()`.
+- **Run `ng build` from the app root.** Tailwind resolves `content: ['./src/**']`
+  against the **current working directory**, not the config file's location. A
+  build run from `admin/src/app` scans `admin/src/app/src/**`, matches nothing,
+  and emits **zero utilities** — the app builds "successfully" and renders
+  completely unstyled.
+- **Don't grep build output for `"bundle generation"`.** It matches
+  `Application bundle generation failed` as happily as `...complete`. Grep for
+  `✘` or the word `complete`.
+- **Backticks inside an inline `styles: [\`...\`]` block terminate the template
+  literal.** A CSS comment mentioning a property in backticks breaks the build
+  with a confusing `TS-991010: Failed to resolve styles` error.
+- **Scoped rules need their class kept.** `.row mat-form-field { flex: 1 }` only
+  matched fields *inside a row*; replacing `class="row"` with `class="flex gap-3"`
+  silently dropped the scope, and applying `flex-1` to every field instead grew
+  the dialog by 12px.
 
 ---
 
