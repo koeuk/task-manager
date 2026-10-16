@@ -39,6 +39,17 @@
         </span>
         <mat-icon class="user-caret !ml-auto !h-5 !w-5 !text-xl text-white/50">expand_less</mat-icon>
       </button>
+
+      <div *ngIf="!(currentUser$ | async)" class="flex items-center">
+        <button *ngIf="!collapsed" mat-flat-button color="primary" class="!w-full !rounded-xl !py-2.5 !text-xs !font-semibold" (click)="openAuthDialog('login')">
+          <mat-icon class="!mr-1 !h-4 !w-4 !text-base">login</mat-icon>
+          Sign In / Register
+        </button>
+        <button *ngIf="collapsed" mat-icon-button (click)="openAuthDialog('login')" matTooltip="Sign In / Register" matTooltipPosition="right"
+                class="!mx-auto !flex !h-10 !w-10 !items-center !justify-center !rounded-xl !bg-[#64748b] !text-white">
+          <mat-icon>login</mat-icon>
+        </button>
+      </div>
     </div>
 
     <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
@@ -71,12 +82,17 @@
         <mat-icon>{{ (themeService.isDark$ | async) ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
 
-      <button mat-icon-button matTooltip="Notifications" [matMenuTriggerFor]="notifMenu">
+      <button *ngIf="currentUser$ | async" mat-icon-button matTooltip="Notifications" [matMenuTriggerFor]="notifMenu">
         <mat-icon [matBadge]="notifications.length"
                   [matBadgeHidden]="!notifications.length"
                   matBadgeColor="warn" matBadgeSize="small">
           notifications
         </mat-icon>
+      </button>
+
+      <button *ngIf="!(currentUser$ | async)" mat-flat-button color="primary" class="!ml-2 !rounded-xl" (click)="openAuthDialog('login')">
+        <mat-icon class="!mr-1 !h-4 !w-4 !text-base">login</mat-icon>
+        <span class="max-[640px]:hidden">Sign In</span>
       </button>
 
       <mat-menu #notifMenu="matMenu" class="notif-menu">

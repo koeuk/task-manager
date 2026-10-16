@@ -84,21 +84,31 @@ export class TaskListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Only load tasks if authenticated
-    if (this.authService.isAuthenticated()) {
-      this.loadTasks();
-      this.loadProjects();
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(user => {
+        if (user) {
+          this.loadTasks();
+          this.loadProjects();
+        } else {
+          this.tasks = [];
+          this.projects = [];
+          this.total = 0;
+          this.loading = false;
+        }
+      });
 
-      this.searchControl.valueChanges
-        .pipe(
-          debounceTime(SEARCH_DEBOUNCE_MS),
-          distinctUntilChanged(),
-          takeUntilDestroyed(this.destroyRef)
-        )
-        .subscribe(() => this.reloadFromFirstPage());
-    } else {
-      this.loading = false;
-    }
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(SEARCH_DEBOUNCE_MS),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        if (this.authService.isAuthenticated()) {
+          this.reloadFromFirstPage();
+        }
+      });
   }
 
   get isAuthenticated(): boolean {
@@ -108,6 +118,13 @@ export class TaskListComponent implements OnInit {
   // ---------------------------------------------------------------- loading
 
   loadTasks(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.tasks = [];
+      this.total = 0;
+      this.loading = false;
+      return;
+    }
+
     this.loading = true;
     this.taskService.getTasks({
       search: this.searchControl.value || '',
@@ -129,6 +146,10 @@ export class TaskListComponent implements OnInit {
   }
 
   loadProjects(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.projects = [];
+      return;
+    }
     this.projectService.getProjects({ per_page: PROJECT_PICKER_LIMIT })
       .subscribe({ next: (res) => (this.projects = res.data) });
   }
@@ -136,7 +157,9 @@ export class TaskListComponent implements OnInit {
   // ------------------------------------------------------- filters & paging
 
   onFilterChange(): void {
-    this.reloadFromFirstPage();
+    if (this.authService.isAuthenticated()) {
+      this.reloadFromFirstPage();
+    }
   }
 
   onPage(event: PageEvent): void {
@@ -153,12 +176,18 @@ export class TaskListComponent implements OnInit {
 
   openCreate(): void {
     this.ifWritable(() => {
-      if (this.projects.length === 0) {
-        this.toast.info('Create a project first before adding tasks');
-        return;
-      }
-      this.openDialog(TaskFormDialogComponent, { width: '560px', data: { projects: this.projects } })
-        .subscribe(() => this.loadTasks());
+      this.projectService.getProjects({ per_page: PROJECT_PICKER_LIMIT }).subscribe({
+        next: (res) => {
+          this.projects = res.data;
+          if (this.projects.length === 0) {
+            this.toast.info('Create a project first before adding tasks');
+            return;
+          }
+          this.openDialog(TaskFormDialogComponent, { width: '560px', maxWidth: '95vw', data: { projects: this.projects } })
+            .subscribe(() => this.loadTasks());
+        },
+        error: () => this.toast.error('Failed to load projects')
+      });
     });
   }
 
@@ -171,7 +200,7 @@ export class TaskListComponent implements OnInit {
   editTask(task: Task, event: Event): void {
     event.stopPropagation();
     this.ifWritable(() => {
-      this.openDialog(TaskFormDialogComponent, { width: '560px', data: { task } })
+      this.openDialog(TaskFormDialogComponent, { width: '520px', maxWidth: '95vw', data: { task } })
         .subscribe(() => this.loadTasks());
     });
   }

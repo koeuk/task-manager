@@ -9,10 +9,19 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../../core/services/toast.service';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
 import { TaskService, TaskPayload } from '../../../core/services/task.service';
 import { toDateString, parseApiDate } from '../../../core/utils/date-utils';
+import {
+  STATUS_OPTIONS,
+  PRIORITY_OPTIONS,
+  statusLabel,
+  priorityLabel,
+  statusColor,
+  priorityColor
+} from '../../../core/utils/task-meta';
 
 export interface TaskFormData {
   task?: Task;
@@ -27,7 +36,7 @@ export interface TaskFormData {
   imports: [
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule, MatSelectModule, MatButtonModule, MatDatepickerModule,
-    MatNativeDateModule, MatProgressSpinnerModule
+    MatNativeDateModule, MatProgressSpinnerModule, MatIconModule
   ],
   templateUrl: './task-form-dialog.component.html'
 })
@@ -37,19 +46,13 @@ export class TaskFormDialogComponent implements OnInit {
   isEdit = false;
   showProjectSelect = false;
 
-  priorities: { value: TaskPriority; label: string }[] = [
-    { value: 'low', label: 'Low' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' },
-    { value: 'critical', label: 'Critical' }
-  ];
+  priorities = PRIORITY_OPTIONS;
+  statuses = STATUS_OPTIONS;
 
-  statuses: { value: TaskStatus; label: string }[] = [
-    { value: 'todo', label: 'To Do' },
-    { value: 'in_progress', label: 'In Progress' },
-    { value: 'review', label: 'Review' },
-    { value: 'completed', label: 'Completed' }
-  ];
+  priorityColor = priorityColor;
+  priorityLabel = priorityLabel;
+  statusColor = statusColor;
+  statusLabel = statusLabel;
 
   constructor(
     private fb: FormBuilder,
@@ -58,6 +61,10 @@ export class TaskFormDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<TaskFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: TaskFormData
   ) {}
+
+  close(): void {
+    this.dialogRef.close(null);
+  }
 
   ngOnInit(): void {
     const t = this.data?.task;

@@ -57,6 +57,6 @@ export class AuthInterceptor implements HttpInterceptor {
     const auth = this.injector.get(AuthService);
 
     auth.clearSession();
-    this.router.navigate(['/landing']);
+    this.router.navigate(['/dashboard']);
   }
 }

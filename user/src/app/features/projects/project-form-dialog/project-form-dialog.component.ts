@@ -9,10 +9,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../../core/services/toast.service';
 import { Project, ProjectStatus } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
 import { toDateString, parseApiDate } from '../../../core/utils/date-utils';
+import { PROJECT_STATUS_OPTIONS, projectStatusColor, statusLabel } from '../../../core/utils/task-meta';
 
 @Component({
   selector: 'app-project-form-dialog',
@@ -20,7 +22,7 @@ import { toDateString, parseApiDate } from '../../../core/utils/date-utils';
   imports: [
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule, MatSelectModule, MatButtonModule, MatDatepickerModule,
-    MatNativeDateModule, MatProgressSpinnerModule
+    MatNativeDateModule, MatProgressSpinnerModule, MatIconModule
   ],
   templateUrl: './project-form-dialog.component.html',
   styleUrls: ['./project-form-dialog.component.scss']
@@ -30,13 +32,9 @@ export class ProjectFormDialogComponent implements OnInit {
   saving = false;
   isEdit = false;
 
-  statuses: { value: ProjectStatus; label: string }[] = [
-    { value: 'planning', label: 'Planning' },
-    { value: 'active', label: 'Active' },
-    { value: 'on_hold', label: 'On Hold' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'archived', label: 'Archived' }
-  ];
+  statuses = PROJECT_STATUS_OPTIONS;
+  projectStatusColor = projectStatusColor;
+  statusLabel = statusLabel;
 
   constructor(
     private fb: FormBuilder,
@@ -45,6 +43,10 @@ export class ProjectFormDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<ProjectFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { project?: Project }
   ) {}
+
+  close(): void {
+    this.dialogRef.close(null);
+  }
 
   ngOnInit(): void {
     const p = this.data?.project;

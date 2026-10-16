@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { TaskService } from './task.service';
+import { AuthService } from './auth.service';
 import { Task } from '../models/project.model';
 import { daysFromToday } from '../utils/date-utils';
 
@@ -19,7 +20,10 @@ const DUE_SOON_DAYS = 3;
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private authService: AuthService
+  ) {}
 
   /**
    * Builds a real notification feed from the user's own tasks: anything not yet
@@ -27,6 +31,9 @@ export class NotificationService {
    * an empty feed means there's genuinely nothing needing attention.
    */
   loadNotifications(): Observable<AppNotification[]> {
+    if (!this.authService.isAuthenticated()) {
+      return of([]);
+    }
     return this.taskService.getTasks({ per_page: 100 }).pipe(
       map(res => this.buildFeed(res?.data ?? [])),
       catchError(() => of([]))

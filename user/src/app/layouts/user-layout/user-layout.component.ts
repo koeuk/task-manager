@@ -10,9 +10,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService, AppNotification } from '../../core/services/notification.service';
+import { LoginDialogComponent } from '../../features/auth/login-dialog/login-dialog.component';
 import { Observable } from 'rxjs';
 import { User } from '../../core/models/user.model';
 
@@ -62,13 +64,30 @@ export class UserLayoutComponent implements OnInit {
   constructor(
     private authService: AuthService,
     public themeService: ThemeService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private dialog: MatDialog
   ) {
     this.currentUser$ = this.authService.currentUser$;
   }
 
   ngOnInit(): void {
-    this.loadNotifications();
+    this.currentUser$.subscribe(user => {
+      if (user) {
+        this.loadNotifications();
+      } else {
+        this.notifications = [];
+      }
+    });
+  }
+
+  openAuthDialog(mode: 'login' | 'register' = 'login'): void {
+    this.dialog.open(LoginDialogComponent, {
+      width: '420px',
+      maxWidth: '95vw',
+      restoreFocus: true,
+      panelClass: 'auth-dialog',
+      data: { initialMode: mode }
+    });
   }
 
   loadNotifications(): void {

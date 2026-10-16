@@ -118,7 +118,7 @@ export class ProjectListComponent implements OnInit {
 
   openCreate(): void {
     this.ifWritable(() => {
-      this.openDialog(ProjectFormDialogComponent, { width: '520px', data: {} })
+      this.openDialog(ProjectFormDialogComponent, { width: '520px', maxWidth: '95vw', data: {} })
         .subscribe(() => this.loadProjects());
     });
   }
@@ -126,7 +126,7 @@ export class ProjectListComponent implements OnInit {
   openEdit(project: Project, event: Event): void {
     event.stopPropagation();
     this.ifWritable(() => {
-      this.openDialog(ProjectFormDialogComponent, { width: '520px', data: { project } })
+      this.openDialog(ProjectFormDialogComponent, { width: '520px', maxWidth: '95vw', data: { project } })
         .subscribe(() => this.loadProjects());
     });
   }

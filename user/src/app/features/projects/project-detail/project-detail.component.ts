@@ -181,7 +181,8 @@ export class ProjectDetailComponent implements OnInit {
   addTask(column: BoardColumn): void {
     this.ifWritable(() => {
       this.openDialog(TaskFormDialogComponent, {
-        width: '560px',
+        width: '520px',
+        maxWidth: '95vw',
         data: { projectId: this.projectId, taskListId: column.id }
       }).subscribe(() => this.loadProject());
     });
@@ -257,7 +258,7 @@ export class ProjectDetailComponent implements OnInit {
   // ---- Project ----
   editProject(): void {
     if (!this.project) return;
-    this.openDialog(ProjectFormDialogComponent, { width: '520px', data: { project: this.project } })
+    this.openDialog(ProjectFormDialogComponent, { width: '520px', maxWidth: '95vw', data: { project: this.project } })
       .subscribe(() => this.loadProject());
   }
 

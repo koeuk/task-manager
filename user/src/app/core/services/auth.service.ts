@@ -97,7 +97,7 @@ export class AuthService {
   private finishLogout(): void {
     this.clearToken();
     this.currentUserSubject.next(null);
-    this.router.navigate(['/landing']);
+    this.router.navigate(['/dashboard']);
   }
 
   getCurrentUser(): Observable<User> {

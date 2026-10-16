@@ -185,7 +185,7 @@ export class DashboardComponent implements OnInit {
         this.toast.info('Create a project first before adding tasks');
         return;
       }
-      this.openDialog(TaskFormDialogComponent, { width: '560px', data: { projects: this.projects } })
+      this.openDialog(TaskFormDialogComponent, { width: '520px', maxWidth: '95vw', data: { projects: this.projects } })
         .subscribe(() => this.refresh());
     });
   }

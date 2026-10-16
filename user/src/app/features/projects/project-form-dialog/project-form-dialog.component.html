@@ -1,54 +1,89 @@
-<h2 mat-dialog-title>{{ isEdit ? 'Edit Project' : 'New Project' }}</h2>
-
-<form [formGroup]="form" (ngSubmit)="save()">
-  <mat-dialog-content class="!flex flex-col min-w-[420px] pt-2 max-[520px]:!min-w-0">
-    <mat-form-field appearance="outline" class="w-full flex-1">
-      <mat-label>Project name</mat-label>
-      <input matInput formControlName="name" maxlength="255" required>
-      <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="w-full flex-1">
-      <mat-label>Description</mat-label>
-      <textarea matInput formControlName="description" rows="3"></textarea>
-    </mat-form-field>
-
-    <div class="flex gap-3 max-[520px]:flex-col max-[520px]:gap-0">
-      <mat-form-field appearance="outline" class="w-full flex-1">
-        <mat-label>Status</mat-label>
-        <mat-select formControlName="status">
-          <mat-option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="color-field w-[90px] max-[520px]:!w-full">
-        <mat-label>Color</mat-label>
-        <input matInput type="color" formControlName="color">
-      </mat-form-field>
+<div class="popup-card flex flex-col w-[520px] max-w-full">
+  <!-- Header -->
+  <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-[#262c40]">
+    <div class="flex items-center gap-3">
+      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
+        <mat-icon class="!h-5 !w-5 !text-[20px]">{{ isEdit ? 'edit_square' : 'folder_open' }}</mat-icon>
+      </div>
+      <div>
+        <h2 class="m-0 text-base font-semibold leading-tight text-slate-900 dark:text-[#e5e7eb]">
+          {{ isEdit ? 'Edit Project' : 'New Project' }}
+        </h2>
+        <p class="m-0 mt-0.5 text-xs text-slate-500 dark:text-[#9ca3af]">
+          {{ isEdit ? 'Update project details and timeline' : 'Create a new project workspace' }}
+        </p>
+      </div>
     </div>
-
-    <div class="flex gap-3 max-[520px]:flex-col max-[520px]:gap-0">
-      <mat-form-field appearance="outline" class="w-full flex-1">
-        <mat-label>Start date</mat-label>
-        <input matInput [matDatepicker]="startPicker" formControlName="start_date">
-        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-        <mat-datepicker #startPicker></mat-datepicker>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="w-full flex-1">
-        <mat-label>Due date</mat-label>
-        <input matInput [matDatepicker]="duePicker" formControlName="due_date">
-        <mat-datepicker-toggle matSuffix [for]="duePicker"></mat-datepicker-toggle>
-        <mat-datepicker #duePicker></mat-datepicker>
-      </mat-form-field>
-    </div>
-  </mat-dialog-content>
-
-  <mat-dialog-actions align="end">
-    <button mat-button type="button" [mat-dialog-close]="null" [disabled]="saving">Cancel</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="saving">
-      <mat-progress-spinner *ngIf="saving" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
-      <span>{{ isEdit ? 'Save changes' : 'Create project' }}</span>
+    <button mat-icon-button type="button" (click)="close()" class="!h-8 !w-8 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" aria-label="Close dialog">
+      <mat-icon class="!h-4 !w-4 !text-[18px]">close</mat-icon>
     </button>
-  </mat-dialog-actions>
-</form>
+  </div>
+
+  <!-- Form Body -->
+  <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col m-0">
+    <div class="flex flex-col gap-3.5 px-6 py-4 max-h-[68vh] overflow-y-auto">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>Project name</mat-label>
+        <input matInput formControlName="name" maxlength="255" placeholder="e.g. Website Redesign" required>
+        <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="2" placeholder="Add project overview or goals..."></textarea>
+      </mat-form-field>
+
+      <div class="grid grid-cols-[1fr,90px] gap-3 max-[520px]:grid-cols-1">
+        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-select-trigger>
+              <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full shrink-0" [style.background]="projectStatusColor(form.get('status')?.value)"></span>
+                <span>{{ statusLabel(form.get('status')?.value) }}</span>
+              </div>
+            </mat-select-trigger>
+            <mat-option *ngFor="let s of statuses" [value]="s.value">
+              <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full shrink-0" [style.background]="projectStatusColor(s.value)"></span>
+                <span>{{ s.label }}</span>
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="color-field w-full" subscriptSizing="dynamic">
+          <mat-label>Color</mat-label>
+          <input matInput type="color" formControlName="color">
+        </mat-form-field>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 max-[520px]:grid-cols-1">
+        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+          <mat-label>Start date</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="start_date" placeholder="MM/DD/YYYY">
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+          <mat-label>Due date</mat-label>
+          <input matInput [matDatepicker]="duePicker" formControlName="due_date" placeholder="MM/DD/YYYY">
+          <mat-datepicker-toggle matSuffix [for]="duePicker"></mat-datepicker-toggle>
+          <mat-datepicker #duePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Actions / Footer -->
+    <div class="flex items-center justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-6 py-3.5 dark:border-[#262c40] dark:bg-[#131826]">
+      <button mat-button type="button" (click)="close()" [disabled]="saving" class="!rounded-lg text-slate-600 dark:text-slate-300">
+        Cancel
+      </button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving" class="!rounded-lg !px-4">
+        <mat-progress-spinner *ngIf="saving" diameter="16" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
+        <span>{{ isEdit ? 'Save changes' : 'Create project' }}</span>
+      </button>
+    </div>
+  </form>
+</div>
