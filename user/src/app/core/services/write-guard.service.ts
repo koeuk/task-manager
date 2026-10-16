@@ -9,9 +9,9 @@ import { LoginDialogComponent } from '../../features/auth/login-dialog/login-dia
 export class WriteGuardService {
   constructor(private auth: AuthService, private dialog: MatDialog) {}
 
-  /** True when not authenticated (no account). */
+  /** True when not authenticated (guest mode removed). */
   get isGuest(): boolean {
-    return this.auth.isGuest;
+    return !this.auth.isAuthenticated();
   }
 
   /**
@@ -20,13 +20,13 @@ export class WriteGuardService {
    * only if they successfully sign in — so the caller can continue the action.
    */
   requireWrite(): Observable<boolean> {
-    if (!this.auth.isGuest) {
+    if (this.auth.isAuthenticated()) {
       return of(true);
     }
     return this.dialog
       .open(LoginDialogComponent, { width: '400px', restoreFocus: true, panelClass: 'auth-dialog' })
       .afterClosed()
-      .pipe(map(() => !this.auth.isGuest));
+      .pipe(map(() => this.auth.isAuthenticated()));
   }
 
   /**
@@ -36,7 +36,7 @@ export class WriteGuardService {
    * Usage: `if (this.writeGuard.blockGuest()) return;`
    */
   blockGuest(): boolean {
-    if (!this.auth.isGuest) {
+    if (this.auth.isAuthenticated()) {
       return false;
     }
     this.dialog.open(LoginDialogComponent, { width: '400px', restoreFocus: true, panelClass: 'auth-dialog' });

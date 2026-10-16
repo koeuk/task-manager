@@ -16,7 +16,6 @@ import { Task, Comment, TaskStatus } from '../../../core/models/project.model';
 import { TaskService } from '../../../core/services/task.service';
 import { CommentService } from '../../../core/services/comment.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { TaskFormDialogComponent } from '../task-form-dialog/task-form-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { STATUS_OPTIONS, statusLabel, priorityLabel, statusColor, priorityColor } from '../../../core/utils/task-meta';
@@ -61,7 +60,6 @@ export class TaskDetailDialogComponent implements OnInit {
     private taskService: TaskService,
     private commentService: CommentService,
     private authService: AuthService,
-    private writeGuard: WriteGuardService,
     private dialog: MatDialog,
     private toast: ToastService,
     private dialogRef: MatDialogRef<TaskDetailDialogComponent>,
@@ -94,7 +92,6 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   changeStatus(status: TaskStatus): void {
-    if (this.writeGuard.blockGuest()) { this.loadTask(); return; }
     this.taskService.updateStatus(this.task.id, status).subscribe({
       next: (res) => {
         this.task = { ...this.task, ...res.task };
@@ -105,7 +102,6 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   editTask(): void {
-    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(TaskFormDialogComponent, {
       width: '560px',
       data: { task: this.task }
@@ -119,7 +115,6 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   deleteTask(): void {
-    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -145,26 +140,22 @@ export class TaskDetailDialogComponent implements OnInit {
   addComment(): void {
     const text = this.newComment.trim();
     if (!text) return;
-    this.writeGuard.requireWrite().subscribe(ok => {
-      if (!ok) return;
-      this.postingComment = true;
-      this.commentService.createComment(this.task.id, text).subscribe({
-        next: () => {
-          this.newComment = '';
-          this.postingComment = false;
-          this.changed = true;
-          this.reloadComments();
-        },
-        error: () => {
-          this.postingComment = false;
-          this.toast.error('Failed to add comment');
-        }
-      });
+    this.postingComment = true;
+    this.commentService.createComment(this.task.id, text).subscribe({
+      next: () => {
+        this.newComment = '';
+        this.postingComment = false;
+        this.changed = true;
+        this.reloadComments();
+      },
+      error: () => {
+        this.postingComment = false;
+        this.toast.error('Failed to add comment');
+      }
     });
   }
 
   startEditComment(c: Comment): void {
-    if (this.writeGuard.blockGuest()) return;
     this.editingCommentId = c.id;
     this.editingText = c.comment;
   }
@@ -187,7 +178,6 @@ export class TaskDetailDialogComponent implements OnInit {
   }
 
   deleteComment(c: Comment): void {
-    if (this.writeGuard.blockGuest()) return;
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: { title: 'Delete comment', message: 'Delete this comment?', confirmText: 'Delete', danger: true }

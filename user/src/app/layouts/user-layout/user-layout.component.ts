@@ -13,7 +13,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService, AppNotification } from '../../core/services/notification.service';
-import { WriteGuardService } from '../../core/services/write-guard.service';
 import { Observable } from 'rxjs';
 import { User } from '../../core/models/user.model';
 
@@ -63,8 +62,7 @@ export class UserLayoutComponent implements OnInit {
   constructor(
     private authService: AuthService,
     public themeService: ThemeService,
-    private notificationService: NotificationService,
-    private writeGuard: WriteGuardService
+    private notificationService: NotificationService
   ) {
     this.currentUser$ = this.authService.currentUser$;
   }
@@ -90,21 +88,5 @@ export class UserLayoutComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
-  }
-
-  /** True when browsing as the shared guest account (no real login). */
-  get isGuest(): boolean {
-    return this.authService.isGuest;
-  }
-
-  /**
-   * Show the login form so a guest can sign into their own account.
-   *
-   * This must NOT log out first: clearing the token leaves the app with no
-   * session at all (the guest session is only established at bootstrap), so
-   * every subsequent request 401s until a full page reload.
-   */
-  login(): void {
-    this.writeGuard.blockGuest();
   }
 }

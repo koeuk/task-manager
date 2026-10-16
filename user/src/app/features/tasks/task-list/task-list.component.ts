@@ -21,6 +21,7 @@ import { ComponentType } from '@angular/cdk/portal';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
 import { TaskService } from '../../../core/services/task.service';
 import { ProjectService } from '../../../core/services/project.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TaskFormDialogComponent } from '../task-form-dialog/task-form-dialog.component';
@@ -75,6 +76,7 @@ export class TaskListComponent implements OnInit {
   constructor(
     private taskService: TaskService,
     private projectService: ProjectService,
+    private authService: AuthService,
     private dialog: MatDialog,
     private toast: ToastService,
     private writeGuard: WriteGuardService,
@@ -83,7 +85,7 @@ export class TaskListComponent implements OnInit {
 
   ngOnInit(): void {
     // Only load tasks if authenticated
-    if (!this.writeGuard.isGuest) {
+    if (this.authService.isAuthenticated()) {
       this.loadTasks();
       this.loadProjects();
 
@@ -100,7 +102,7 @@ export class TaskListComponent implements OnInit {
   }
 
   get isAuthenticated(): boolean {
-    return !this.writeGuard.isGuest;
+    return this.authService.isAuthenticated();
   }
 
   // ---------------------------------------------------------------- loading

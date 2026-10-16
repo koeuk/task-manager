@@ -137,17 +137,11 @@ class DemoDataSeeder extends Seeder
      *
      * Projects are scoped by ownership (Project::scopeVisibleTo), so without a
      * pivot row this data would be invisible to everyone except each project's
-     * owner — the seeder would look like it had silently done nothing. The guest
-     * account is included because the user portal signs in as it by default.
+     * owner — the seeder would look like it had silently done nothing.
      */
     private function grantAccess($projects, $users): void
     {
         $memberIds = $users->pluck('id')->all();
-
-        $guestId = User::where('email', 'guest@example.com')->value('id');
-        if ($guestId) {
-            $memberIds[] = $guestId;
-        }
 
         $pivot = array_fill_keys($memberIds, ['role' => 'editor']);
 

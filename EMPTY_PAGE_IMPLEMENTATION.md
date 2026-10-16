@@ -47,7 +47,17 @@ Implemented a feature where users without an account see an empty page with a pr
 - **Empty state UI**: Shows centered card with "Sign in to view your tasks on the calendar" message
 - **Conditional rendering**: All calendar content wrapped in `*ngIf="isAuthenticated"`
 
-## Backend (No Changes Required)
+## Backend Changes
+
+### 1. Database
+- **Deleted guest user**: Removed the `guest@example.com` user account from the database
+- **Command used**: `User::where('email', 'guest@example.com')->first()->delete()`
+
+### 2. Database Seeder (`backend/database/seeders/DemoDataSeeder.php`)
+- **Removed guest user reference**: Updated `grantAccess()` method to no longer look for and attach the guest user to demo projects
+- **Updated comments**: Removed mention of guest account in documentation
+
+### 3. Authentication Middleware
 The Laravel backend already has proper authentication middleware (`auth:sanctum`) protecting all data endpoints:
 - `/api/projects/*`
 - `/api/tasks/*`
@@ -88,6 +98,8 @@ Unauthenticated requests to these endpoints return 401 Unauthorized, ensuring no
 ⚠️ Bundle size warnings (existing, not related to this feature)
 
 ## Files Modified
+
+### Frontend
 1. `user/src/app/core/services/auth.service.ts`
 2. `user/src/app/core/guards/auth.guard.ts`
 3. `user/src/app/core/services/write-guard.service.ts`
@@ -101,6 +113,10 @@ Unauthenticated requests to these endpoints return 401 Unauthorized, ensuring no
 11. `user/src/app/features/tasks/task-list/task-list.component.html`
 12. `user/src/app/features/calendar/calendar.component.ts`
 13. `user/src/app/features/calendar/calendar.component.html`
+
+### Backend
+1. `backend/database/seeders/DemoDataSeeder.php`
+2. Database: Deleted `guest@example.com` user account
 
 ## Notes
 - The login/register pages remain public and accessible

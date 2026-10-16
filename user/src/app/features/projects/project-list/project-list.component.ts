@@ -20,6 +20,7 @@ import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dial
 import { ComponentType } from '@angular/cdk/portal';
 import { Project, ProjectStatus } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-dialog.component';
@@ -56,6 +57,7 @@ export class ProjectListComponent implements OnInit {
 
   constructor(
     private projectService: ProjectService,
+    private authService: AuthService,
     private dialog: MatDialog,
     private toast: ToastService,
     private router: Router,
@@ -65,7 +67,7 @@ export class ProjectListComponent implements OnInit {
 
   ngOnInit(): void {
     // Only load projects if authenticated
-    if (!this.writeGuard.isGuest) {
+    if (this.authService.isAuthenticated()) {
       this.loadProjects();
 
       this.searchControl.valueChanges
@@ -81,7 +83,7 @@ export class ProjectListComponent implements OnInit {
   }
 
   get isAuthenticated(): boolean {
-    return !this.writeGuard.isGuest;
+    return this.authService.isAuthenticated();
   }
 
   loadProjects(): void {

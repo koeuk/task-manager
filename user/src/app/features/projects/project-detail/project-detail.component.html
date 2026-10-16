@@ -60,7 +60,7 @@
 
       <div class="task-list min-h-10 overflow-y-auto px-2 pb-2 pt-1" cdkDropList [cdkDropListData]="col.tasks"
            (cdkDropListDropped)="drop($event, col)">
-        <div class="task-card mb-2 flex cursor-pointer gap-2.5 rounded-xl border px-3 py-2.5" *ngFor="let task of col.tasks" cdkDrag [cdkDragDisabled]="isGuest" (click)="openTask(task)">
+        <div class="task-card mb-2 flex cursor-pointer gap-2.5 rounded-xl border px-3 py-2.5" *ngFor="let task of col.tasks" cdkDrag (click)="openTask(task)">
           <span class="min-h-[28px] w-[3px] shrink-0 self-stretch rounded-sm" [style.background]="priorityColor(task.priority)"
                 [matTooltip]="priorityLabel(task.priority) + ' priority'"></span>
 
