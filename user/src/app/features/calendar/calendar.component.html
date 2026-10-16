@@ -1,23 +1,4 @@
 <div class="w-full">
-  <!-- Empty state for unauthenticated users -->
-  <div class="empty-state-container flex min-h-[500px] items-center justify-center" *ngIf="!isAuthenticated">
-    <mat-card class="empty-state-card max-w-md text-center">
-      <mat-card-content class="p-12">
-        <mat-icon class="!h-20 !w-20 !text-[80px] !text-[#cbd5e1] dark:!text-[#475569]">event</mat-icon>
-        <h2 class="mb-2 mt-4 text-[22px] font-bold text-[#1e293b] dark:text-[#e5e7eb]">Calendar</h2>
-        <p class="mb-6 text-[14px] text-[#6b7280] dark:text-[#9ca3af]">
-          Sign in to view your tasks on the calendar
-        </p>
-        <button mat-flat-button color="primary" onclick="location.reload()">
-          <mat-icon>login</mat-icon>
-          Sign In
-        </button>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Content for authenticated users -->
-  <ng-container *ngIf="isAuthenticated">
   <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
     <h1 class="m-0 text-[26px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb]">Calendar</h1>
     <div class="flex items-center gap-2">
@@ -64,5 +45,4 @@
       </div>
     </div>
   </mat-card>
-  </ng-container>
 </div>

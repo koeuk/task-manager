@@ -66,20 +66,29 @@ export class ProjectListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Only load projects if authenticated
-    if (this.authService.isAuthenticated()) {
-      this.loadProjects();
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(user => {
+        if (user) {
+          this.loadProjects();
+        } else {
+          this.projects = [];
+          this.total = 0;
+          this.loading = false;
+        }
+      });
 
-      this.searchControl.valueChanges
-        .pipe(
-          debounceTime(SEARCH_DEBOUNCE_MS),
-          distinctUntilChanged(),
-          takeUntilDestroyed(this.destroyRef)
-        )
-        .subscribe(() => this.reloadFromFirstPage());
-    } else {
-      this.loading = false;
-    }
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(SEARCH_DEBOUNCE_MS),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        if (this.authService.isAuthenticated()) {
+          this.reloadFromFirstPage();
+        }
+      });
   }
 
   get isAuthenticated(): boolean {
@@ -87,6 +96,13 @@ export class ProjectListComponent implements OnInit {
   }
 
   loadProjects(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.projects = [];
+      this.total = 0;
+      this.loading = false;
+      return;
+    }
+
     this.loading = true;
     this.projectService.getProjects({
       search: this.searchControl.value || '',
@@ -107,7 +123,9 @@ export class ProjectListComponent implements OnInit {
   }
 
   onStatusChange(): void {
-    this.reloadFromFirstPage();
+    if (this.authService.isAuthenticated()) {
+      this.reloadFromFirstPage();
+    }
   }
 
   onPage(event: PageEvent): void {

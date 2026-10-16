@@ -21,6 +21,7 @@ import { ProjectService } from '../../core/services/project.service';
 import { Task, Project } from '../../core/models/project.model';
 import { TaskFormDialogComponent } from '../tasks/task-form-dialog/task-form-dialog.component';
 import { TaskDetailDialogComponent } from '../tasks/task-detail-dialog/task-detail-dialog.component';
+import { ProjectFormDialogComponent } from '../projects/project-form-dialog/project-form-dialog.component';
 import { priorityColor, priorityLabel, projectStatusColor } from '../../core/utils/task-meta';
 import { daysFromToday } from '../../core/utils/date-utils';
 import { environment } from '../../../environments/environment';
@@ -85,19 +86,21 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Only load data if user is authenticated
-    if (this.authService.isAuthenticated()) {
-      this.loadDashboardData();
-      this.loadTasks();
-      this.loadProjects();
-    } else {
-      this.loading = false;
-      this.loadingTasks = false;
-    }
-    
-    // Assign unconditionally so the name clears on logout instead of going stale.
     this.authService.currentUser$.subscribe(user => {
       this.userName = user?.name ?? '';
+      if (user) {
+        this.loadDashboardData();
+        this.loadTasks();
+        this.loadProjects();
+      } else {
+        this.stats = null;
+        this.projects = [];
+        this.overdueTasks = [];
+        this.todayTasks = [];
+        this.upcomingTasks = [];
+        this.loading = false;
+        this.loadingTasks = false;
+      }
     });
   }
 
@@ -119,6 +122,11 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.stats = null;
+      this.loading = false;
+      return;
+    }
     this.http.get<DashboardStats>(`${environment.apiUrl}/dashboard`).subscribe({
       next: (data) => {
         this.stats = data;
@@ -129,12 +137,21 @@ export class DashboardComponent implements OnInit {
   }
 
   loadProjects(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.projects = [];
+      return;
+    }
     this.projectService.getProjects({ per_page: 100 }).subscribe({
       next: (res) => (this.projects = res.data ?? [])
     });
   }
 
   loadTasks(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.bucketTasks([]);
+      this.loadingTasks = false;
+      return;
+    }
     this.loadingTasks = true;
     this.taskService.getTasks({ per_page: 100 }).subscribe({
       next: (res) => {
@@ -181,17 +198,26 @@ export class DashboardComponent implements OnInit {
   /** Quick-add a task without leaving the dashboard. */
   quickAddTask(): void {
     this.ifWritable(() => {
-      if (!this.projects.length) {
-        this.toast.info('Create a project first before adding tasks');
-        return;
-      }
-      this.openDialog(TaskFormDialogComponent, { width: '520px', maxWidth: '95vw', data: { projects: this.projects } })
-        .subscribe(() => this.refresh());
+      this.projectService.getProjects({ per_page: 100 }).subscribe({
+        next: (res) => {
+          this.projects = res.data ?? [];
+          if (!this.projects.length) {
+            this.toast.info('Create a project first before adding tasks');
+            return;
+          }
+          this.openDialog(TaskFormDialogComponent, { width: '560px', maxWidth: '95vw', data: { projects: this.projects } })
+            .subscribe(() => this.refresh());
+        },
+        error: () => this.toast.error('Failed to load projects')
+      });
     });
   }
 
   createProject(): void {
-    this.ifWritable(() => this.router.navigate(['/projects']));
+    this.ifWritable(() => {
+      this.openDialog(ProjectFormDialogComponent, { width: '520px', maxWidth: '95vw', data: {} })
+        .subscribe(() => this.refresh());
+    });
   }
 
   calculateProgress(): number {

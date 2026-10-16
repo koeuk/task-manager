@@ -14,14 +14,15 @@
   <div class="px-5 py-4 text-sm leading-relaxed text-slate-600 dark:text-[#cbd0da]">
     {{ data.message }}
   </div>
-  <div class="flex items-center justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-5 py-3.5 dark:border-[#262c40] dark:bg-[#131826]">
-    <button mat-button [mat-dialog-close]="false" class="!rounded-lg text-slate-600 dark:text-slate-300">
+  <div class="flex items-center justify-end gap-3.5 border-t border-slate-100 bg-slate-50/70 px-5 py-3.5 dark:border-[#262c40] dark:bg-[#131826]">
+    <button mat-button [mat-dialog-close]="false"
+            class="!min-w-[84px] !h-9 !rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800">
       {{ data.cancelText || 'Cancel' }}
     </button>
     <button mat-flat-button
             [color]="data.danger ? 'warn' : 'primary'"
             [mat-dialog-close]="true"
-            class="!rounded-lg !px-4">
+            class="!min-w-[104px] !h-9 !rounded-lg !px-5 shadow-sm">
       {{ data.confirmText || 'Confirm' }}
     </button>
   </div>

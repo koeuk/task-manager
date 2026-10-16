@@ -21,6 +21,7 @@ import { Project, Task } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
 import { TaskService, ReorderItem } from '../../../core/services/task.service';
 import { TaskListService } from '../../../core/services/task-list.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { WriteGuardService } from '../../../core/services/write-guard.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ProjectFormDialogComponent } from '../project-form-dialog/project-form-dialog.component';
@@ -72,6 +73,7 @@ export class ProjectDetailComponent implements OnInit {
     private projectService: ProjectService,
     private taskService: TaskService,
     private taskListService: TaskListService,
+    private authService: AuthService,
     private dialog: MatDialog,
     private toast: ToastService,
     private writeGuard: WriteGuardService
@@ -79,10 +81,27 @@ export class ProjectDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.projectId = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadProject();
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.loadProject();
+      } else {
+        this.project = null;
+        this.loading = false;
+      }
+    });
+  }
+
+  get isAuthenticated(): boolean {
+    return this.authService.isAuthenticated();
   }
 
   loadProject(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.project = null;
+      this.loading = false;
+      return;
+    }
+
     this.loading = true;
     this.projectService.getProject(this.projectId).subscribe({
       next: (project) => {

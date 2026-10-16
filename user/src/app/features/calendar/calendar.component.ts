@@ -50,13 +50,15 @@ export class CalendarComponent implements OnInit {
 
   ngOnInit(): void {
     this.viewDate.setDate(1);
-    // Only load tasks if authenticated
-    if (this.authService.isAuthenticated()) {
-      this.loadTasks();
-    } else {
-      this.buildGrid();
-      this.loading = false;
-    }
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.loadTasks();
+      } else {
+        this.tasksByDay.clear();
+        this.buildGrid();
+        this.loading = false;
+      }
+    });
   }
 
   get isAuthenticated(): boolean {
@@ -64,6 +66,13 @@ export class CalendarComponent implements OnInit {
   }
 
   loadTasks(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.tasksByDay.clear();
+      this.buildGrid();
+      this.loading = false;
+      return;
+    }
+
     this.loading = true;
     this.taskService.getTasks({ per_page: 500 }).subscribe({
       next: (res) => {

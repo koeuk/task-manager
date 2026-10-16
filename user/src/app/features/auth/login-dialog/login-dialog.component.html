@@ -72,9 +72,9 @@
       </div>
     </mat-dialog-content>
 
-    <mat-dialog-actions align="end" class="!px-0 !pb-1 !pt-2">
-      <button mat-button type="button" (click)="cancel()" [disabled]="loading">Cancel</button>
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading">
+    <mat-dialog-actions align="end" class="!px-0 !pb-1 !pt-2 !flex !gap-3.5">
+      <button mat-button type="button" (click)="cancel()" [disabled]="loading" class="!min-w-[84px] !h-9">Cancel</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading" class="!min-w-[108px] !h-9 shadow-sm">
         <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
         <span>Sign In</span>
       </button>
@@ -135,9 +135,9 @@
       </p>
     </mat-dialog-content>
 
-    <mat-dialog-actions align="end" class="!px-0 !pb-1 !pt-2">
-      <button mat-button type="button" (click)="cancel()" [disabled]="loading">Cancel</button>
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading">
+    <mat-dialog-actions align="end" class="!px-0 !pb-1 !pt-2 !flex !gap-3.5">
+      <button mat-button type="button" (click)="cancel()" [disabled]="loading" class="!min-w-[84px] !h-9">Cancel</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loading" class="!min-w-[130px] !h-9 shadow-sm">
         <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
         <span>Create Account</span>
       </button>

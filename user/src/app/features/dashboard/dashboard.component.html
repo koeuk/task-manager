@@ -1,23 +1,4 @@
 <div class="w-full">
-  <!-- Empty state for unauthenticated users -->
-  <div class="empty-state-container flex min-h-[500px] items-center justify-center" *ngIf="!isAuthenticated">
-    <mat-card class="empty-state-card max-w-md text-center">
-      <mat-card-content class="p-12">
-        <mat-icon class="!h-20 !w-20 !text-[80px] !text-[#cbd5e1] dark:!text-[#475569]">assignment_outlined</mat-icon>
-        <h2 class="mb-2 mt-4 text-[22px] font-bold text-[#1e293b] dark:text-[#e5e7eb]">Welcome to Task Manager</h2>
-        <p class="mb-6 text-[14px] text-[#6b7280] dark:text-[#9ca3af]">
-          Sign in or create an account to start managing your tasks and projects
-        </p>
-        <button mat-flat-button color="primary" (click)="quickAddTask()">
-          <mat-icon>login</mat-icon>
-          Sign In
-        </button>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Content for authenticated users -->
-  <ng-container *ngIf="isAuthenticated">
   <!-- Header -->
   <div class="mb-5 flex items-start justify-between gap-4 max-[640px]:flex-col max-[640px]:items-stretch">
     <div>
@@ -150,7 +131,6 @@
       </mat-card>
     </div>
   </div>
-  </ng-container>
 </div>
 
 <!-- ===== Reusable task rows ===== -->
