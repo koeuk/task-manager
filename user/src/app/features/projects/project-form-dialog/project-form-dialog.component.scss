@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 // Layout lives as Tailwind utilities in the template. This remains because it
 // styles the native colour input that Material renders inside the form field.
 .color-field input[type="color"] {

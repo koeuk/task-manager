@@ -23,7 +23,13 @@ export interface LoginDialogData {
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
   ],
-  templateUrl: './login-dialog.component.html'
+  templateUrl: './login-dialog.component.html',
+  styles: [`
+    :host {
+      display: block;
+      width: 100%;
+    }
+  `]
 })
 export class LoginDialogComponent {
   mode: 'login' | 'register' = 'login';

@@ -38,7 +38,13 @@ export interface TaskFormData {
     MatInputModule, MatSelectModule, MatButtonModule, MatDatepickerModule,
     MatNativeDateModule, MatProgressSpinnerModule, MatIconModule
   ],
-  templateUrl: './task-form-dialog.component.html'
+  templateUrl: './task-form-dialog.component.html',
+  styles: [`
+    :host {
+      display: block;
+      width: 100%;
+    }
+  `]
 })
 export class TaskFormDialogComponent implements OnInit {
   form!: FormGroup;
