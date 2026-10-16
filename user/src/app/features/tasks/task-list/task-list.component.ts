@@ -81,16 +81,25 @@ export class TaskListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadTasks();
-    this.loadProjects();
+    // Only load tasks if authenticated
+    if (!this.writeGuard.isGuest) {
+      this.loadTasks();
+      this.loadProjects();
 
-    this.searchControl.valueChanges
-      .pipe(
-        debounceTime(SEARCH_DEBOUNCE_MS),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(() => this.reloadFromFirstPage());
+      this.searchControl.valueChanges
+        .pipe(
+          debounceTime(SEARCH_DEBOUNCE_MS),
+          distinctUntilChanged(),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe(() => this.reloadFromFirstPage());
+    } else {
+      this.loading = false;
+    }
+  }
+
+  get isAuthenticated(): boolean {
+    return !this.writeGuard.isGuest;
   }
 
   // ---------------------------------------------------------------- loading

@@ -12,8 +12,6 @@ import { environment } from '../../../environments/environment';
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private userKey = 'auth_user';
-  /** Shared guest identity used when nobody has logged in (public/guest mode). */
-  private readonly guestCredentials = { email: 'guest@example.com', password: 'guest-access-123' };
   private currentUserSubject = new BehaviorSubject<User | null>(this.readStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -94,21 +92,12 @@ export class AuthService {
   }
 
   /**
-   * Clear the session and drop back to guest browsing.
-   *
-   * Re-establishing the guest session is essential: this app is designed to be
-   * usable without logging in, but the guest session is otherwise only created
-   * once at bootstrap. Without this, signing out leaves the app with no token
-   * and every request 401s until a full page reload. Navigation happens after
-   * the guest session resolves so the dashboard loads with a usable token.
+   * Clear the session and navigate to dashboard (which will show empty state).
    */
   private finishLogout(): void {
     this.clearToken();
     this.currentUserSubject.next(null);
-
-    this.ensureGuestSession().then(() => {
-      this.router.navigate(['/dashboard']);
-    });
+    this.router.navigate(['/dashboard']);
   }
 
   getCurrentUser(): Observable<User> {
@@ -144,31 +133,10 @@ export class AuthService {
   }
 
   /**
-   * Ensure there is an active session. If no token is stored, sign in silently as
-   * the shared guest account so the app is usable without an explicit login.
-   * Always resolves (even on failure) so app bootstrap is never blocked.
-   */
-  ensureGuestSession(): Promise<void> {
-    if (this.getToken()) {
-      return Promise.resolve();
-    }
-    return new Promise<void>((resolve) => {
-      this.login(this.guestCredentials).subscribe({
-        next: () => resolve(),
-        error: () => resolve()
-      });
-    });
-  }
-
-  /**
-   * True unless a real (non-guest) user is signed in.
-   *
-   * A missing user must count as a guest: otherwise a null session (e.g. right
-   * after a failed login) would read as "not a guest" and slip past the write gate.
+   * True when no user is signed in (not authenticated).
    */
   get isGuest(): boolean {
-    const user = this.currentUserValue;
-    return !user || user.email === this.guestCredentials.email;
+    return !this.isAuthenticated();
   }
 
   isAuthenticated(): boolean {

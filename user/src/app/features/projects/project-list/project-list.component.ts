@@ -64,15 +64,24 @@ export class ProjectListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadProjects();
+    // Only load projects if authenticated
+    if (!this.writeGuard.isGuest) {
+      this.loadProjects();
 
-    this.searchControl.valueChanges
-      .pipe(
-        debounceTime(SEARCH_DEBOUNCE_MS),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(() => this.reloadFromFirstPage());
+      this.searchControl.valueChanges
+        .pipe(
+          debounceTime(SEARCH_DEBOUNCE_MS),
+          distinctUntilChanged(),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe(() => this.reloadFromFirstPage());
+    } else {
+      this.loading = false;
+    }
+  }
+
+  get isAuthenticated(): boolean {
+    return !this.writeGuard.isGuest;
   }
 
   loadProjects(): void {

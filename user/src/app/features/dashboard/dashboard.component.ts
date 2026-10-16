@@ -85,9 +85,16 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
-    this.loadTasks();
-    this.loadProjects();
+    // Only load data if user is authenticated
+    if (this.authService.isAuthenticated()) {
+      this.loadDashboardData();
+      this.loadTasks();
+      this.loadProjects();
+    } else {
+      this.loading = false;
+      this.loadingTasks = false;
+    }
+    
     // Assign unconditionally so the name clears on logout instead of going stale.
     this.authService.currentUser$.subscribe(user => {
       this.userName = user?.name ?? '';
@@ -104,6 +111,11 @@ export class DashboardComponent implements OnInit {
   /** Nothing due, nothing late — used for the all-clear state. */
   get hasNothingDue(): boolean {
     return !this.overdueTasks.length && !this.todayTasks.length && !this.upcomingTasks.length;
+  }
+
+  /** Check if user is authenticated (has an account) */
+  get isAuthenticated(): boolean {
+    return this.authService.isAuthenticated();
   }
 
   loadDashboardData(): void {

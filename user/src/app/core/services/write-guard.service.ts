@@ -9,15 +9,15 @@ import { LoginDialogComponent } from '../../features/auth/login-dialog/login-dia
 export class WriteGuardService {
   constructor(private auth: AuthService, private dialog: MatDialog) {}
 
-  /** True when browsing as the shared guest account. */
+  /** True when not authenticated (no account). */
   get isGuest(): boolean {
     return this.auth.isGuest;
   }
 
   /**
-   * Ensure the current user may perform a write (create / edit). Real users emit
-   * `true` immediately. Guests get the login dialog and emit `true` only if they
-   * successfully sign into a real account — so the caller can continue the action.
+   * Ensure the current user may perform a write (create / edit). Authenticated users
+   * emit `true` immediately. Unauthenticated users get the login dialog and emit `true`
+   * only if they successfully sign in — so the caller can continue the action.
    */
   requireWrite(): Observable<boolean> {
     if (!this.auth.isGuest) {
@@ -30,8 +30,9 @@ export class WriteGuardService {
   }
 
   /**
-   * Synchronous guard for write actions. If the current user is a guest, opens the
-   * login dialog and returns `true` (meaning: block the action). Real users get `false`.
+   * Synchronous guard for write actions. If the current user is not authenticated,
+   * opens the login dialog and returns `true` (meaning: block the action).
+   * Authenticated users get `false`.
    * Usage: `if (this.writeGuard.blockGuest()) return;`
    */
   blockGuest(): boolean {
