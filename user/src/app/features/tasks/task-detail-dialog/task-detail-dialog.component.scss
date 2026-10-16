@@ -5,12 +5,7 @@
 
 :host {
   display: block;
-  width: 560px;
-  max-width: 100%;
-}
-
-@media (max-width: 600px) {
-  :host { width: 100%; }
+  width: 100%;
 }
 
 // Icon sizing inside the action buttons (Material sets these itself)

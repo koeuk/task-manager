@@ -200,7 +200,7 @@ export class ProjectDetailComponent implements OnInit {
   addTask(column: BoardColumn): void {
     this.ifWritable(() => {
       this.openDialog(TaskFormDialogComponent, {
-        width: '520px',
+        width: '540px',
         maxWidth: '95vw',
         data: { projectId: this.projectId, taskListId: column.id }
       }).subscribe(() => this.loadProject());

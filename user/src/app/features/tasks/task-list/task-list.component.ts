@@ -183,7 +183,7 @@ export class TaskListComponent implements OnInit {
             this.toast.info('Create a project first before adding tasks');
             return;
           }
-          this.openDialog(TaskFormDialogComponent, { width: '560px', maxWidth: '95vw', data: { projects: this.projects } })
+          this.openDialog(TaskFormDialogComponent, { width: '540px', maxWidth: '95vw', data: { projects: this.projects } })
             .subscribe(() => this.loadTasks());
         },
         error: () => this.toast.error('Failed to load projects')
@@ -200,7 +200,7 @@ export class TaskListComponent implements OnInit {
   editTask(task: Task, event: Event): void {
     event.stopPropagation();
     this.ifWritable(() => {
-      this.openDialog(TaskFormDialogComponent, { width: '520px', maxWidth: '95vw', data: { task } })
+      this.openDialog(TaskFormDialogComponent, { width: '540px', maxWidth: '95vw', data: { task } })
         .subscribe(() => this.loadTasks());
     });
   }
