@@ -24,7 +24,7 @@ export class WriteGuardService {
       return of(true);
     }
     return this.dialog
-      .open(LoginDialogComponent, { width: '400px', restoreFocus: true, panelClass: 'auth-dialog' })
+      .open(LoginDialogComponent, { width: '420px', maxWidth: '95vw', restoreFocus: true, panelClass: 'auth-dialog' })
       .afterClosed()
       .pipe(map(() => this.auth.isAuthenticated()));
   }
@@ -38,7 +38,7 @@ export class WriteGuardService {
     if (this.auth.isAuthenticated()) {
       return false;
     }
-    this.dialog.open(LoginDialogComponent, { width: '400px', restoreFocus: true, panelClass: 'auth-dialog' });
+    this.dialog.open(LoginDialogComponent, { width: '420px', maxWidth: '95vw', restoreFocus: true, panelClass: 'auth-dialog' });
     return true;
   }
 }

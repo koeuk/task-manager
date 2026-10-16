@@ -108,3 +108,12 @@
     </div>
   </div>
 </div>
+
+<div class="rounded-xl border border-[#edeff2] bg-white px-5 py-14 text-center text-[#9ca3af] dark:border-[#262c40] dark:bg-[#171d2e]" *ngIf="!loading && !project">
+  <mat-icon class="!h-11 !w-11 !text-[44px] opacity-45">folder_open</mat-icon>
+  <h3 class="mb-1 mt-3 text-[17px] text-[#1e293b] dark:text-[#e5e7eb]">Project not found</h3>
+  <p class="mb-4 mt-0 text-[13.5px]">This project does not exist or you must sign in to view it.</p>
+  <button mat-stroked-button color="primary" (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon> Back to Projects
+  </button>
+</div>
