@@ -1,0 +1,28 @@
+<div class="landing-container">
+  <mat-card class="welcome-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>task_alt</mat-icon>
+        <span>Welcome to Task Management</span>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="welcome-message">
+        Organize your projects, collaborate with your team, and track your progress efficiently.
+      </p>
+      <p class="subtitle">
+        You need an account to access the task management system.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="openLogin()">
+        <mat-icon>login</mat-icon>
+        Login
+      </button>
+      <button mat-raised-button color="accent" (click)="goToRegister()">
+        <mat-icon>person_add</mat-icon>
+        Register
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

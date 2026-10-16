@@ -92,12 +92,12 @@ export class AuthService {
   }
 
   /**
-   * Clear the session and navigate to dashboard (which will show empty state).
+   * Clear the session and navigate to landing page.
    */
   private finishLogout(): void {
     this.clearToken();
     this.currentUserSubject.next(null);
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/landing']);
   }
 
   getCurrentUser(): Observable<User> {
@@ -130,13 +130,6 @@ export class AuthService {
 
   resetPassword(data: { email: string; token: string; password: string; password_confirmation: string }): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, data);
-  }
-
-  /**
-   * True when no user is signed in (not authenticated).
-   */
-  get isGuest(): boolean {
-    return !this.isAuthenticated();
   }
 
   isAuthenticated(): boolean {

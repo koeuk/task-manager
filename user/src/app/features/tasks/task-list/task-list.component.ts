@@ -15,6 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { ComponentType } from '@angular/cdk/portal';
 import { Task, Project, TaskStatus, TaskPriority } from '../../../core/models/project.model';
@@ -43,7 +44,7 @@ const PROJECT_PICKER_LIMIT = 100;
     CommonModule, ReactiveFormsModule, MatTableModule, MatPaginatorModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule,
     MatButtonModule, MatMenuModule, MatProgressSpinnerModule, MatTooltipModule,
-    MatCheckboxModule
+    MatCheckboxModule, MatCardModule
   ],
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss']

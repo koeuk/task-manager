@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TaskService } from '../../core/services/task.service';
+import { WriteGuardService } from '../../core/services/write-guard.service';
 import { Task } from '../../core/models/project.model';
 import { TaskDetailDialogComponent } from '../tasks/task-detail-dialog/task-detail-dialog.component';
 
@@ -43,12 +44,23 @@ export class CalendarComponent implements OnInit {
 
   constructor(
     private taskService: TaskService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private writeGuard: WriteGuardService
   ) {}
 
   ngOnInit(): void {
     this.viewDate.setDate(1);
-    this.loadTasks();
+    // Only load tasks if authenticated
+    if (!this.writeGuard.isGuest) {
+      this.loadTasks();
+    } else {
+      this.buildGrid();
+      this.loading = false;
+    }
+  }
+
+  get isAuthenticated(): boolean {
+    return !this.writeGuard.isGuest;
   }
 
   loadTasks(): void {
