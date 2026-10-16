@@ -110,15 +110,7 @@ The two apps authenticate very differently.
 
 **Admin** has a real login and rejects non-`admin` roles client-side in `auth.service.ts`.
 
-**User is guest-first.** An `APP_INITIALIZER` in `user/src/app/app.config.ts` calls
-`ensureGuestSession()`, which silently logs into a hardcoded shared account defined in
-`user/src/app/core/services/auth.service.ts`. `authGuard` never blocks. Write actions are
-gated only by `user/src/app/core/services/write-guard.service.ts`, which pops a login dialog.
-
-That gate is **UI-only**. The backend has no concept of a guest — the guest token is an
-ordinary `user` account, so the API happily accepts writes that the dialog appears to block.
-What limits it is project visibility (see Authorization), not the write-guard. Don't treat
-the write-guard as a security boundary.
+**User requires authentication.** Routes are protected by `authGuard` which redirects unauthenticated visitors to `/landing`. Users must sign in or register to access the dashboard and their projects/tasks.
 
 Both apps store the Sanctum bearer token in `localStorage` under `auth_token`. The
 `AuthInterceptor` injects `Injector` rather than `AuthService` to break a construction cycle,

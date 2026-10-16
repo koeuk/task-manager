@@ -289,7 +289,7 @@ export class ProjectDetailComponent implements OnInit {
 
   // -------------------------------------------------------------- internals
 
-  /** Run `action` only once the write guard grants access (pops login if guest). */
+  /** Run `action` when write access is confirmed. */
   private ifWritable(action: () => void): void {
     this.writeGuard.requireWrite().subscribe(allowed => {
       if (allowed) action();

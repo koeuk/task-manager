@@ -33,7 +33,6 @@ export class WriteGuardService {
    * Synchronous guard for write actions. If the current user is not authenticated,
    * opens the login dialog and returns `true` (meaning: block the action).
    * Authenticated users get `false`.
-   * Usage: `if (this.writeGuard.blockGuest()) return;`
    */
   blockGuest(): boolean {
     if (this.auth.isAuthenticated()) {

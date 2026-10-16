@@ -41,11 +41,7 @@ export class TaskDetailDialogComponent implements OnInit {
   editingText = '';
   changed = false;
 
-  /**
-   * Read live rather than snapshotting in ngOnInit: the write gate can log the
-   * user in while this dialog is open, which would otherwise leave this holding
-   * the previous (guest) id and mis-attribute comment ownership.
-   */
+  /** Current authenticated user ID. */
   get currentUserId(): number | null {
     return this.authService.currentUserValue?.id ?? null;
   }

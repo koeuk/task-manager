@@ -30,7 +30,7 @@ npm start
 **Access:** http://localhost:4200
 
 **Features:**
-- Auto-login as guest user
+- User registration and authentication
 - Project and task management
 - Dashboard with statistics
 - Light/dark mode toggle
