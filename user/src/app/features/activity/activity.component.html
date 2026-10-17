@@ -1,0 +1,215 @@
+<div class="mx-auto max-w-5xl pb-12">
+  <!-- Page Header -->
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm shadow-blue-500/20">
+        <mat-icon class="!h-6 !w-6 !text-[24px]">history</mat-icon>
+      </div>
+      <div>
+        <h1 class="m-0 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Activity Feed</h1>
+        <p class="m-0 text-xs text-slate-500 dark:text-slate-400">
+          Live stream of updates, task completions, and team collaboration across your workspaces
+        </p>
+      </div>
+    </div>
+
+    <button mat-icon-button (click)="loadActivities(currentPage)" matTooltip="Refresh feed" [disabled]="loading">
+      <mat-icon [class.animate-spin]="loading">refresh</mat-icon>
+    </button>
+  </div>
+
+  <!-- Filters Bar -->
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+    <!-- Action Pills -->
+    <div class="flex flex-wrap items-center gap-1.5">
+      <button type="button"
+              (click)="setFilter('')"
+              class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+              [ngClass]="actionFilter === '' ? 'bg-slate-900 text-white shadow-xs dark:bg-slate-700' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">
+        All Actions
+      </button>
+      <button type="button"
+              (click)="setFilter('created')"
+              class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+              [ngClass]="actionFilter === 'created' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">
+        Created
+      </button>
+      <button type="button"
+              (click)="setFilter('updated')"
+              class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+              [ngClass]="actionFilter === 'updated' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">
+        Updated
+      </button>
+      <button type="button"
+              (click)="setFilter('status_changed')"
+              class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+              [ngClass]="actionFilter === 'status_changed' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">
+        Status
+      </button>
+      <button type="button"
+              (click)="setFilter('completed')"
+              class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+              [ngClass]="actionFilter === 'completed' ? 'bg-green-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">
+        Completed
+      </button>
+      <button type="button"
+              (click)="setFilter('comment_added')"
+              class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+              [ngClass]="actionFilter === 'comment_added' ? 'bg-purple-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">
+        Comments
+      </button>
+    </div>
+
+    <!-- Entity Filters -->
+    <div class="flex items-center gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+      <button type="button"
+              (click)="setEntityFilter('')"
+              class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+              [ngClass]="entityFilter === '' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+        All
+      </button>
+      <button type="button"
+              (click)="setEntityFilter('Task')"
+              class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+              [ngClass]="entityFilter === 'Task' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+        Tasks
+      </button>
+      <button type="button"
+              (click)="setEntityFilter('Project')"
+              class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+              [ngClass]="entityFilter === 'Project' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+        Projects
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex flex-col items-center justify-center py-20">
+    <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+    <span class="mt-3 text-xs text-slate-500 dark:text-slate-400">Loading activities...</span>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && activities.length === 0"
+       class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-20 text-center dark:border-slate-800 dark:bg-slate-900/60">
+    <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+      <mat-icon class="!h-8 !w-8 !text-[32px]">history_edu</mat-icon>
+    </div>
+    <h3 class="m-0 text-base font-bold text-slate-900 dark:text-white">No activity records found</h3>
+    <p class="mb-4 mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
+      There is no activity logged matching your current filter settings.
+    </p>
+    <button mat-stroked-button (click)="setFilter(''); setEntityFilter('')" *ngIf="actionFilter || entityFilter">
+      Clear all filters
+    </button>
+  </div>
+
+  <!-- Timeline Feed -->
+  <div *ngIf="!loading && activities.length > 0" class="relative pl-6 before:absolute before:bottom-3 before:left-2.5 before:top-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+    <div *ngFor="let act of activities" class="group relative mb-4">
+      <!-- Point icon -->
+      <div class="absolute -left-[27px] top-4 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow-sm dark:border-slate-900"
+           [ngClass]="getActionBadge(act.action).bg">
+        <mat-icon class="!h-3.5 !w-3.5 !text-[15px]" [ngClass]="getActionBadge(act.action).text">
+          {{ getActionIcon(act.action) }}
+        </mat-icon>
+      </div>
+
+      <!-- Activity Card -->
+      <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- User avatar -->
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-white shadow-xs dark:bg-slate-700">
+              {{ (act.user?.name || 'S')[0] | uppercase }}
+            </span>
+            <span class="text-xs font-semibold text-slate-900 dark:text-slate-100">
+              {{ act.user?.name || 'System' }}
+            </span>
+            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium"
+                  [ngClass]="[getActionBadge(act.action).bg, getActionBadge(act.action).text]">
+              {{ getActionBadge(act.action).label }}
+            </span>
+            <span *ngIf="act.entity_type" class="text-[11px] text-slate-400 dark:text-slate-500">
+              on {{ act.entity_type }}
+            </span>
+          </div>
+
+          <!-- Timestamp -->
+          <span class="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500" [matTooltip]="act.created_at | date:'medium'">
+            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">schedule</mat-icon>
+            {{ relativeTime(act.created_at) }}
+          </span>
+        </div>
+
+        <!-- Description -->
+        <p class="mb-0 mt-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+          {{ act.description }}
+        </p>
+
+        <!-- Linked Targets: Project and/or Task -->
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <!-- Project Link -->
+          <a *ngIf="act.project"
+             [routerLink]="['/projects', act.project.id]"
+             class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 no-underline transition-colors hover:border-slate-300 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800">
+            <span class="h-2 w-2 rounded-full" [style.background]="act.project.color || '#3b82f6'"></span>
+            <span>{{ act.project.name }}</span>
+          </a>
+
+          <!-- Task Target Button -->
+          <button *ngIf="act.task"
+                  type="button"
+                  (click)="openTask(act.task)"
+                  class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/70 px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/60">
+            <mat-icon class="!h-3.5 !w-3.5 !text-[15px]">task_alt</mat-icon>
+            <span>Task: {{ act.task.title }}</span>
+            <mat-icon class="!h-3 !w-3 !text-[12px] opacity-70">open_in_new</mat-icon>
+          </button>
+        </div>
+
+        <!-- Changes / Properties Diff tags -->
+        <div *ngIf="act.properties" class="mt-2.5 flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+          <span *ngIf="act.properties['from_status'] && act.properties['to_status']"
+                class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            <span class="line-through opacity-70">{{ act.properties['from_status'] }}</span>
+            <mat-icon class="!h-3 !w-3 !text-[12px]">arrow_forward</mat-icon>
+            <span class="font-semibold">{{ act.properties['to_status'] }}</span>
+          </span>
+          <span *ngIf="act.properties['from_priority'] && act.properties['to_priority']"
+                class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            <span>Priority:</span>
+            <span class="line-through opacity-70">{{ act.properties['from_priority'] }}</span>
+            <mat-icon class="!h-3 !w-3 !text-[12px]">arrow_forward</mat-icon>
+            <span class="font-semibold">{{ act.properties['to_priority'] }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination Controls -->
+  <div *ngIf="totalActivities > 0" class="mt-6 flex items-center justify-between border-t border-slate-200/80 pt-4 dark:border-slate-800">
+    <span class="text-xs text-slate-500 dark:text-slate-400">
+      Showing {{ activities.length }} of {{ totalActivities }} activities
+    </span>
+
+    <div class="flex items-center gap-2">
+      <button mat-stroked-button
+              [disabled]="currentPage <= 1 || loading"
+              (click)="loadActivities(currentPage - 1)"
+              class="!rounded-lg !text-xs font-semibold">
+        <mat-icon class="!h-4 !w-4 !text-base">chevron_left</mat-icon> Previous
+      </button>
+      <span class="text-xs font-medium text-slate-700 dark:text-slate-300">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+      <button mat-stroked-button
+              [disabled]="currentPage >= totalPages || loading"
+              (click)="loadActivities(currentPage + 1)"
+              class="!rounded-lg !text-xs font-semibold">
+        Next <mat-icon class="!h-4 !w-4 !text-base">chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

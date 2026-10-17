@@ -62,7 +62,8 @@ export class AdminLayoutComponent implements OnInit {
     { title: 'Users', route: '/users', icon: 'people' },
     { title: 'Projects', route: '/projects', icon: 'folder' },
     { title: 'Tasks', route: '/tasks', icon: 'assignment' },
-    { title: 'Reports', route: '/reports', icon: 'analytics' }
+    { title: 'Reports', route: '/reports', icon: 'analytics' },
+    { title: 'Audit Logs', route: '/audit-logs', icon: 'history' }
   ];
 
   constructor(
