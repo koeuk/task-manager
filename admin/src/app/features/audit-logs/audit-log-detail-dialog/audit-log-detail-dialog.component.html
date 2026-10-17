@@ -1,0 +1,148 @@
+<div class="p-6 max-w-2xl text-slate-800 dark:text-slate-100">
+  <!-- Dialog Header -->
+  <div class="flex items-start justify-between gap-4 border-b border-slate-200/80 pb-4 dark:border-slate-800">
+    <div class="flex items-center gap-3">
+      <div class="flex h-11 w-11 items-center justify-center rounded-xl" [ngClass]="getActionBadge(log.action).bg">
+        <mat-icon class="!h-6 !w-6 !text-[24px]" [ngClass]="getActionBadge(log.action).text">
+          {{ getActionIcon(log.action) }}
+        </mat-icon>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h2 class="m-0 text-lg font-bold text-slate-900 dark:text-white">Audit Log #{{ log.id }}</h2>
+          <span class="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+                [ngClass]="[getActionBadge(log.action).bg, getActionBadge(log.action).text]">
+            {{ getActionBadge(log.action).label }}
+          </span>
+        </div>
+        <p class="m-0 mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+          Logged on {{ log.created_at | date:'medium' }}
+        </p>
+      </div>
+    </div>
+
+    <button mat-icon-button (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- View Switcher -->
+  <div class="my-4 flex items-center justify-between">
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+      {{ jsonView ? 'Raw Payload & Properties' : 'Event Overview' }}
+    </span>
+
+    <div class="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
+      <button type="button"
+              (click)="jsonView = false"
+              class="rounded-md px-2.5 py-1 text-xs font-medium transition-all"
+              [ngClass]="!jsonView ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 dark:text-slate-400'">
+        Overview
+      </button>
+      <button type="button"
+              (click)="jsonView = true"
+              class="rounded-md px-2.5 py-1 text-xs font-medium transition-all"
+              [ngClass]="jsonView ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 dark:text-slate-400'">
+        JSON & Diff
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab 1: Structured Overview -->
+  <div *ngIf="!jsonView" class="space-y-4">
+    <!-- Description Card -->
+    <div class="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+      <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Activity Summary</span>
+      <p class="mb-0 mt-1.5 text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-200">
+        {{ log.description }}
+      </p>
+    </div>
+
+    <!-- Actor & Target Grid -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <!-- Actor -->
+      <div class="rounded-xl border border-slate-200/80 p-3.5 dark:border-slate-800">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Actor (User)</span>
+        <div class="mt-2 flex items-center gap-2.5">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-white shadow-xs dark:bg-slate-700">
+            {{ (log.user?.name || 'S')[0] | uppercase }}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-1.5">
+              <span class="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                {{ log.user?.name || 'System / Guest' }}
+              </span>
+              <span *ngIf="log.user?.role"
+                    class="rounded-sm bg-slate-100 px-1.5 py-0.2 text-[10px] font-bold uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                {{ log.user?.role }}
+              </span>
+            </div>
+            <p class="m-0 truncate text-xs text-slate-500 dark:text-slate-400">
+              {{ log.user?.email || 'user_id: ' + (log.user_id || 'null') }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Entity -->
+      <div class="rounded-xl border border-slate-200/80 p-3.5 dark:border-slate-800">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Target Entity</span>
+        <div class="mt-2">
+          <div class="flex items-center gap-1.5">
+            <span class="rounded bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+              {{ log.entity_type || 'General' }} #{{ log.entity_id || '-' }}
+            </span>
+          </div>
+          <p class="m-0 mt-1 truncate text-xs text-slate-600 dark:text-slate-300" *ngIf="log.project">
+            Project: <span class="font-medium text-slate-900 dark:text-white">{{ log.project.name }}</span>
+          </p>
+          <p class="m-0 mt-0.5 truncate text-xs text-slate-600 dark:text-slate-300" *ngIf="log.task">
+            Task: <span class="font-medium text-slate-900 dark:text-white">{{ log.task.title }}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Network & Device Info -->
+    <div class="rounded-xl border border-slate-200/80 p-3.5 dark:border-slate-800">
+      <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Origin Telemetry</span>
+      <div class="mt-2 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
+        <div>
+          <span class="text-slate-400 dark:text-slate-500">IP Address:</span>
+          <span class="ml-1.5 font-mono font-medium text-slate-700 dark:text-slate-300">{{ log.ip_address || 'Not recorded' }}</span>
+        </div>
+        <div class="truncate">
+          <span class="text-slate-400 dark:text-slate-500">User Agent:</span>
+          <span class="ml-1.5 truncate text-slate-700 dark:text-slate-300" [title]="log.user_agent || ''">
+            {{ log.user_agent || 'Not recorded' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Properties Summary (if available) -->
+    <div *ngIf="propertyEntries.length > 0" class="rounded-xl border border-slate-200/80 p-3.5 dark:border-slate-800">
+      <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Changed Attributes</span>
+      <div class="mt-2.5 flex flex-wrap gap-2">
+        <div *ngFor="let p of propertyEntries" class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs dark:border-slate-700 dark:bg-slate-800/80">
+          <span class="font-semibold text-slate-600 dark:text-slate-400">{{ p.key }}:</span>
+          <span class="font-medium text-slate-900 dark:text-slate-100">{{ formatValue(p.value) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Raw JSON / Diff View -->
+  <div *ngIf="jsonView" class="space-y-3">
+    <div class="rounded-xl border border-slate-200/80 bg-slate-950 p-4 text-xs font-mono text-emerald-400 dark:border-slate-800">
+      <pre class="m-0 max-h-80 overflow-auto whitespace-pre-wrap leading-relaxed">{{ log | json }}</pre>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="mt-6 flex justify-end gap-2 border-t border-slate-200/80 pt-4 dark:border-slate-800">
+    <button mat-flat-button color="primary" (click)="close()">
+      Done
+    </button>
+  </div>
+</div>

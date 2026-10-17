@@ -1,0 +1,196 @@
+<div class="w-full">
+  <mat-card class="!rounded-2xl border border-slate-200/80 !shadow-sm dark:border-slate-800">
+    <mat-card-header class="!mb-4 !flex w-full">
+      <mat-card-title class="!m-0 !flex w-full flex-1 items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white dark:bg-slate-800">
+            <mat-icon class="!h-5 !w-5 !text-[20px]">history</mat-icon>
+          </div>
+          <div>
+            <span class="text-lg font-bold text-slate-900 dark:text-white">Audit & Activity Logs</span>
+            <p class="m-0 text-xs font-normal text-slate-500 dark:text-slate-400">
+              System-wide audit trail of user actions, task modifications, and security events
+            </p>
+          </div>
+        </div>
+
+        <span class="ml-auto flex items-center gap-2.5">
+          <button mat-stroked-button (click)="exportCsv()" [disabled]="exporting || loading" class="!rounded-xl !text-xs font-semibold">
+            <mat-icon>download</mat-icon>
+            {{ exporting ? 'Exporting…' : 'Export CSV' }}
+          </button>
+          <button mat-icon-button (click)="loadLogs()" matTooltip="Refresh logs" [disabled]="loading">
+            <mat-icon [class.animate-spin]="loading">refresh</mat-icon>
+          </button>
+        </span>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Filters -->
+      <form [formGroup]="filterForm" class="filter-form mb-4 flex flex-wrap gap-3 text-[13px]">
+        <mat-form-field appearance="outline" class="min-w-[240px] flex-1">
+          <mat-label>Search logs</mat-label>
+          <input matInput formControlName="search" placeholder="Search by user, description, or IP...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-48">
+          <mat-label>Action</mat-label>
+          <mat-select formControlName="action">
+            <mat-option value="">All Actions</mat-option>
+            <mat-option value="created">Created</mat-option>
+            <mat-option value="updated">Updated</mat-option>
+            <mat-option value="status_changed">Status Changed</mat-option>
+            <mat-option value="priority_changed">Priority Changed</mat-option>
+            <mat-option value="completed">Completed</mat-option>
+            <mat-option value="comment_added">Comment Added</mat-option>
+            <mat-option value="deleted">Deleted</mat-option>
+            <mat-option value="login">Login</mat-option>
+            <mat-option value="logout">Logout</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-44">
+          <mat-label>Entity Type</mat-label>
+          <mat-select formControlName="entity_type">
+            <mat-option value="">All Entities</mat-option>
+            <mat-option value="Task">Task</mat-option>
+            <mat-option value="Project">Project</mat-option>
+            <mat-option value="Comment">Comment</mat-option>
+            <mat-option value="Auth">Auth / Security</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-button (click)="clearFilters()" *ngIf="filterForm.value.search || filterForm.value.action || filterForm.value.entity_type"
+                class="self-center !text-xs text-slate-500">
+          Clear filters
+        </button>
+      </form>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="flex flex-col items-center justify-center p-12">
+        <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+        <span class="mt-3 text-xs text-slate-500 dark:text-slate-400">Loading audit records...</span>
+      </div>
+
+      <!-- Audit Logs Table -->
+      <div class="overflow-auto" *ngIf="!loading">
+        <table mat-table [dataSource]="logs" class="w-full">
+          <!-- Timestamp Column -->
+          <ng-container matColumnDef="created_at">
+            <th mat-header-cell *matHeaderCellDef class="w-44 whitespace-nowrap">Timestamp</th>
+            <td mat-cell *matCellDef="let log" class="whitespace-nowrap text-xs text-slate-600 dark:text-slate-300">
+              <span class="font-medium text-slate-900 dark:text-slate-100">{{ log.created_at | date:'shortDate' }}</span>
+              <span class="text-slate-400 dark:text-slate-500"> {{ log.created_at | date:'shortTime' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- User (Actor) Column -->
+          <ng-container matColumnDef="user">
+            <th mat-header-cell *matHeaderCellDef class="min-w-[180px]">Actor</th>
+            <td mat-cell *matCellDef="let log">
+              <div class="flex items-center gap-2 py-1">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-white shadow-xs dark:bg-slate-700">
+                  {{ (log.user?.name || 'S')[0] | uppercase }}
+                </span>
+                <div class="min-w-0">
+                  <div class="truncate text-xs font-semibold text-slate-900 dark:text-white">
+                    {{ log.user?.name || 'System' }}
+                  </div>
+                  <div class="truncate text-[11px] text-slate-400 dark:text-slate-500" *ngIf="log.user?.email">
+                    {{ log.user.email }}
+                  </div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Action Column -->
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef class="w-36">Action</th>
+            <td mat-cell *matCellDef="let log">
+              <span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+                    [ngClass]="[getActionBadge(log.action).bg, getActionBadge(log.action).text]">
+                <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">
+                  {{ getActionIcon(log.action) }}
+                </mat-icon>
+                <span>{{ getActionBadge(log.action).label }}</span>
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Entity Column -->
+          <ng-container matColumnDef="entity">
+            <th mat-header-cell *matHeaderCellDef class="w-36">Target</th>
+            <td mat-cell *matCellDef="let log">
+              <div class="flex flex-col">
+                <span class="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  {{ log.entity_type || 'General' }}
+                </span>
+                <span class="truncate text-[11px] text-slate-400 dark:text-slate-500" *ngIf="log.project || log.task">
+                  {{ log.project ? log.project.name : (log.task ? log.task.title : '') }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Description Column -->
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let log">
+              <span class="text-xs text-slate-700 dark:text-slate-300 line-clamp-2">
+                {{ log.description }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- IP Address Column -->
+          <ng-container matColumnDef="ip_address">
+            <th mat-header-cell *matHeaderCellDef class="w-32">IP Address</th>
+            <td mat-cell *matCellDef="let log">
+              <span class="font-mono text-xs text-slate-500 dark:text-slate-400">
+                {{ log.ip_address || '—' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="w-16 text-right"></th>
+            <td mat-cell *matCellDef="let log" class="text-right">
+              <button mat-icon-button (click)="viewDetails(log)" matTooltip="View details & payload">
+                <mat-icon class="!text-slate-500">visibility</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              (click)="viewDetails(row)"
+              class="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"></tr>
+
+          <!-- No Data State -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="py-14 text-center text-slate-400 dark:text-slate-500">
+                <mat-icon class="!mx-auto !h-12 !w-12 !text-5xl opacity-40">history</mat-icon>
+                <p class="mt-2 text-sm font-medium">No audit logs found matching criteria</p>
+                <p class="text-xs text-slate-400">Try adjusting your search or filters.</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Paginator -->
+        <mat-paginator
+          [length]="totalLogs"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

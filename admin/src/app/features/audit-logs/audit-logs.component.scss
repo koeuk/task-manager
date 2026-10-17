@@ -1,0 +1,12 @@
+@use '@angular/material' as mat;
+
+mat-card-header {
+  ::ng-deep .mat-mdc-card-header-text {
+    flex: 1;
+    width: 100%;
+  }
+}
+
+.filter-form {
+  @include mat.form-field-density(-4);
+}
