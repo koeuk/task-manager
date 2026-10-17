@@ -75,6 +75,14 @@ class ProjectController extends Controller
 
         $project = Project::create($validated);
 
+        \App\Models\ActivityLog::record(
+            'project_created',
+            "Created project '{$project->name}'",
+            $project,
+            ['status' => $project->status, 'color' => $project->color],
+            $project->id
+        );
+
         return response()->json([
             'message' => 'Project created successfully',
             'project' => $project->load(['taskLists', 'tasks'])
@@ -138,6 +146,12 @@ class ProjectController extends Controller
         ]);
 
         $project->update($validated);
+        $changes = $project->getChanges();
+        $desc = "Updated project '{$project->name}'";
+        if (isset($changes['status'])) {
+            $desc = "Changed status of project '{$project->name}' to " . ucfirst(str_replace('_', ' ', $project->status));
+        }
+        \App\Models\ActivityLog::record('project_updated', $desc, $project, ['changes' => $changes], $project->id);
 
         return response()->json([
             'message' => 'Project updated successfully',
@@ -169,6 +183,14 @@ class ProjectController extends Controller
         if (!$user->isAdmin() && $project->owner_id !== $user->id) {
             abort(403, 'Only the project owner can delete this project.');
         }
+
+        \App\Models\ActivityLog::record(
+            'project_deleted',
+            "Deleted project '{$project->name}'",
+            null,
+            ['project_id' => $project->id, 'name' => $project->name],
+            $project->id
+        );
 
         $project->delete();
 

@@ -119,6 +119,15 @@ class TaskController extends Controller
 
         $task = Task::create($validated);
 
+        \App\Models\ActivityLog::record(
+            'task_created',
+            "Created task '{$task->title}'",
+            $task,
+            ['priority' => $task->priority, 'status' => $task->status],
+            $task->project_id,
+            $task->id
+        );
+
         return response()->json([
             'message' => 'Task created successfully',
             'task' => $task->load(['project', 'taskList', 'creator', 'assignee'])
@@ -197,6 +206,21 @@ class TaskController extends Controller
 
         $task->update($validated);
 
+        $changes = $task->getChanges();
+        $action = 'task_updated';
+        $desc = "Updated task '{$task->title}'";
+        if (isset($changes['status'])) {
+            if ($task->status === 'completed') {
+                $action = 'task_completed';
+                $desc = "Completed task '{$task->title}'";
+            } else {
+                $desc = "Moved task '{$task->title}' to " . ucfirst(str_replace('_', ' ', $task->status));
+            }
+        } elseif (isset($changes['priority'])) {
+            $desc = "Changed priority of '{$task->title}' to " . ucfirst($task->priority);
+        }
+        \App\Models\ActivityLog::record($action, $desc, $task, ['changes' => $changes], $task->project_id, $task->id);
+
         return response()->json([
             'message' => 'Task updated successfully',
             'task' => $task->load(['project', 'taskList', 'creator', 'assignee'])
@@ -214,6 +238,15 @@ class TaskController extends Controller
         $task = Task::findOrFail($id);
 
         $this->authorizeTask($task, $request);
+
+        \App\Models\ActivityLog::record(
+            'task_deleted',
+            "Deleted task '{$task->title}'",
+            null,
+            ['title' => $task->title],
+            $task->project_id,
+            $task->id
+        );
 
         $task->delete();
 

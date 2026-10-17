@@ -87,6 +87,8 @@ class AuthController extends Controller
         $user = User::where('email', $credentials['email'])->first();
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        \App\Models\ActivityLog::record('user_login', "User '{$user->name}' logged in", $user);
+
         return response()->json([
             'user' => $user,
             'token' => $token,
@@ -104,7 +106,11 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if ($user) {
+            \App\Models\ActivityLog::record('user_logout', "User '{$user->name}' logged out", $user);
+            $user->currentAccessToken()->delete();
+        }
 
         return response()->json([
             'message' => 'Successfully logged out'

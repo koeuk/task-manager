@@ -65,6 +65,18 @@ class CommentController extends Controller
 
         $comment = Comment::create($validated);
 
+        $task = \App\Models\Task::find($comment->task_id);
+        if ($task) {
+            \App\Models\ActivityLog::record(
+                'comment_created',
+                "Added a comment on task '{$task->title}'",
+                $comment,
+                ['task_title' => $task->title],
+                $task->project_id,
+                $task->id
+            );
+        }
+
         return response()->json([
             'message' => 'Comment created successfully',
             'comment' => $comment->load('user')

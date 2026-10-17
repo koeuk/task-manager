@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 
 // API root - health / welcome response (avoids a bare 404 at /api)
@@ -55,12 +56,19 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     // User Dashboard
     Route::get('/dashboard', [ProjectController::class, 'dashboard']);
 
+    // Activity Logs
+    Route::get('/activities', [ActivityLogController::class, 'index']);
+    Route::get('/projects/{project}/activities', [ActivityLogController::class, 'forProject']);
+
     // Admin routes
     Route::middleware([\App\Http\Middleware\IsAdmin::class])->prefix('admin')->group(function () {
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::get('/reports', [DashboardController::class, 'reports']);
         
+        // Audit Logs
+        Route::get('/audit-logs', [ActivityLogController::class, 'adminAuditLogs']);
+
         // User management
         Route::apiResource('users', UserController::class);
         Route::put('/users/{user}/role', [UserController::class, 'updateRole']);
