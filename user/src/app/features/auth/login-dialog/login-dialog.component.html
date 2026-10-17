@@ -1,29 +1,38 @@
-<div class="w-full p-2">
-  <!-- Header with Icon & Title -->
-  <div class="pb-3 text-center">
-    <div class="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl
-                bg-gradient-to-br from-[#94a3b8] to-[#64748b] text-white shadow-md">
+<div class="relative w-full bg-white p-7 text-slate-900 dark:bg-[#1e293b] dark:text-slate-100 sm:p-8">
+  <!-- Close Button -->
+  <button type="button"
+          (click)="cancel()"
+          class="absolute right-4 top-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          aria-label="Close dialog">
+    <mat-icon class="!h-4 !w-4 !text-[18px]">close</mat-icon>
+  </button>
+
+  <!-- Header Badge & Titles -->
+  <div class="text-center">
+    <div class="mx-auto mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-800 to-slate-950 text-white shadow-md dark:from-blue-600 dark:to-blue-700">
       <mat-icon class="!h-6 !w-6 !text-2xl">{{ mode === 'login' ? 'lock' : 'person_add' }}</mat-icon>
     </div>
-    <h2 mat-dialog-title class="!m-0 !p-0 !text-xl !font-bold text-[#1e293b] dark:text-[#e5e7eb]">
+    
+    <h2 class="m-0 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
       {{ mode === 'login' ? 'Sign In to Continue' : 'Create an Account' }}
     </h2>
-    <p class="mb-3 mt-1 text-[13px] text-[#64748b] dark:text-[#9ca3af]">
+    
+    <p class="mb-5 mt-1 text-[13px] leading-snug text-slate-500 dark:text-slate-400">
       {{ mode === 'login' ? 'Log in to your account to perform this action' : 'Sign up to start creating and managing your tasks' }}
     </p>
 
-    <!-- Segmented Toggle between Login & Register -->
-    <div class="mx-auto flex max-w-[280px] rounded-xl bg-[#f1f5f9] p-1 dark:bg-[#1e293b]">
+    <!-- Segmented Mode Toggle (No browser borders!) -->
+    <div class="mb-5 flex rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-900/80">
       <button type="button"
               (click)="setMode('login')"
-              class="flex-1 rounded-lg py-1.5 text-center text-[13px] font-semibold transition-all duration-200"
-              [ngClass]="mode === 'login' ? 'bg-white text-[#1e293b] shadow-sm dark:bg-[#334155] dark:text-white' : 'text-[#64748b] hover:text-[#1e293b] dark:text-[#9ca3af] dark:hover:text-white'">
+              class="flex-1 cursor-pointer rounded-lg border-0 bg-transparent py-1.5 text-center text-[13px] font-semibold outline-none transition-all duration-200"
+              [ngClass]="mode === 'login' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
         Sign In
       </button>
       <button type="button"
               (click)="setMode('register')"
-              class="flex-1 rounded-lg py-1.5 text-center text-[13px] font-semibold transition-all duration-200"
-              [ngClass]="mode === 'register' ? 'bg-white text-[#1e293b] shadow-sm dark:bg-[#334155] dark:text-white' : 'text-[#64748b] hover:text-[#1e293b] dark:text-[#9ca3af] dark:hover:text-white'">
+              class="flex-1 cursor-pointer rounded-lg border-0 bg-transparent py-1.5 text-center text-[13px] font-semibold outline-none transition-all duration-200"
+              [ngClass]="mode === 'register' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
         Register
       </button>
     </div>
@@ -31,116 +40,154 @@
 
   <!-- Error Alert -->
   <div *ngIf="errorMessage"
-       class="mb-3 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50/80 p-3 text-[13px] text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
-    <mat-icon class="!h-5 !w-5 !text-[20px] shrink-0 text-red-500">error_outline</mat-icon>
+       class="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50/90 p-3 text-[13px] text-red-600 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-400">
+    <mat-icon class="!h-4 !w-4 shrink-0 text-red-500 !text-[18px]">error_outline</mat-icon>
     <span class="flex-1 leading-snug">{{ errorMessage }}</span>
   </div>
 
   <!-- ==================== SIGN IN FORM ==================== -->
-  <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
-    <mat-dialog-content class="!flex flex-col pt-1">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Email</mat-label>
-        <mat-icon matPrefix>email</mat-icon>
+  <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="submitLogin()" class="flex flex-col">
+    <div class="flex flex-col gap-2">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>Email address</mat-label>
+        <mat-icon matPrefix class="text-slate-400 mr-2 !text-[20px] !w-5 !h-5">mail_outline</mat-icon>
         <input matInput type="email" formControlName="email" autocomplete="email" placeholder="you@example.com">
         <mat-error *ngIf="loginForm.get('email')?.hasError('required')">Email is required</mat-error>
-        <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Enter a valid email</mat-error>
+        <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Please enter a valid email</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
         <mat-label>Password</mat-label>
-        <mat-icon matPrefix>lock</mat-icon>
-        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" autocomplete="current-password">
-        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword" tabindex="-1">
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        <mat-icon matPrefix class="text-slate-400 mr-2 !text-[20px] !w-5 !h-5">lock_outline</mat-icon>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" autocomplete="current-password" placeholder="••••••••">
+        <button type="button"
+                matSuffix
+                (click)="hidePassword = !hidePassword"
+                class="flex cursor-pointer items-center justify-center border-0 bg-transparent p-1 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+                tabindex="-1"
+                [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'">
+          <mat-icon class="!text-[20px] !w-5 !h-5">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
         <mat-error *ngIf="loginForm.get('password')?.hasError('required')">Password is required</mat-error>
       </mat-form-field>
+    </div>
 
-      <div class="-mt-1 mb-2 flex items-center justify-between text-[13px]">
-        <span class="text-[#64748b] dark:text-[#9ca3af]">
-          No account?
-          <button type="button" (click)="setMode('register')"
-                  class="cursor-pointer border-none bg-transparent font-medium text-[#475569] underline hover:text-[#0f172a] dark:text-[#cbd5e1] dark:hover:text-white">
-            Register now
-          </button>
-        </span>
-        <button type="button" (click)="goToForgotPassword()"
-                class="cursor-pointer border-none bg-transparent font-medium text-[#475569] underline hover:text-[#0f172a] dark:text-[#cbd5e1] dark:hover:text-white">
-          Forgot password?
+    <!-- Links row -->
+    <div class="mb-5 mt-2 flex items-center justify-between text-[13px]">
+      <span class="text-slate-500 dark:text-slate-400">
+        No account?
+        <button type="button"
+                (click)="setMode('register')"
+                class="cursor-pointer border-0 bg-transparent p-0 font-semibold text-blue-600 underline hover:no-underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+          Register now
         </button>
-      </div>
-    </mat-dialog-content>
+      </span>
+      <button type="button"
+              (click)="goToForgotPassword()"
+              class="cursor-pointer border-0 bg-transparent p-0 font-semibold text-blue-600 underline hover:no-underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+        Forgot password?
+      </button>
+    </div>
 
-    <mat-dialog-actions align="end" class="!px-0 !pb-1 !pt-2 !flex !gap-3.5">
-      <button mat-button type="button" (click)="cancel()" [disabled]="loading" class="!min-w-[84px] !h-9">Cancel</button>
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading" class="!min-w-[108px] !h-9 shadow-sm">
-        <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
+    <!-- Actions -->
+    <div class="flex flex-col gap-2">
+      <button type="submit"
+              [disabled]="loading"
+              class="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-slate-900 font-semibold text-sm text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-600 dark:hover:bg-blue-500">
+        <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate" class="inline-block"></mat-progress-spinner>
         <span>Sign In</span>
       </button>
-    </mat-dialog-actions>
+      <button type="button"
+              (click)="cancel()"
+              [disabled]="loading"
+              class="mx-auto cursor-pointer rounded-lg border-0 bg-transparent px-4 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+        Cancel
+      </button>
+    </div>
   </form>
 
   <!-- ==================== REGISTER FORM ==================== -->
-  <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
-    <mat-dialog-content class="!flex flex-col pt-1">
-      <mat-form-field appearance="outline" class="w-full">
+  <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="submitRegister()" class="flex flex-col">
+    <div class="flex flex-col gap-2">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
         <mat-label>Full Name</mat-label>
-        <mat-icon matPrefix>person</mat-icon>
+        <mat-icon matPrefix class="text-slate-400 mr-2 !text-[20px] !w-5 !h-5">person_outline</mat-icon>
         <input matInput type="text" formControlName="name" autocomplete="name" placeholder="John Doe">
         <mat-error *ngIf="registerForm.get('name')?.hasError('required')">Name is required</mat-error>
         <mat-error *ngIf="registerForm.get('name')?.hasError('minlength')">Name must be at least 2 characters</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Email</mat-label>
-        <mat-icon matPrefix>email</mat-icon>
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>Email address</mat-label>
+        <mat-icon matPrefix class="text-slate-400 mr-2 !text-[20px] !w-5 !h-5">mail_outline</mat-icon>
         <input matInput type="email" formControlName="email" autocomplete="email" placeholder="you@example.com">
         <mat-error *ngIf="registerForm.get('email')?.hasError('required')">Email is required</mat-error>
-        <mat-error *ngIf="registerForm.get('email')?.hasError('email')">Enter a valid email</mat-error>
+        <mat-error *ngIf="registerForm.get('email')?.hasError('email')">Please enter a valid email</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
         <mat-label>Password</mat-label>
-        <mat-icon matPrefix>lock</mat-icon>
-        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" autocomplete="new-password">
-        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword" tabindex="-1">
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        <mat-icon matPrefix class="text-slate-400 mr-2 !text-[20px] !w-5 !h-5">lock_outline</mat-icon>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" autocomplete="new-password" placeholder="At least 8 characters">
+        <button type="button"
+                matSuffix
+                (click)="hidePassword = !hidePassword"
+                class="flex cursor-pointer items-center justify-center border-0 bg-transparent p-1 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+                tabindex="-1"
+                [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'">
+          <mat-icon class="!text-[20px] !w-5 !h-5">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
         <mat-error *ngIf="registerForm.get('password')?.hasError('required')">Password is required</mat-error>
         <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">Password must be at least 8 characters</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
         <mat-label>Confirm Password</mat-label>
-        <mat-icon matPrefix>lock_outline</mat-icon>
-        <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="password_confirmation" autocomplete="new-password">
-        <button mat-icon-button matSuffix type="button" (click)="hideConfirmPassword = !hideConfirmPassword" tabindex="-1">
-          <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        <mat-icon matPrefix class="text-slate-400 mr-2 !text-[20px] !w-5 !h-5">lock_outline</mat-icon>
+        <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="password_confirmation" autocomplete="new-password" placeholder="Confirm password">
+        <button type="button"
+                matSuffix
+                (click)="hideConfirmPassword = !hideConfirmPassword"
+                class="flex cursor-pointer items-center justify-center border-0 bg-transparent p-1 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+                tabindex="-1"
+                [attr.aria-label]="hideConfirmPassword ? 'Show confirm password' : 'Hide confirm password'">
+          <mat-icon class="!text-[20px] !w-5 !h-5">{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
         <mat-error *ngIf="registerForm.get('password_confirmation')?.hasError('required')">Please confirm your password</mat-error>
       </mat-form-field>
 
       <div *ngIf="registerForm.hasError('passwordMismatch') && (registerForm.get('password_confirmation')?.touched || registerForm.get('password')?.touched)"
-           class="-mt-2 mb-2 text-[12px] text-red-500">
+           class="-mt-1 text-xs font-medium text-red-500">
         Passwords do not match
       </div>
+    </div>
 
-      <p class="-mt-1 mb-2 text-[13px] text-[#64748b] dark:text-[#9ca3af]">
+    <!-- Links row -->
+    <div class="mb-5 mt-2 flex items-center justify-center text-[13px]">
+      <span class="text-slate-500 dark:text-slate-400">
         Already have an account?
-        <button type="button" (click)="setMode('login')"
-                class="cursor-pointer border-none bg-transparent font-medium text-[#475569] underline hover:text-[#0f172a] dark:text-[#cbd5e1] dark:hover:text-white">
+        <button type="button"
+                (click)="setMode('login')"
+                class="cursor-pointer border-0 bg-transparent p-0 font-semibold text-blue-600 underline hover:no-underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
           Sign In
         </button>
-      </p>
-    </mat-dialog-content>
+      </span>
+    </div>
 
-    <mat-dialog-actions align="end" class="!px-0 !pb-1 !pt-2 !flex !gap-3.5">
-      <button mat-button type="button" (click)="cancel()" [disabled]="loading" class="!min-w-[84px] !h-9">Cancel</button>
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading" class="!min-w-[130px] !h-9 shadow-sm">
-        <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate" class="mr-2 inline-block"></mat-progress-spinner>
+    <!-- Actions -->
+    <div class="flex flex-col gap-2">
+      <button type="submit"
+              [disabled]="loading"
+              class="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-slate-900 font-semibold text-sm text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-600 dark:hover:bg-blue-500">
+        <mat-progress-spinner *ngIf="loading" diameter="18" mode="indeterminate" class="inline-block"></mat-progress-spinner>
         <span>Create Account</span>
       </button>
-    </mat-dialog-actions>
+      <button type="button"
+              (click)="cancel()"
+              [disabled]="loading"
+              class="mx-auto cursor-pointer rounded-lg border-0 bg-transparent px-4 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+        Cancel
+      </button>
+    </div>
   </form>
 </div>

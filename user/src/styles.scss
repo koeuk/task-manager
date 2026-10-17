@@ -240,13 +240,48 @@ body.dark-theme .notif-menu {
   .notif-empty mat-icon { color: #94a3b8; }
 }
 
-// Auth dialog: adds interior padding and uncapped height
+// Auth dialog: modern card surface with seamless edges
 .auth-dialog {
   .mat-mdc-dialog-surface {
-    padding: 24px !important;
+    padding: 0 !important;
     border-radius: 20px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.06) !important;
   }
-  .mat-mdc-dialog-content { max-height: none; }
+  .mat-mdc-dialog-content {
+    max-height: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #0f172a !important;
+    caret-color: #0f172a !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+.dark-theme .auth-dialog {
+  .mat-mdc-dialog-surface {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #1e293b inset !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    caret-color: #f8fafc !important;
+  }
 }
 
 // Soft, rounded white cards with a whisper-soft shadow (Bankio-style layout)
