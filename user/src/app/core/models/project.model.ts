@@ -7,6 +7,9 @@ export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 export interface Project {
   id: number;
   workspace_id?: number;
+  owner_id?: number;
+  owner?: User;
+  members?: User[];
   name: string;
   description?: string | null;
   color?: string | null;

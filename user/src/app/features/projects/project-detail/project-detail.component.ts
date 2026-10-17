@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem
 } from '@angular/cdk/drag-drop';
@@ -10,9 +10,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { ComponentType } from '@angular/cdk/portal';
 import { Observable } from 'rxjs';
@@ -29,7 +32,7 @@ import { TaskFormDialogComponent } from '../../tasks/task-form-dialog/task-form-
 import { TaskDetailDialogComponent } from '../../tasks/task-detail-dialog/task-detail-dialog.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { statusLabel, priorityLabel, statusColor, priorityColor, projectStatusColor } from '../../../core/utils/task-meta';
-import { parseApiDate, isPastDay } from '../../../core/utils/date-utils';
+import { parseApiDate, isPastDay, daysFromToday } from '../../../core/utils/date-utils';
 
 interface BoardColumn {
   id: number | null; // task list id, or null for the "Unassigned" column
@@ -43,9 +46,9 @@ interface BoardColumn {
   selector: 'app-project-detail',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, DragDropModule, MatIconModule, MatButtonModule,
-    MatMenuModule, MatFormFieldModule, MatInputModule, MatProgressBarModule,
-    MatProgressSpinnerModule, MatTooltipModule
+    CommonModule, FormsModule, RouterModule, DragDropModule, MatIconModule, MatButtonModule,
+    MatMenuModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatProgressBarModule,
+    MatProgressSpinnerModule, MatTooltipModule, MatChipsModule, MatDividerModule
   ],
   templateUrl: './project-detail.component.html',
   styleUrls: ['./project-detail.component.scss']
@@ -55,6 +58,11 @@ export class ProjectDetailComponent implements OnInit {
   columns: BoardColumn[] = [];
   loading = true;
   projectId!: number;
+
+  activeTab: 'board' | 'overview' = 'board';
+  overviewSearch = '';
+  overviewStatusFilter = '';
+  overviewPriorityFilter = '';
 
   addingList = false;
   newListName = '';
@@ -81,6 +89,10 @@ export class ProjectDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.projectId = Number(this.route.snapshot.paramMap.get('id'));
+    const initialTab = this.route.snapshot.queryParamMap.get('tab');
+    if (initialTab === 'overview' || initialTab === 'details') {
+      this.activeTab = 'overview';
+    }
     this.authService.currentUser$.subscribe(user => {
       if (user) {
         this.loadProject();
@@ -89,6 +101,97 @@ export class ProjectDetailComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  setTab(tab: 'board' | 'overview'): void {
+    this.activeTab = tab;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  get inProgressTasks(): number {
+    return this.project?.tasks?.filter(t => t.status === 'in_progress').length ?? 0;
+  }
+
+  get todoTasks(): number {
+    return this.project?.tasks?.filter(t => t.status === 'todo').length ?? 0;
+  }
+
+  get reviewTasks(): number {
+    return this.project?.tasks?.filter(t => t.status === 'review').length ?? 0;
+  }
+
+  get overdueTasks(): number {
+    return this.project?.tasks?.filter(t => this.isOverdue(t)).length ?? 0;
+  }
+
+  get isProjectOverdue(): boolean {
+    if (!this.project?.due_date) return false;
+    if (this.project.status === 'completed' || this.project.status === 'archived') return false;
+    return isPastDay(this.project.due_date);
+  }
+
+  get dueStatusText(): string {
+    if (!this.project?.due_date) return 'No due date set';
+    const days = daysFromToday(this.project.due_date);
+    if (days === null) return '';
+    if (days < 0) return `Overdue by ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'}`;
+    if (days === 0) return 'Due today';
+    if (days === 1) return 'Due tomorrow';
+    return `${days} days remaining`;
+  }
+
+  get statusBreakdown() {
+    const total = this.totalTasks;
+    const items = [
+      { key: 'todo', label: 'To Do', count: this.todoTasks, color: statusColor('todo') },
+      { key: 'in_progress', label: 'In Progress', count: this.inProgressTasks, color: statusColor('in_progress') },
+      { key: 'review', label: 'In Review', count: this.reviewTasks, color: statusColor('review') },
+      { key: 'completed', label: 'Completed', count: this.completedTasks, color: statusColor('completed') },
+    ];
+    return items.map(item => ({
+      ...item,
+      pct: total ? Math.round((item.count / total) * 100) : 0
+    }));
+  }
+
+  get priorityBreakdown() {
+    const total = this.totalTasks;
+    const tasks = this.project?.tasks ?? [];
+    const counts = {
+      critical: tasks.filter(t => t.priority === 'critical').length,
+      high: tasks.filter(t => t.priority === 'high').length,
+      medium: tasks.filter(t => t.priority === 'medium').length,
+      low: tasks.filter(t => t.priority === 'low').length,
+    };
+    const items = [
+      { key: 'critical', label: 'Critical', count: counts.critical, color: priorityColor('critical') },
+      { key: 'high', label: 'High', count: counts.high, color: priorityColor('high') },
+      { key: 'medium', label: 'Medium', count: counts.medium, color: priorityColor('medium') },
+      { key: 'low', label: 'Low', count: counts.low, color: priorityColor('low') },
+    ];
+    return items.map(item => ({
+      ...item,
+      pct: total ? Math.round((item.count / total) * 100) : 0
+    }));
+  }
+
+  get filteredOverviewTasks(): Task[] {
+    let list = this.project?.tasks ?? [];
+    if (this.overviewSearch.trim()) {
+      const q = this.overviewSearch.toLowerCase();
+      list = list.filter(t => t.title.toLowerCase().includes(q) || (t.description && t.description.toLowerCase().includes(q)));
+    }
+    if (this.overviewStatusFilter) {
+      list = list.filter(t => t.status === this.overviewStatusFilter);
+    }
+    if (this.overviewPriorityFilter) {
+      list = list.filter(t => t.priority === this.overviewPriorityFilter);
+    }
+    return list;
   }
 
   get isAuthenticated(): boolean {

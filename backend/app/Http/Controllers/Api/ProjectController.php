@@ -92,6 +92,8 @@ class ProjectController extends Controller
     public function show(Request $request, string $id)
     {
         $project = Project::with([
+            'owner',
+            'members',
             'taskLists.tasks.assignee',
             'taskLists.tasks.creator',
             'tasks.assignee',

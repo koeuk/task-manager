@@ -18,6 +18,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { ComponentType } from '@angular/cdk/portal';
+import { MatDividerModule } from '@angular/material/divider';
 import { Project, ProjectStatus } from '../../../core/models/project.model';
 import { ProjectService } from '../../../core/services/project.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -36,7 +37,7 @@ const SEARCH_DEBOUNCE_MS = 350;
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatButtonModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatMenuModule,
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatMenuModule, MatDividerModule,
     MatProgressBarModule, MatProgressSpinnerModule, MatPaginatorModule, MatTooltipModule
   ],
   templateUrl: './project-list.component.html',
@@ -164,8 +165,12 @@ export class ProjectListComponent implements OnInit {
     });
   }
 
-  openProject(project: Project): void {
-    this.router.navigate(['/projects', project.id]);
+  openProject(project: Project, tab: 'board' | 'overview' = 'board'): void {
+    if (tab === 'overview') {
+      this.router.navigate(['/projects', project.id], { queryParams: { tab: 'overview' } });
+    } else {
+      this.router.navigate(['/projects', project.id]);
+    }
   }
 
   taskCount(p: Project): number {

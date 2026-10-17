@@ -64,11 +64,22 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="openEdit(p, $event)">
-            <mat-icon>edit</mat-icon><span>Edit</span>
+          <button mat-menu-item (click)="openProject(p, 'overview')">
+            <mat-icon class="text-blue-600 dark:text-blue-400">info</mat-icon>
+            <span>View details</span>
           </button>
+          <button mat-menu-item (click)="openProject(p, 'board')">
+            <mat-icon>view_kanban</mat-icon>
+            <span>Task board</span>
+          </button>
+          <button mat-menu-item (click)="openEdit(p, $event)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          <mat-divider></mat-divider>
           <button mat-menu-item (click)="confirmDelete(p, $event)">
-            <mat-icon color="warn">delete</mat-icon><span>Delete</span>
+            <mat-icon color="warn">delete</mat-icon>
+            <span>Delete</span>
           </button>
         </mat-menu>
       </div>

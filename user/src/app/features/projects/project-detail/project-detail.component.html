@@ -3,38 +3,91 @@
 </div>
 
 <div class="flex h-full flex-col" *ngIf="!loading && project">
-  <div class="mb-5 flex items-start gap-2">
-    <button mat-icon-button (click)="goBack()" matTooltip="Back to projects">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
+  <!-- Top Navigation & Header Bar -->
+  <div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+    <div class="flex items-start gap-3 min-w-0 flex-1">
+      <button mat-icon-button (click)="goBack()" matTooltip="Back to projects" class="mt-0.5 shrink-0">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
 
-    <div class="min-w-0 flex-1">
-      <div class="flex items-center gap-2.5">
-        <mat-icon class="shrink-0" [style.color]="project.color || '#2196f3'">folder</mat-icon>
-        <h1 class="m-0 text-[24px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb]">{{ project.name }}</h1>
-        <span class="rounded-full px-2.5 py-[3px] text-xs font-semibold"
-              [style.color]="projectStatusColor(project.status)"
-              [style.background]="'color-mix(in srgb, ' + projectStatusColor(project.status) + ' 14%, transparent)'">
-          {{ statusLabel(project.status) }}
-        </span>
-      </div>
-      <p class="mb-2.5 mt-1.5 max-w-[720px] text-[13.5px] text-[#6b7280] dark:text-[#9ca3af]" *ngIf="project.description">{{ project.description }}</p>
-      <div class="flex max-w-[420px] items-center gap-3">
-        <mat-progress-bar mode="determinate" [value]="progress" class="!flex-1 !rounded"></mat-progress-bar>
-        <span class="whitespace-nowrap text-xs text-[#6b7280] dark:text-[#9ca3af]">{{ completedTasks }}/{{ totalTasks }} done ({{ progress }}%)</span>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+                [style.background]="project.color || '#3b82f6'">
+            <mat-icon class="!h-5 !w-5 !text-xl">folder</mat-icon>
+          </span>
+          <h1 class="m-0 text-[24px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb] truncate">
+            {{ project.name }}
+          </h1>
+          <span class="rounded-full px-2.5 py-[3px] text-xs font-semibold"
+                [style.color]="projectStatusColor(project.status)"
+                [style.background]="'color-mix(in srgb, ' + projectStatusColor(project.status) + ' 14%, transparent)'">
+            {{ statusLabel(project.status) }}
+          </span>
+        </div>
+
+        <p class="mb-2 mt-1.5 max-w-[760px] text-[13.5px] text-[#6b7280] dark:text-[#9ca3af] line-clamp-2" *ngIf="project.description">
+          {{ project.description }}
+        </p>
+
+        <!-- Progress bar pill -->
+        <div class="flex max-w-[380px] items-center gap-2.5 mt-1">
+          <mat-progress-bar mode="determinate" [value]="progress" class="!flex-1 !rounded-full !h-2"></mat-progress-bar>
+          <span class="whitespace-nowrap text-xs font-medium text-[#6b7280] dark:text-[#9ca3af]">
+            {{ completedTasks }}/{{ totalTasks }} done ({{ progress }}%)
+          </span>
+        </div>
       </div>
     </div>
 
-    <button mat-icon-button [matMenuTriggerFor]="projMenu" aria-label="Project actions">
-      <mat-icon>more_vert</mat-icon>
-    </button>
-    <mat-menu #projMenu="matMenu">
-      <button mat-menu-item (click)="editProject()"><mat-icon>edit</mat-icon><span>Edit project</span></button>
-      <button mat-menu-item (click)="deleteProject()"><mat-icon color="warn">delete</mat-icon><span>Delete project</span></button>
-    </mat-menu>
+    <!-- Actions -->
+    <div class="flex items-center gap-2">
+      <button mat-stroked-button (click)="editProject()" class="!rounded-xl !text-xs font-semibold">
+        <mat-icon class="!h-4 !w-4 !text-base">edit</mat-icon> Edit
+      </button>
+      <button mat-flat-button color="primary" (click)="addTask(columns[0])" class="!rounded-xl !text-xs font-semibold">
+        <mat-icon class="!h-4 !w-4 !text-base">add</mat-icon> New Task
+      </button>
+      <button mat-icon-button [matMenuTriggerFor]="projMenu" aria-label="More actions">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #projMenu="matMenu">
+        <button mat-menu-item (click)="editProject()"><mat-icon>edit</mat-icon><span>Edit project</span></button>
+        <button mat-menu-item (click)="deleteProject()"><mat-icon color="warn">delete</mat-icon><span>Delete project</span></button>
+      </mat-menu>
+    </div>
   </div>
 
-  <div class="flex flex-1 items-start gap-4 overflow-x-auto pb-3" cdkDropListGroup>
+  <!-- View Switcher Tabs (Board vs. Overview & Details) -->
+  <div class="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#edeff2] pb-3 dark:border-[#262c40]">
+    <div class="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-800 dark:bg-slate-900/80">
+      <button type="button"
+              (click)="setTab('board')"
+              class="flex cursor-pointer items-center gap-1.5 rounded-lg border-0 px-3.5 py-1.5 text-xs font-semibold outline-none transition-all"
+              [ngClass]="activeTab === 'board' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+        <mat-icon class="!h-4 !w-4 !text-[18px]">view_kanban</mat-icon>
+        <span>Task Board</span>
+      </button>
+      <button type="button"
+              (click)="setTab('overview')"
+              class="flex cursor-pointer items-center gap-1.5 rounded-lg border-0 px-3.5 py-1.5 text-xs font-semibold outline-none transition-all"
+              [ngClass]="activeTab === 'overview' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+        <mat-icon class="!h-4 !w-4 !text-[18px]">info</mat-icon>
+        <span>Project Details & Overview</span>
+      </button>
+    </div>
+
+    <!-- Due date indicator -->
+    <div class="flex items-center gap-2 text-xs text-[#64748b] dark:text-[#94a3b8]">
+      <mat-icon class="!h-4 !w-4 !text-[16px]" [ngClass]="isProjectOverdue ? 'text-red-500' : ''">event</mat-icon>
+      <span [ngClass]="isProjectOverdue ? 'font-semibold text-red-500' : ''">
+        {{ project.due_date ? ('Due: ' + (project.due_date | date:'mediumDate':'UTC') + ' (' + dueStatusText + ')') : 'No due date' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ==================== VIEW 1: KANBAN BOARD ==================== -->
+  <div *ngIf="activeTab === 'board'" class="flex flex-1 items-start gap-4 overflow-x-auto pb-3" cdkDropListGroup>
     <div class="column flex max-h-full w-72 min-w-[288px] flex-col rounded-xl" *ngFor="let col of columns" [class.virtual]="col.isVirtual">
       <div class="flex items-center gap-2 px-3 pb-2 pt-3">
         <ng-container *ngIf="editingListId !== col.id || col.isVirtual">
@@ -103,6 +156,256 @@
         <div class="mt-2 flex gap-2">
           <button mat-flat-button color="primary" (click)="saveNewList()" [disabled]="!newListName.trim()">Add</button>
           <button mat-button (click)="cancelAddList()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VIEW 2: PROJECT OVERVIEW & DETAILS ==================== -->
+  <div *ngIf="activeTab === 'overview'" class="flex flex-1 flex-col gap-5 overflow-y-auto pb-8">
+    <!-- Key Metric Stat Cards -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-2xl border border-[#edeff2] bg-white p-5 shadow-sm dark:border-[#262c40] dark:bg-[#1e293b]">
+        <div class="flex items-center justify-between text-xs text-[#64748b] dark:text-[#94a3b8] mb-1">
+          <span class="font-medium">Completion</span>
+          <mat-icon class="!h-4 !w-4 !text-base text-blue-500">donut_large</mat-icon>
+        </div>
+        <div class="text-2xl font-bold text-[#1e293b] dark:text-[#e5e7eb]">{{ progress }}%</div>
+        <div class="mt-2 text-xs text-[#64748b] dark:text-[#94a3b8]">
+          {{ completedTasks }} of {{ totalTasks }} tasks finished
+        </div>
+        <mat-progress-bar mode="determinate" [value]="progress" class="!mt-2 !h-1.5 !rounded-full"></mat-progress-bar>
+      </div>
+
+      <div class="rounded-2xl border border-[#edeff2] bg-white p-5 shadow-sm dark:border-[#262c40] dark:bg-[#1e293b]">
+        <div class="flex items-center justify-between text-xs text-[#64748b] dark:text-[#94a3b8] mb-1">
+          <span class="font-medium">Active Tasks</span>
+          <mat-icon class="!h-4 !w-4 !text-base text-amber-500">play_circle_outline</mat-icon>
+        </div>
+        <div class="text-2xl font-bold text-[#1e293b] dark:text-[#e5e7eb]">{{ inProgressTasks }}</div>
+        <div class="mt-2 text-xs text-[#64748b] dark:text-[#94a3b8]">
+          {{ todoTasks }} pending in backlog
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-[#edeff2] bg-white p-5 shadow-sm dark:border-[#262c40] dark:bg-[#1e293b]">
+        <div class="flex items-center justify-between text-xs text-[#64748b] dark:text-[#94a3b8] mb-1">
+          <span class="font-medium">Due Date</span>
+          <mat-icon class="!h-4 !w-4 !text-base" [ngClass]="isProjectOverdue ? 'text-red-500' : 'text-slate-400'">event</mat-icon>
+        </div>
+        <div class="text-lg font-bold truncate text-[#1e293b] dark:text-[#e5e7eb]">
+          {{ project.due_date ? (project.due_date | date:'mediumDate':'UTC') : 'None' }}
+        </div>
+        <div class="mt-2 text-xs" [ngClass]="isProjectOverdue ? 'text-red-500 font-semibold' : 'text-[#64748b] dark:text-[#94a3b8]'">
+          {{ dueStatusText }}
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-[#edeff2] bg-white p-5 shadow-sm dark:border-[#262c40] dark:bg-[#1e293b]">
+        <div class="flex items-center justify-between text-xs text-[#64748b] dark:text-[#94a3b8] mb-1">
+          <span class="font-medium">Task Lists</span>
+          <mat-icon class="!h-4 !w-4 !text-base text-purple-500">view_column</mat-icon>
+        </div>
+        <div class="text-2xl font-bold text-[#1e293b] dark:text-[#e5e7eb]">{{ columns.length }}</div>
+        <div class="mt-2 text-xs text-[#64748b] dark:text-[#94a3b8]">
+          {{ overdueTasks > 0 ? (overdueTasks + ' overdue tasks') : 'No overdue tasks' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-Column Grid: Details on Left, Task List on Right -->
+    <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <!-- Left Column: Details & Breakdowns -->
+      <div class="flex flex-col gap-5 lg:col-span-1">
+        <!-- Project Information Card -->
+        <div class="rounded-2xl border border-[#edeff2] bg-white p-5 shadow-sm dark:border-[#262c40] dark:bg-[#1e293b]">
+          <h3 class="m-0 mb-4 text-sm font-bold tracking-tight text-[#1e293b] dark:text-[#e5e7eb] flex items-center gap-2">
+            <mat-icon class="!h-4 !w-4 !text-[18px] text-blue-500">info</mat-icon>
+            Project Details
+          </h3>
+          <div class="flex flex-col gap-3.5 text-xs">
+            <div>
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-[#64748b] dark:text-[#94a3b8] mb-1">Description</span>
+              <p class="m-0 leading-relaxed text-[#1e293b] dark:text-[#cbd5e1]">
+                {{ project.description || 'No description provided for this project.' }}
+              </p>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <span class="block text-[11px] font-semibold uppercase tracking-wider text-[#64748b] dark:text-[#94a3b8]">Start Date</span>
+                <span class="font-medium text-[#1e293b] dark:text-[#e5e7eb]">
+                  {{ project.start_date ? (project.start_date | date:'mediumDate':'UTC') : '—' }}
+                </span>
+              </div>
+              <div>
+                <span class="block text-[11px] font-semibold uppercase tracking-wider text-[#64748b] dark:text-[#94a3b8]">Due Date</span>
+                <span class="font-medium text-[#1e293b] dark:text-[#e5e7eb]" [ngClass]="isProjectOverdue ? 'text-red-500' : ''">
+                  {{ project.due_date ? (project.due_date | date:'mediumDate':'UTC') : '—' }}
+                </span>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div *ngIf="project.owner">
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-[#64748b] dark:text-[#94a3b8] mb-2">Project Owner</span>
+              <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-white">
+                  {{ (project.owner.name || 'U')[0] | uppercase }}
+                </span>
+                <div class="flex flex-col leading-tight">
+                  <span class="font-semibold text-[#1e293b] dark:text-[#e5e7eb]">{{ project.owner.name }}</span>
+                  <span class="text-[11px] text-[#64748b] dark:text-[#94a3b8]">{{ project.owner.email }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="project.members && project.members.length > 0">
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-[#64748b] dark:text-[#94a3b8] mb-2">Team Members ({{ project.members.length }})</span>
+              <div class="flex flex-wrap gap-2">
+                <div *ngFor="let m of project.members" class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 dark:border-slate-800 dark:bg-slate-900/60">
+                  <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-semibold text-white">
+                    {{ (m.name || '?')[0] | uppercase }}
+                  </span>
+                  <span class="text-[11px] font-medium text-[#1e293b] dark:text-[#e5e7eb]">{{ m.name }}</span>
+                </div>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="text-[11px] text-[#64748b] dark:text-[#94a3b8]">
+              Created {{ project.created_at | date:'mediumDate' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Breakdown Card -->
+        <div class="rounded-2xl border border-[#edeff2] bg-white p-5 shadow-sm dark:border-[#262c40] dark:bg-[#1e293b]">
+          <h3 class="m-0 mb-3 text-sm font-bold tracking-tight text-[#1e293b] dark:text-[#e5e7eb]">Tasks by Status</h3>
+          <div class="flex flex-col gap-3">
+            <div *ngFor="let s of statusBreakdown" class="flex flex-col gap-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-medium text-[#1e293b] dark:text-[#e5e7eb]">{{ s.label }}</span>
+                <span class="text-[#64748b] dark:text-[#94a3b8]">{{ s.count }} ({{ s.pct }}%)</span>
+              </div>
+              <div class="h-2 w-full overflow-hidden rounded-full bg-[#f1f3f5] dark:bg-[#2b3352]">
+                <div class="h-full rounded-full transition-all duration-300"
+                     [style.width.%]="s.pct"
+                     [style.background]="s.color"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Priority Breakdown Card -->
+        <div class="rounded-2xl border border-[#edeff2] bg-white p-5 shadow-sm dark:border-[#262c40] dark:bg-[#1e293b]">
+          <h3 class="m-0 mb-3 text-sm font-bold tracking-tight text-[#1e293b] dark:text-[#e5e7eb]">Tasks by Priority</h3>
+          <div class="flex flex-col gap-3">
+            <div *ngFor="let p of priorityBreakdown" class="flex flex-col gap-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-medium text-[#1e293b] dark:text-[#e5e7eb]">{{ p.label }}</span>
+                <span class="text-[#64748b] dark:text-[#94a3b8]">{{ p.count }} ({{ p.pct }}%)</span>
+              </div>
+              <div class="h-2 w-full overflow-hidden rounded-full bg-[#f1f3f5] dark:bg-[#2b3352]">
+                <div class="h-full rounded-full transition-all duration-300"
+                     [style.width.%]="p.pct"
+                     [style.background]="p.color"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: All Tasks in Project -->
+      <div class="flex flex-col gap-3 lg:col-span-2">
+        <div class="rounded-2xl border border-[#edeff2] bg-white p-5 shadow-sm dark:border-[#262c40] dark:bg-[#1e293b]">
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="m-0 text-base font-bold tracking-tight text-[#1e293b] dark:text-[#e5e7eb]">Project Tasks</h3>
+              <p class="m-0 mt-0.5 text-xs text-[#64748b] dark:text-[#94a3b8]">
+                Showing {{ filteredOverviewTasks.length }} of {{ totalTasks }} tasks
+              </p>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap items-center gap-2">
+              <mat-form-field appearance="outline" class="!w-44" subscriptSizing="dynamic">
+                <mat-icon matPrefix class="!text-slate-400 !text-[18px] !w-4 !h-4 mr-1">search</mat-icon>
+                <input matInput [(ngModel)]="overviewSearch" placeholder="Search tasks">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="!w-32" subscriptSizing="dynamic">
+                <mat-select [(value)]="overviewStatusFilter" placeholder="Status">
+                  <mat-option value="">All Statuses</mat-option>
+                  <mat-option value="todo">To Do</mat-option>
+                  <mat-option value="in_progress">In Progress</mat-option>
+                  <mat-option value="review">Review</mat-option>
+                  <mat-option value="completed">Completed</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="!w-32" subscriptSizing="dynamic">
+                <mat-select [(value)]="overviewPriorityFilter" placeholder="Priority">
+                  <mat-option value="">All Priorities</mat-option>
+                  <mat-option value="critical">Critical</mat-option>
+                  <mat-option value="high">High</mat-option>
+                  <mat-option value="medium">Medium</mat-option>
+                  <mat-option value="low">Low</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="filteredOverviewTasks.length === 0" class="py-12 text-center text-[#64748b] dark:text-[#94a3b8]">
+            <mat-icon class="!h-10 !w-10 !text-[40px] opacity-40 mb-2">task_alt</mat-icon>
+            <p class="text-sm m-0">No tasks match your filters.</p>
+          </div>
+
+          <!-- Task List Rows -->
+          <div *ngIf="filteredOverviewTasks.length > 0" class="flex flex-col divide-y divide-[#edeff2] dark:divide-[#262c40]">
+            <div *ngFor="let t of filteredOverviewTasks"
+                 (click)="openTask(t)"
+                 class="group flex cursor-pointer items-center justify-between gap-3 py-3 px-2 rounded-xl transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <span class="h-2.5 w-2.5 shrink-0 rounded-full" [style.background]="priorityColor(t.priority)"></span>
+                <div class="min-w-0 flex-1">
+                  <span class="font-semibold text-sm text-[#1e293b] dark:text-[#e5e7eb] truncate block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                        [class.line-through]="t.status === 'completed'"
+                        [class.opacity-60]="t.status === 'completed'">
+                    {{ t.title }}
+                  </span>
+                  <div class="flex items-center gap-2 mt-0.5 text-xs text-[#64748b] dark:text-[#94a3b8]">
+                    <span *ngIf="t.task_list" class="rounded px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium">
+                      {{ t.task_list.name }}
+                    </span>
+                    <span *ngIf="t.due_date" [ngClass]="isOverdue(t) ? 'text-red-500 font-semibold' : ''" class="flex items-center gap-1">
+                      <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">event</mat-icon>
+                      {{ t.due_date | date:dueFormat(t):'UTC' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status & Assignee -->
+              <div class="flex items-center gap-2.5 shrink-0">
+                <span class="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                      [style.color]="statusColor(t.status)"
+                      [style.background]="'color-mix(in srgb, ' + statusColor(t.status) + ' 14%, transparent)'">
+                  {{ statusLabel(t.status) }}
+                </span>
+                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-white"
+                      *ngIf="t.assignee" [matTooltip]="t.assignee.name">
+                  {{ (t.assignee.name || '?')[0] | uppercase }}
+                </span>
+                <mat-icon class="!h-4 !w-4 !text-[16px] text-slate-400 group-hover:translate-x-0.5 transition-transform">chevron_right</mat-icon>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
