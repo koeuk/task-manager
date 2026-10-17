@@ -1,15 +1,25 @@
-<div class="max-w-[760px]">
-  <h1 class="m-0 mb-5 text-[26px] font-bold tracking-[-0.02em] text-[#1e293b] dark:text-[#e5e7eb]">Settings</h1>
+<div class="max-w-4xl pb-12">
+  <div class="mb-6">
+    <h1 class="m-0 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Settings</h1>
+    <p class="m-0 mt-1 text-xs text-slate-500 dark:text-slate-400">
+      Manage your application preferences, account security, and personal activity logs
+    </p>
+  </div>
 
-  <mat-card class="mb-4">
-    <mat-card-header><mat-card-title>Appearance</mat-card-title></mat-card-header>
+  <!-- Appearance Card -->
+  <mat-card class="!mb-5 !rounded-2xl border border-slate-200/80 !shadow-xs dark:border-slate-800">
+    <mat-card-header class="!pb-2">
+      <mat-card-title class="!text-base !font-bold">Appearance</mat-card-title>
+    </mat-card-header>
     <mat-card-content>
-      <div class="flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5 [&>mat-icon]:!text-[#94a3b8]">
-          <mat-icon>{{ (themeService.isDark$ | async) ? 'dark_mode' : 'light_mode' }}</mat-icon>
+      <div class="flex items-center justify-between gap-4 py-2">
+        <div class="flex items-center gap-3.5">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <mat-icon>{{ (themeService.isDark$ | async) ? 'dark_mode' : 'light_mode' }}</mat-icon>
+          </div>
           <div>
-            <p class="m-0 font-semibold text-[#1e293b] dark:text-[#e5e7eb]">Dark mode</p>
-            <p class="mt-0.5 text-[13px] text-[#6b7280] dark:text-[#9ca3af]">Use a darker color scheme across the app</p>
+            <p class="m-0 font-semibold text-slate-900 dark:text-slate-100">Dark Theme</p>
+            <p class="m-0 mt-0.5 text-xs text-slate-500 dark:text-slate-400">Use a high-contrast dark color scheme</p>
           </div>
         </div>
         <mat-slide-toggle
@@ -20,27 +30,245 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-card class="mb-4">
-    <mat-card-header><mat-card-title>Account</mat-card-title></mat-card-header>
+  <!-- Account Card -->
+  <mat-card class="!mb-5 !rounded-2xl border border-slate-200/80 !shadow-xs dark:border-slate-800">
+    <mat-card-header class="!pb-2">
+      <mat-card-title class="!text-base !font-bold">Account & Security</mat-card-title>
+    </mat-card-header>
     <mat-card-content>
-      <div class="flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5 [&>mat-icon]:!text-[#94a3b8]">
-          <mat-icon>person</mat-icon>
+      <div class="flex items-center justify-between gap-4 py-2">
+        <div class="flex items-center gap-3.5">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+            <mat-icon>manage_accounts</mat-icon>
+          </div>
           <div>
-            <p class="m-0 font-semibold text-[#1e293b] dark:text-[#e5e7eb]">Profile & password</p>
-            <p class="mt-0.5 text-[13px] text-[#6b7280] dark:text-[#9ca3af]">Update your personal information or change your password</p>
+            <p class="m-0 font-semibold text-slate-900 dark:text-slate-100">Profile & Security Credentials</p>
+            <p class="m-0 mt-0.5 text-xs text-slate-500 dark:text-slate-400">Update your email, password, avatar, and contact info</p>
           </div>
         </div>
-        <a mat-stroked-button color="primary" routerLink="/profile">Open Profile</a>
+        <a mat-stroked-button color="primary" routerLink="/profile" class="!rounded-xl !text-xs font-semibold">
+          Open Profile
+        </a>
       </div>
     </mat-card-content>
   </mat-card>
 
-  <mat-card class="mb-4">
-    <mat-card-header><mat-card-title>About</mat-card-title></mat-card-header>
+  <!-- ==================== ACTIVITY & AUDIT LOG SECTION ==================== -->
+  <mat-card class="!mb-5 !rounded-2xl border border-slate-200/80 !shadow-xs dark:border-slate-800">
+    <mat-card-header class="!pb-3">
+      <mat-card-title class="!m-0 !flex w-full flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white dark:bg-slate-800">
+            <mat-icon class="!h-5 !w-5 !text-[20px]">history</mat-icon>
+          </div>
+          <div>
+            <span class="text-base font-bold text-slate-900 dark:text-white">Activity & Audit Trail</span>
+            <p class="m-0 text-xs font-normal text-slate-500 dark:text-slate-400" *ngIf="currentUser?.role === 'admin'">
+              Administrator view: You can inspect activity across all users or filter to your own events.
+            </p>
+            <p class="m-0 text-xs font-normal text-slate-500 dark:text-slate-400" *ngIf="currentUser?.role !== 'admin'">
+              Personal activity log: Tracking actions, task updates, and comments made by you.
+            </p>
+          </div>
+        </div>
+
+        <!-- Scope switch for Admins -->
+        <div *ngIf="currentUser?.role === 'admin'" class="flex items-center gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+          <button type="button"
+                  (click)="setAdminScope('all')"
+                  class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                  [ngClass]="adminScope === 'all' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 dark:text-slate-400'">
+            All Users
+          </button>
+          <button type="button"
+                  (click)="setAdminScope('mine')"
+                  class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                  [ngClass]="adminScope === 'mine' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 dark:text-slate-400'">
+            My Activity Only
+          </button>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+
     <mat-card-content>
-      <div class="flex justify-between border-b border-[#eee] py-2.5 last:border-b-0 dark:border-[#262c40]"><span>Application</span><span>Task Manager</span></div>
-      <div class="flex justify-between border-b border-[#eee] py-2.5 last:border-b-0 dark:border-[#262c40]"><span>Version</span><span>1.0.0</span></div>
+      <!-- Filter Bar -->
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50/70 p-2.5 dark:border-slate-800 dark:bg-slate-900/40">
+        <!-- Action Filter Pills -->
+        <div class="flex flex-wrap items-center gap-1">
+          <button type="button"
+                  (click)="setActionFilter('')"
+                  class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                  [ngClass]="actionFilter === '' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+            All
+          </button>
+          <button type="button"
+                  (click)="setActionFilter('created')"
+                  class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                  [ngClass]="actionFilter === 'created' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+            Created
+          </button>
+          <button type="button"
+                  (click)="setActionFilter('updated')"
+                  class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                  [ngClass]="actionFilter === 'updated' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+            Updated
+          </button>
+          <button type="button"
+                  (click)="setActionFilter('completed')"
+                  class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                  [ngClass]="actionFilter === 'completed' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+            Completed
+          </button>
+          <button type="button"
+                  (click)="setActionFilter('comment_added')"
+                  class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                  [ngClass]="actionFilter === 'comment_added' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+            Comments
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Search input -->
+          <div class="relative flex items-center">
+            <input type="text"
+                   [(ngModel)]="searchQuery"
+                   (keyup.enter)="onSearch()"
+                   placeholder="Search activity..."
+                   class="h-8 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+            <button mat-icon-button (click)="onSearch()" class="!h-7 !w-7 ml-1" matTooltip="Search">
+              <mat-icon class="!h-4 !w-4 !text-base text-slate-400">search</mat-icon>
+            </button>
+          </div>
+
+          <button mat-icon-button (click)="loadActivities(activityPage)" [disabled]="loadingActivities" matTooltip="Refresh">
+            <mat-icon class="!h-4 !w-4 !text-base" [class.animate-spin]="loadingActivities">refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loadingActivities" class="flex flex-col items-center justify-center py-12">
+        <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+        <span class="mt-2.5 text-xs text-slate-500 dark:text-slate-400">Loading activity trail...</span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loadingActivities && activities.length === 0"
+           class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-12 text-center dark:border-slate-800">
+        <mat-icon class="!h-10 !w-10 !text-[40px] opacity-30 text-slate-400 mb-1">history</mat-icon>
+        <p class="m-0 text-sm font-semibold text-slate-800 dark:text-slate-200">No activity logged yet</p>
+        <p class="m-0 mt-0.5 text-xs text-slate-400">
+          {{ currentUser?.role === 'admin' && adminScope === 'all' ? 'No actions recorded yet for any user.' : 'You have not performed any logged actions yet.' }}
+        </p>
+      </div>
+
+      <!-- Activity Items List -->
+      <div *ngIf="!loadingActivities && activities.length > 0" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+        <div *ngFor="let act of activities" class="flex items-start justify-between gap-3 py-3 transition-colors hover:bg-slate-50/60 dark:hover:bg-slate-800/30 px-1.5 rounded-lg">
+          <div class="flex items-start gap-3 min-w-0 flex-1">
+            <!-- Icon badge -->
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border"
+                 [ngClass]="[getActionBadge(act.action).bg, getActionBadge(act.action).text]">
+              <mat-icon class="!h-4 !w-4 !text-[16px]">
+                {{ getActionIcon(act.action) }}
+              </mat-icon>
+            </div>
+
+            <!-- Content -->
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs font-semibold text-slate-900 dark:text-white">
+                  {{ act.user?.name || 'System' }}
+                </span>
+                <span *ngIf="currentUser?.role === 'admin' && act.user?.email" class="text-[11px] text-slate-400">
+                  ({{ act.user?.email }})
+                </span>
+                <span class="rounded-full border px-2 py-0.2 text-[10px] font-semibold"
+                      [ngClass]="[getActionBadge(act.action).bg, getActionBadge(act.action).text]">
+                  {{ getActionBadge(act.action).label }}
+                </span>
+              </div>
+
+              <!-- Description -->
+              <p class="mb-0 mt-1 text-xs text-slate-700 dark:text-slate-300">
+                {{ act.description }}
+              </p>
+
+              <!-- Tags for Project / Task -->
+              <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                <a *ngIf="act.project"
+                   [routerLink]="['/projects', act.project.id]"
+                   class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-slate-700 no-underline hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300">
+                  <span class="h-1.5 w-1.5 rounded-full" [style.background]="act.project.color || '#3b82f6'"></span>
+                  <span>{{ act.project.name }}</span>
+                </a>
+
+                <button *ngIf="act.task"
+                        type="button"
+                        (click)="openTask(act.task)"
+                        class="inline-flex cursor-pointer items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300">
+                  <mat-icon class="!h-3 !w-3 !text-[12px]">task_alt</mat-icon>
+                  <span>{{ act.task.title }}</span>
+                </button>
+
+                <span *ngIf="act.properties && act.properties['from_status'] && act.properties['to_status']"
+                      class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                  <span class="line-through">{{ act.properties['from_status'] }}</span>
+                  <mat-icon class="!h-2.5 !w-2.5 !text-[10px]">arrow_forward</mat-icon>
+                  <span class="font-semibold">{{ act.properties['to_status'] }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timestamp -->
+          <div class="shrink-0 text-right">
+            <span class="text-[11px] text-slate-400 dark:text-slate-500" [matTooltip]="act.created_at | date:'medium'">
+              {{ relativeTime(act.created_at) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div *ngIf="activityTotal > 0" class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
+        <span class="text-xs text-slate-500 dark:text-slate-400">
+          Showing {{ activities.length }} of {{ activityTotal }} records
+        </span>
+
+        <div class="flex items-center gap-1.5">
+          <button mat-button
+                  [disabled]="activityPage <= 1 || loadingActivities"
+                  (click)="loadActivities(activityPage - 1)"
+                  class="!text-xs">
+            Previous
+          </button>
+          <span class="text-xs text-slate-600 dark:text-slate-300">
+            Page {{ activityPage }} / {{ activityLastPage }}
+          </span>
+          <button mat-button
+                  [disabled]="activityPage >= activityLastPage || loadingActivities"
+                  (click)="loadActivities(activityPage + 1)"
+                  class="!text-xs">
+            Next
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- About Card -->
+  <mat-card class="!rounded-2xl border border-slate-200/80 !shadow-xs dark:border-slate-800">
+    <mat-card-header class="!pb-2"><mat-card-title class="!text-base !font-bold">About</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <div class="flex justify-between border-b border-slate-100 py-2.5 text-xs dark:border-slate-800">
+        <span class="text-slate-500 dark:text-slate-400">Application</span>
+        <span class="font-semibold text-slate-800 dark:text-slate-200">Task Management Suite</span>
+      </div>
+      <div class="flex justify-between py-2.5 text-xs">
+        <span class="text-slate-500 dark:text-slate-400">System Role</span>
+        <span class="font-semibold capitalize text-slate-800 dark:text-slate-200">{{ currentUser?.role || 'User' }}</span>
+      </div>
     </mat-card-content>
   </mat-card>
 </div>

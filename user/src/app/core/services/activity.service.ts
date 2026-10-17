@@ -8,6 +8,8 @@ import { environment } from '../../../environments/environment';
 export interface ActivityFilters {
   entity_type?: string;
   action?: string;
+  search?: string;
+  user_id?: number | string;
   per_page?: number;
   page?: number;
 }
@@ -22,6 +24,8 @@ export class ActivityService {
     let params = new HttpParams();
     if (filters.entity_type) params = params.set('entity_type', filters.entity_type);
     if (filters.action) params = params.set('action', filters.action);
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.user_id) params = params.set('user_id', filters.user_id.toString());
     if (filters.per_page) params = params.set('per_page', filters.per_page);
     if (filters.page) params = params.set('page', filters.page);
 

@@ -9,7 +9,7 @@
               class="nav-item flex cursor-pointer items-center gap-3 rounded-[10px] border border-transparent
                      bg-transparent px-3.5 py-2.5 text-left text-sm font-medium"
               [class.active]="section === item.id"
-              (click)="section = item.id">
+              (click)="setSection(item.id)">
         <mat-icon class="!h-5 !w-5 !text-xl">{{ item.icon }}</mat-icon>
         <span>{{ item.label }}</span>
       </button>
@@ -220,6 +220,238 @@
               </button>
             </div>
           </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- ACTIVITY & AUDIT -->
+      <mat-card *ngSwitchCase="'activity'">
+        <mat-card-header class="!flex !items-start !justify-between !pb-3">
+          <div class="flex flex-col">
+            <mat-card-title class="!text-lg !font-bold">Activity & Audit Logs</mat-card-title>
+            <span class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Audit trail across the system. As an administrator, you can audit all users' actions or switch to your own activity.
+            </span>
+          </div>
+
+          <!-- Actions / Scope switcher -->
+          <div class="flex items-center gap-2">
+            <!-- Scope toggle -->
+            <div class="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 dark:border-slate-700 dark:bg-slate-800">
+              <button type="button"
+                      (click)="setAdminScope('all')"
+                      class="rounded-md px-2.5 py-1 text-xs font-semibold transition-all"
+                      [ngClass]="adminScope === 'all' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 dark:text-slate-400'">
+                All Users
+              </button>
+              <button type="button"
+                      (click)="setAdminScope('mine')"
+                      class="rounded-md px-2.5 py-1 text-xs font-semibold transition-all"
+                      [ngClass]="adminScope === 'mine' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 dark:text-slate-400'">
+                My Activity Only
+              </button>
+            </div>
+
+            <!-- Jump to Full Audit Logs Console -->
+            <a [routerLink]="['/audit-logs']"
+               mat-stroked-button
+               class="!h-8 !px-2.5 !text-xs !leading-8"
+               matTooltip="Open full Audit Log console with filters & export">
+              <mat-icon class="!h-3.5 !w-3.5 !text-sm mr-1">open_in_new</mat-icon>
+              <span>Full Console</span>
+            </a>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <!-- Filter & Search Toolbar -->
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50/70 p-2.5 dark:border-slate-800 dark:bg-slate-900/40">
+            <!-- Action filter pills -->
+            <div class="flex flex-wrap items-center gap-1">
+              <button type="button"
+                      (click)="setActivityActionFilter('')"
+                      class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                      [ngClass]="activityActionFilter === '' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                All
+              </button>
+              <button type="button"
+                      (click)="setActivityActionFilter('created')"
+                      class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                      [ngClass]="activityActionFilter === 'created' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                Created
+              </button>
+              <button type="button"
+                      (click)="setActivityActionFilter('updated')"
+                      class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                      [ngClass]="activityActionFilter === 'updated' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                Updated
+              </button>
+              <button type="button"
+                      (click)="setActivityActionFilter('completed')"
+                      class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                      [ngClass]="activityActionFilter === 'completed' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                Completed
+              </button>
+              <button type="button"
+                      (click)="setActivityActionFilter('status')"
+                      class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                      [ngClass]="activityActionFilter === 'status' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                Status
+              </button>
+              <button type="button"
+                      (click)="setActivityActionFilter('comment')"
+                      class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                      [ngClass]="activityActionFilter === 'comment' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                Comments
+              </button>
+              <button type="button"
+                      (click)="setActivityActionFilter('login')"
+                      class="rounded-lg px-2.5 py-1 text-xs font-medium transition-all"
+                      [ngClass]="activityActionFilter === 'login' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                Auth
+              </button>
+            </div>
+
+            <!-- Search & Refresh -->
+            <div class="flex items-center gap-2">
+              <div class="relative flex items-center">
+                <input type="text"
+                       [(ngModel)]="activitySearchQuery"
+                       (keyup.enter)="onActivitySearch()"
+                       placeholder="Search action or user..."
+                       class="h-8 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                <button mat-icon-button (click)="onActivitySearch()" class="!h-7 !w-7 ml-1" matTooltip="Search">
+                  <mat-icon class="!h-4 !w-4 !text-base text-slate-400">search</mat-icon>
+                </button>
+              </div>
+
+              <button mat-icon-button (click)="loadActivities(activityPage)" [disabled]="loadingActivities" matTooltip="Refresh">
+                <mat-icon class="!h-4 !w-4 !text-base" [class.animate-spin]="loadingActivities">refresh</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="loadingActivities" class="flex flex-col items-center justify-center py-12">
+            <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+            <span class="mt-2.5 text-xs text-slate-500 dark:text-slate-400">Loading audit records...</span>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!loadingActivities && activities.length === 0"
+               class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-12 text-center dark:border-slate-800">
+            <mat-icon class="!h-10 !w-10 !text-[40px] opacity-30 text-slate-400 mb-1">history</mat-icon>
+            <p class="m-0 text-sm font-semibold text-slate-800 dark:text-slate-200">No activity logs found</p>
+            <p class="m-0 mt-0.5 text-xs text-slate-400">
+              {{ adminScope === 'all' ? 'No operations logged yet across the system matching current filters.' : 'You have not performed any logged actions matching current filters.' }}
+            </p>
+          </div>
+
+          <!-- Activity List -->
+          <div *ngIf="!loadingActivities && activities.length > 0" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+            <div *ngFor="let act of activities" class="flex items-start justify-between gap-3 py-3 transition-colors hover:bg-slate-50/60 dark:hover:bg-slate-800/30 px-2 rounded-lg">
+              <div class="flex items-start gap-3 min-w-0 flex-1">
+                <!-- Action Icon Badge -->
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border"
+                     [ngClass]="[getActionBadge(act.action).bg, getActionBadge(act.action).text]">
+                  <mat-icon class="!h-4 !w-4 !text-[16px]">
+                    {{ getActionIcon(act.action) }}
+                  </mat-icon>
+                </div>
+
+                <!-- Info -->
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <!-- User Avatar / Initial -->
+                    <div class="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-300 overflow-hidden">
+                      <img *ngIf="act.user?.avatar" [src]="act.user?.avatar" class="h-full w-full object-cover" alt="User">
+                      <span *ngIf="!act.user?.avatar">{{ (act.user?.name || 'S').charAt(0).toUpperCase() }}</span>
+                    </div>
+
+                    <span class="text-xs font-semibold text-slate-900 dark:text-white">
+                      {{ act.user?.name || 'System' }}
+                    </span>
+                    <span *ngIf="act.user?.email" class="text-[11px] text-slate-400">
+                      ({{ act.user?.email }})
+                    </span>
+
+                    <span class="rounded-full border px-2 py-0.2 text-[10px] font-semibold"
+                          [ngClass]="[getActionBadge(act.action).bg, getActionBadge(act.action).text]">
+                      {{ getActionBadge(act.action).label }}
+                    </span>
+                  </div>
+
+                  <!-- Description -->
+                  <p class="mb-0 mt-1 text-xs text-slate-700 dark:text-slate-300">
+                    {{ act.description }}
+                  </p>
+
+                  <!-- Context Tags: Project, Task, Changes, IP -->
+                  <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <span *ngIf="act.project"
+                          class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      <span class="h-1.5 w-1.5 rounded-full" [style.background]="act.project.color || '#3b82f6'"></span>
+                      <span>{{ act.project.name }}</span>
+                    </span>
+
+                    <span *ngIf="act.task"
+                          class="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                      <mat-icon class="!h-3 !w-3 !text-[12px]">task_alt</mat-icon>
+                      <span>{{ act.task.title }}</span>
+                    </span>
+
+                    <span *ngIf="act.properties && act.properties['from_status'] && act.properties['to_status']"
+                          class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                      <span class="line-through">{{ act.properties['from_status'] }}</span>
+                      <mat-icon class="!h-2.5 !w-2.5 !text-[10px]">arrow_forward</mat-icon>
+                      <span class="font-semibold">{{ act.properties['to_status'] }}</span>
+                    </span>
+
+                    <span *ngIf="act.ip_address" class="text-[10px] text-slate-400">
+                      IP: {{ act.ip_address }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Timestamp & Details Dialog Button -->
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[11px] text-slate-400 dark:text-slate-500" [matTooltip]="act.created_at | date:'medium'">
+                  {{ relativeTime(act.created_at) }}
+                </span>
+                <button mat-icon-button
+                        (click)="viewLogDetails(act)"
+                        class="!h-7 !w-7"
+                        matTooltip="View full log & metadata">
+                  <mat-icon class="!h-4 !w-4 !text-base text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">info</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination Footer -->
+          <div *ngIf="activityTotal > 0" class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+              Showing {{ activities.length }} of {{ activityTotal }} records
+            </span>
+
+            <div class="flex items-center gap-1.5">
+              <button mat-button
+                      [disabled]="activityPage <= 1 || loadingActivities"
+                      (click)="loadActivities(activityPage - 1)"
+                      class="!text-xs">
+                Previous
+              </button>
+              <span class="text-xs text-slate-600 dark:text-slate-300">
+                Page {{ activityPage }} / {{ activityLastPage }}
+              </span>
+              <button mat-button
+                      [disabled]="activityPage >= activityLastPage || loadingActivities"
+                      (click)="loadActivities(activityPage + 1)"
+                      class="!text-xs">
+                Next
+              </button>
+            </div>
+          </div>
         </mat-card-content>
       </mat-card>
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,23 +9,29 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AppSettingsService } from '../../core/services/app-settings.service';
 import { NotificationService, AppNotification } from '../../core/services/notification.service';
+import { AuditLogService } from '../../core/services/audit-log.service';
+import { AuditLog } from '../../core/models/audit-log.model';
+import { AuditLogDetailDialogComponent } from '../audit-logs/audit-log-detail-dialog/audit-log-detail-dialog.component';
 import { environment } from '../../../environments/environment';
 
-type Section = 'profile' | 'appearance' | 'notifications' | 'security' | 'about';
+type Section = 'profile' | 'appearance' | 'notifications' | 'security' | 'activity' | 'about';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -34,7 +40,8 @@ type Section = 'profile' | 'appearance' | 'notifications' | 'security' | 'about'
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     MatDividerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatDialogModule
   ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss']
@@ -50,8 +57,18 @@ export class SettingsComponent implements OnInit {
     { id: 'appearance', icon: 'palette', label: 'Appearance' },
     { id: 'notifications', icon: 'notifications', label: 'Notifications' },
     { id: 'security', icon: 'lock', label: 'Security' },
+    { id: 'activity', icon: 'history', label: 'Activity & Audit' },
     { id: 'about', icon: 'info', label: 'About' }
   ];
+
+  activities: AuditLog[] = [];
+  loadingActivities = false;
+  activityActionFilter = '';
+  activitySearchQuery = '';
+  adminScope: 'all' | 'mine' = 'all';
+  activityPage = 1;
+  activityTotal = 0;
+  activityLastPage = 1;
 
   notifications: AppNotification[] = [];
   loadingNotifications = false;
@@ -71,6 +88,8 @@ export class SettingsComponent implements OnInit {
     public themeService: ThemeService,
     public appSettings: AppSettingsService,
     private notificationService: NotificationService,
+    private auditLogService: AuditLogService,
+    private dialog: MatDialog,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -97,9 +116,116 @@ export class SettingsComponent implements OnInit {
     const requested = this.route.snapshot.queryParamMap.get('section') as Section | null;
     if (requested && this.navItems.some(i => i.id === requested)) {
       this.section = requested;
+      if (requested === 'activity') {
+        this.loadActivities(1);
+      }
     }
 
     this.loadNotifications();
+  }
+
+  setSection(s: Section): void {
+    this.section = s;
+    if (s === 'activity' && this.activities.length === 0) {
+      this.loadActivities(1);
+    }
+  }
+
+  loadActivities(page = 1): void {
+    this.loadingActivities = true;
+    this.activityPage = page;
+
+    const filters: any = {
+      action: this.activityActionFilter || undefined,
+      search: this.activitySearchQuery?.trim() || undefined,
+      page: this.activityPage,
+      per_page: 15
+    };
+
+    if (this.adminScope === 'mine' && this.currentUser?.id) {
+      filters.user_id = this.currentUser.id;
+    }
+
+    this.auditLogService.getAuditLogs(filters).subscribe({
+      next: (res) => {
+        this.activities = res.data;
+        this.activityTotal = res.total;
+        this.activityLastPage = res.last_page;
+        this.loadingActivities = false;
+      },
+      error: () => {
+        this.toast.error('Failed to load audit logs');
+        this.loadingActivities = false;
+      }
+    });
+  }
+
+  setAdminScope(scope: 'all' | 'mine'): void {
+    this.adminScope = scope;
+    this.loadActivities(1);
+  }
+
+  setActivityActionFilter(action: string): void {
+    this.activityActionFilter = action;
+    this.loadActivities(1);
+  }
+
+  onActivitySearch(): void {
+    this.loadActivities(1);
+  }
+
+  viewLogDetails(log: AuditLog): void {
+    this.dialog.open(AuditLogDetailDialogComponent, {
+      width: '680px',
+      maxWidth: '95vw',
+      data: log
+    });
+  }
+
+  getActionIcon(action: string): string {
+    const act = (action || '').toLowerCase();
+    if (act.includes('complete')) return 'check_circle';
+    if (act.includes('create')) return 'add_circle';
+    if (act.includes('delete')) return 'delete';
+    if (act.includes('status')) return 'sync_alt';
+    if (act.includes('priority')) return 'flag';
+    if (act.includes('comment')) return 'chat_bubble';
+    if (act.includes('login')) return 'login';
+    if (act.includes('logout')) return 'logout';
+    if (act.includes('update')) return 'edit';
+    return 'history';
+  }
+
+  getActionBadge(action: string): { bg: string; text: string; label: string } {
+    const act = (action || '').toLowerCase();
+    if (act.includes('complete')) {
+      return { bg: 'bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800', text: 'text-green-700 dark:text-green-400', label: 'Completed' };
+    }
+    if (act.includes('create')) {
+      return { bg: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-400', label: 'Created' };
+    }
+    if (act.includes('delete')) {
+      return { bg: 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800', text: 'text-rose-700 dark:text-rose-400', label: 'Deleted' };
+    }
+    if (act.includes('status')) {
+      return { bg: 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800', text: 'text-indigo-700 dark:text-indigo-400', label: 'Status' };
+    }
+    if (act.includes('priority')) {
+      return { bg: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-400', label: 'Priority' };
+    }
+    if (act.includes('comment')) {
+      return { bg: 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800', text: 'text-purple-700 dark:text-purple-400', label: 'Comment' };
+    }
+    if (act.includes('login')) {
+      return { bg: 'bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-800', text: 'text-teal-700 dark:text-teal-400', label: 'Login' };
+    }
+    if (act.includes('logout')) {
+      return { bg: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-300', label: 'Logout' };
+    }
+    if (act.includes('update')) {
+      return { bg: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-400', label: 'Updated' };
+    }
+    return { bg: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-300', label: action };
   }
 
   loadNotifications(): void {
