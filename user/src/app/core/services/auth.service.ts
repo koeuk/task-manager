@@ -54,9 +54,6 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(response => {
-          if (response.user.role === 'admin') {
-            throw new Error('Admin users must use the admin portal');
-          }
           this.setToken(response.token);
           this.setUser(response.user);
         }),

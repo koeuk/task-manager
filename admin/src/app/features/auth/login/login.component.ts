@@ -37,6 +37,7 @@ export class LoginComponent implements OnInit {
   loading = false;
   returnUrl: string = '/dashboard';
   hidePassword = true;
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
@@ -68,27 +69,29 @@ export class LoginComponent implements OnInit {
 
   onSubmit(): void {
     if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
 
     this.loading = true;
+    this.errorMessage = '';
     this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
+      next: () => {
+        this.loading = false;
         this.toast.success('Login successful!');
         this.router.navigate([this.returnUrl]);
       },
       error: (error) => {
         this.loading = false;
-        let message = 'Login failed. Please try again.';
+        let message = ToastService.extractError(error) || 'Login failed. Please try again.';
         
         if (error.status === 401) {
           message = 'Invalid email or password.';
-        } else if (error.error?.message) {
-          message = error.error.message;
         } else if (error.message === 'Access denied. Admin role required.') {
-          message = 'Access denied. Admin privileges required.';
+          message = 'Access denied. Administrator privileges required.';
         }
         
+        this.errorMessage = message;
         this.toast.error(message);
       }
     });

@@ -1,98 +1,32 @@
-// Everything expressible as layout/spacing/colour now lives as Tailwind
-// utilities in login.component.html. What remains here is what utilities either
-// cannot reach or would lose a specificity fight over:
-//
-//   * decorative ::before/::after glows (pseudo-element geometry + blur)
-//   * the @keyframes entrance animation
-//   * Angular Material internals (.mat-* rendered by Material, not our template)
-//
-// Component styles get Angular's [_ngcontent] attribute, giving them (0,2,0)
-// specificity; a Tailwind utility is (0,1,0) and would lose to Material's own
-// global rules. That is why the button and form-field overrides stay here.
-
 :host {
   display: block;
 }
 
-// Soft decorative glows behind the card
-.login-page {
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.45;
-    pointer-events: none;
-  }
-
-  &::before {
-    width: 420px;
-    height: 420px;
-    background: #e2e8f0;
-    top: -120px;
-    right: -80px;
-  }
-
-  &::after {
-    width: 380px;
-    height: 380px;
-    background: #cbd5e1;
-    bottom: -140px;
-    left: -100px;
-    opacity: 0.35;
+// Align form field prefix icons
+::ng-deep mat-form-field {
+  .mat-mdc-form-field-icon-prefix mat-icon {
+    margin-right: 6px;
   }
 }
 
-.login-card {
-  animation: card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+// Chrome autofill fix
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #0f172a !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-@keyframes card-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
+:host-context(.dark-theme) {
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #1e293b inset !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    caret-color: #f8fafc !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Align the leading icon nicely inside the outlined field
-mat-form-field {
-  mat-icon[matPrefix] {
-    margin: 0 10px 0 4px;
-    color: #9ca3af;
-  }
-}
-
-.login-button {
-  height: 50px;
-  margin-top: 8px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 8px 20px rgba(100, 116, 139, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-
-  &:hover:not([disabled]) {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 26px rgba(100, 116, 139, 0.45);
-  }
-
-  &[disabled] {
-    box-shadow: none;
-  }
-}
-
-// ---- Dark mode (only the pseudo-element glows; the rest is dark: utilities) ----
-:host-context(.dark-theme) .login-page {
-  &::before { background: #1e293b; opacity: 0.5; }
-  &::after { background: #334155; opacity: 0.5; }
 }

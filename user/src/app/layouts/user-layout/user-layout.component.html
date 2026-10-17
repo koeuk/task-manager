@@ -61,6 +61,10 @@
         <mat-icon>settings</mat-icon>
         <span>Settings</span>
       </button>
+      <a mat-menu-item href="http://localhost:4201" target="_blank" *ngIf="(currentUser$ | async)?.role === 'admin'">
+        <mat-icon class="!text-blue-500">admin_panel_settings</mat-icon>
+        <span>Admin Panel</span>
+      </a>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="logout()">
         <mat-icon>logout</mat-icon>

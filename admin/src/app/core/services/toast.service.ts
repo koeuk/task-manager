@@ -44,12 +44,15 @@ export class ToastService {
 
   /** Pull the most useful text out of a Laravel error response. */
   static extractError(error: unknown): string {
-    const err = error as { error?: { errors?: Record<string, unknown>; message?: string } };
+    const err = error as { status?: number; error?: { errors?: Record<string, unknown>; message?: string }; message?: string };
+    if (err?.status === 0) {
+      return 'Unable to reach the server. Please ensure the backend is running on port 8001.';
+    }
     const validation = err?.error?.errors;
     if (validation) {
       const first = Object.values(validation)[0];
       return Array.isArray(first) ? String(first[0]) : String(first);
     }
-    return err?.error?.message || 'An error occurred';
+    return err?.error?.message || err?.message || 'An error occurred';
   }
 }
