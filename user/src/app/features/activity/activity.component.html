@@ -6,14 +6,14 @@
         <mat-icon class="!h-6 !w-6 !text-[24px]">history</mat-icon>
       </div>
       <div>
-        <h1 class="m-0 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Activity Feed</h1>
+        <h1 class="m-0 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Activity Log</h1>
         <p class="m-0 text-xs text-slate-500 dark:text-slate-400">
           Live stream of updates, task completions, and team collaboration across your workspaces
         </p>
       </div>
     </div>
 
-    <button mat-icon-button (click)="loadActivities(currentPage)" matTooltip="Refresh feed" [disabled]="loading">
+    <button mat-icon-button (click)="loadActivities(currentPage)" matTooltip="Refresh log" [disabled]="loading">
       <mat-icon [class.animate-spin]="loading">refresh</mat-icon>
     </button>
   </div>
@@ -110,7 +110,9 @@
       <!-- Point icon -->
       <div class="absolute -left-[27px] top-4 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow-sm dark:border-slate-900"
            [ngClass]="getActionBadge(act.action).bg">
-        <mat-icon class="!h-3.5 !w-3.5 !text-[15px]" [ngClass]="getActionBadge(act.action).text">
+        <mat-icon class="!m-0 !p-0 flex items-center justify-center !leading-none"
+                  style="font-size: 16px; width: 16px; height: 16px; line-height: 16px;"
+                  [ngClass]="getActionBadge(act.action).text">
           {{ getActionIcon(act.action) }}
         </mat-icon>
       </div>
@@ -147,25 +149,14 @@
           {{ act.description }}
         </p>
 
-        <!-- Linked Targets: Project and/or Task -->
-        <div class="mt-3 flex flex-wrap items-center gap-2">
+        <!-- Linked Project Target -->
+        <div *ngIf="act.project" class="mt-3 flex flex-wrap items-center gap-2">
           <!-- Project Link -->
-          <a *ngIf="act.project"
-             [routerLink]="['/projects', act.project.id]"
+          <a [routerLink]="['/projects', act.project.id]"
              class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 no-underline transition-colors hover:border-slate-300 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800">
             <span class="h-2 w-2 rounded-full" [style.background]="act.project.color || '#3b82f6'"></span>
             <span>{{ act.project.name }}</span>
           </a>
-
-          <!-- Task Target Button -->
-          <button *ngIf="act.task"
-                  type="button"
-                  (click)="openTask(act.task)"
-                  class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/70 px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/60">
-            <mat-icon class="!h-3.5 !w-3.5 !text-[15px]">task_alt</mat-icon>
-            <span>Task: {{ act.task.title }}</span>
-            <mat-icon class="!h-3 !w-3 !text-[12px] opacity-70">open_in_new</mat-icon>
-          </button>
         </div>
 
         <!-- Changes / Properties Diff tags -->

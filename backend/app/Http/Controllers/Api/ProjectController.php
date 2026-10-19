@@ -148,13 +148,35 @@ class ProjectController extends Controller
             'status' => 'nullable|in:planning,active,on_hold,completed,archived',
         ]);
 
+        $original = array_intersect_key($project->getOriginal(), $validated);
         $project->update($validated);
+
         $changes = $project->getChanges();
+        unset($changes['updated_at']);
+
+        $diff = [];
+        foreach ($changes as $key => $newValue) {
+            $diff[$key] = [
+                'from' => $original[$key] ?? null,
+                'to' => $newValue,
+            ];
+        }
+
         $desc = "Updated project '{$project->name}'";
         if (isset($changes['status'])) {
             $desc = "Changed status of project '{$project->name}' to ".ucfirst(str_replace('_', ' ', $project->status));
         }
-        ActivityLog::record('project_updated', $desc, $project, ['changes' => $changes], $project->id);
+
+        $properties = [
+            'changes' => $changes,
+            'diff' => $diff,
+        ];
+        if (isset($diff['status'])) {
+            $properties['from_status'] = $diff['status']['from'];
+            $properties['to_status'] = $diff['status']['to'];
+        }
+
+        ActivityLog::record('project_updated', $desc, $project, $properties, $project->id);
 
         return response()->json([
             'message' => 'Project updated successfully',

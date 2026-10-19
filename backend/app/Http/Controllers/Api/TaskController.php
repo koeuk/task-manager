@@ -208,9 +208,20 @@ class TaskController extends Controller
             $validated['completed_at'] = null;
         }
 
+        $original = array_intersect_key($task->getOriginal(), $validated);
         $task->update($validated);
 
         $changes = $task->getChanges();
+        unset($changes['updated_at']);
+
+        $diff = [];
+        foreach ($changes as $key => $newValue) {
+            $diff[$key] = [
+                'from' => $original[$key] ?? null,
+                'to' => $newValue,
+            ];
+        }
+
         $action = 'task_updated';
         $desc = "Updated task '{$task->title}'";
         if (isset($changes['status'])) {
@@ -223,7 +234,21 @@ class TaskController extends Controller
         } elseif (isset($changes['priority'])) {
             $desc = "Changed priority of '{$task->title}' to ".ucfirst($task->priority);
         }
-        ActivityLog::record($action, $desc, $task, ['changes' => $changes], $task->project_id, $task->id);
+
+        $properties = [
+            'changes' => $changes,
+            'diff' => $diff,
+        ];
+        if (isset($diff['status'])) {
+            $properties['from_status'] = $diff['status']['from'];
+            $properties['to_status'] = $diff['status']['to'];
+        }
+        if (isset($diff['priority'])) {
+            $properties['from_priority'] = $diff['priority']['from'];
+            $properties['to_priority'] = $diff['priority']['to'];
+        }
+
+        ActivityLog::record($action, $desc, $task, $properties, $task->project_id, $task->id);
 
         return response()->json([
             'message' => 'Task updated successfully',

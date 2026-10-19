@@ -19,6 +19,7 @@ import { Task } from '../../core/models/project.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { TaskDetailDialogComponent } from '../tasks/task-detail-dialog/task-detail-dialog.component';
+import { getActivityChanges, FieldChange } from '../../core/utils/activity-utils';
 
 @Component({
   selector: 'app-activity',
@@ -83,7 +84,7 @@ export class ActivityComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.toast.error('Failed to load activity feed');
+        this.toast.error('Failed to load activity log');
         this.loading = false;
       }
     });
@@ -101,22 +102,31 @@ export class ActivityComponent implements OnInit {
 
   getActionIcon(action: string): string {
     const act = (action || '').toLowerCase();
+    if (act.includes('comment')) return 'chat_bubble';
     if (act.includes('complete')) return 'check_circle';
+    if (act.includes('login')) return 'login';
+    if (act.includes('logout')) return 'logout';
     if (act.includes('create')) return 'add_circle';
     if (act.includes('delete')) return 'delete';
     if (act.includes('status')) return 'sync_alt';
     if (act.includes('priority')) return 'flag';
-    if (act.includes('comment')) return 'chat_bubble';
-    if (act.includes('login')) return 'login';
-    if (act.includes('logout')) return 'logout';
     if (act.includes('update')) return 'edit';
     return 'history';
   }
 
   getActionBadge(action: string): { bg: string; text: string; label: string } {
     const act = (action || '').toLowerCase();
+    if (act.includes('comment')) {
+      return { bg: 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800', text: 'text-purple-700 dark:text-purple-400', label: 'Comment' };
+    }
     if (act.includes('complete')) {
       return { bg: 'bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800', text: 'text-green-700 dark:text-green-400', label: 'Completed' };
+    }
+    if (act.includes('login')) {
+      return { bg: 'bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-800', text: 'text-teal-700 dark:text-teal-400', label: 'Login' };
+    }
+    if (act.includes('logout')) {
+      return { bg: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-300', label: 'Logout' };
     }
     if (act.includes('create')) {
       return { bg: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-400', label: 'Created' };
@@ -129,15 +139,6 @@ export class ActivityComponent implements OnInit {
     }
     if (act.includes('priority')) {
       return { bg: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-400', label: 'Priority' };
-    }
-    if (act.includes('comment')) {
-      return { bg: 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800', text: 'text-purple-700 dark:text-purple-400', label: 'Comment' };
-    }
-    if (act.includes('login')) {
-      return { bg: 'bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-800', text: 'text-teal-700 dark:text-teal-400', label: 'Login' };
-    }
-    if (act.includes('logout')) {
-      return { bg: 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-300', label: 'Logout' };
     }
     if (act.includes('update')) {
       return { bg: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-400', label: 'Updated' };

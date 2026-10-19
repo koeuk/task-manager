@@ -57,7 +57,7 @@ export class UserLayoutComponent implements OnInit {
     { icon: 'folder', label: 'Projects', route: '/projects' },
     { icon: 'task_alt', label: 'My Tasks', route: '/tasks' },
     { icon: 'calendar_month', label: 'Calendar', route: '/calendar' },
-    { icon: 'history', label: 'Activity', route: '/activity' }
+    { icon: 'history', label: 'Activity Log', route: '/activity' }
   ];
 
   notifications: AppNotification[] = [];
