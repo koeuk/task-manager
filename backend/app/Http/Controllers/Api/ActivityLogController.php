@@ -20,8 +20,12 @@ class ActivityLogController extends Controller
             ->latest('id');
 
         if (! $user->isAdmin()) {
-            // Normal users can only see their own activity
-            $query->where('user_id', $user->id);
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                    ->orWhereHas('project', function ($pq) use ($user) {
+                        $pq->visibleTo($user);
+                    });
+            });
         } else {
             // Admin can see all users or filter by a specific user_id
             if ($request->filled('user_id')) {

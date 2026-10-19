@@ -33,14 +33,26 @@ export function formatFieldLabel(field: string): string {
     .replace(/\b\w/g, l => l.toUpperCase());
 }
 
-export function formatFieldValue(val: any): string {
+export function formatFieldValue(val: any, field?: string): string {
   if (val === null || val === undefined || val === '') return 'None';
   if (typeof val === 'boolean') return val ? 'Yes' : 'No';
   if (typeof val === 'object') return JSON.stringify(val);
   const s = String(val);
+  // Truncate ISO timestamp to date if it's an ISO timestamp
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) {
+    return s.split('T')[0];
+  }
+  // Format hours
+  if (field === 'estimated_hours' && !isNaN(Number(val))) {
+    return `${val}h`;
+  }
   // Humanize common enum values like in_progress
   if (['todo', 'in_progress', 'review', 'completed', 'planning', 'active', 'on_hold', 'archived', 'low', 'medium', 'high', 'critical'].includes(s)) {
     return s.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+  // Truncate very long text (e.g. descriptions) to keep chips compact
+  if (s.length > 60) {
+    return s.substring(0, 57) + '...';
   }
   return s;
 }
@@ -51,16 +63,18 @@ export function getActivityChanges(properties?: Record<string, any> | null): Fie
   const changes: FieldChange[] = [];
   const processedKeys = new Set<string>();
 
-  // 1. Detailed diff { [field]: { from, to } }
+  // 1. Detailed diff { [field]: { from, to, from_name?, to_name? } }
   if (properties['diff'] && typeof properties['diff'] === 'object') {
     for (const [key, diffObj] of Object.entries(properties['diff'])) {
       if (key === 'updated_at') continue;
       const d = diffObj as any;
+      const fromVal = d?.from_name !== undefined ? d?.from_name : d?.from;
+      const toVal = d?.to_name !== undefined ? d?.to_name : d?.to;
       changes.push({
         field: key,
         label: formatFieldLabel(key),
-        from: formatFieldValue(d?.from),
-        to: formatFieldValue(d?.to)
+        from: formatFieldValue(fromVal, key),
+        to: formatFieldValue(toVal, key)
       });
       processedKeys.add(key);
     }

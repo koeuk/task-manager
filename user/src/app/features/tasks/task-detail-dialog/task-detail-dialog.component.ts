@@ -21,6 +21,8 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 import { STATUS_OPTIONS, statusLabel, priorityLabel, statusColor, priorityColor } from '../../../core/utils/task-meta';
 import { ActivityService } from '../../../core/services/activity.service';
 import { ActivityLog } from '../../../core/models/activity.model';
+import { ActivityDetailDialogComponent } from '../../activity/activity-detail-dialog/activity-detail-dialog.component';
+import { getActivityChanges, FieldChange } from '../../../core/utils/activity-utils';
 
 @Component({
   selector: 'app-task-detail-dialog',
@@ -287,6 +289,18 @@ export class TaskDetailDialogComponent implements OnInit {
     const days = Math.floor(hours / 24);
     if (days < 30) return `${days}d ago`;
     return new Date(isoString).toLocaleDateString();
+  }
+
+  getChanges(properties?: Record<string, any> | null): FieldChange[] {
+    return getActivityChanges(properties);
+  }
+
+  openActivityDetails(act: ActivityLog): void {
+    this.dialog.open(ActivityDetailDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      data: { activity: act }
+    });
   }
 
   close(): void {

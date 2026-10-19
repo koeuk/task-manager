@@ -222,6 +222,16 @@ class TaskController extends Controller
             ];
         }
 
+        if (isset($diff['assigned_to'])) {
+            $diff['assigned_to']['from_name'] = $diff['assigned_to']['from'] ? \App\Models\User::find($diff['assigned_to']['from'])?->name : null;
+            $diff['assigned_to']['to_name'] = $diff['assigned_to']['to'] ? \App\Models\User::find($diff['assigned_to']['to'])?->name : null;
+        }
+
+        if (isset($diff['task_list_id'])) {
+            $diff['task_list_id']['from_name'] = $diff['task_list_id']['from'] ? \App\Models\TaskList::find($diff['task_list_id']['from'])?->name : null;
+            $diff['task_list_id']['to_name'] = $diff['task_list_id']['to'] ? \App\Models\TaskList::find($diff['task_list_id']['to'])?->name : null;
+        }
+
         $action = 'task_updated';
         $desc = "Updated task '{$task->title}'";
         if (isset($changes['status'])) {

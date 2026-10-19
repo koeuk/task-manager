@@ -19,6 +19,7 @@ import { Task } from '../../core/models/project.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { TaskDetailDialogComponent } from '../tasks/task-detail-dialog/task-detail-dialog.component';
+import { ActivityDetailDialogComponent } from './activity-detail-dialog/activity-detail-dialog.component';
 import { getActivityChanges, FieldChange } from '../../core/utils/activity-utils';
 
 @Component({
@@ -169,6 +170,18 @@ export class ActivityComponent implements OnInit {
     });
     ref.afterClosed().pipe(filter(Boolean)).subscribe(() => {
       this.loadActivities(this.currentPage);
+    });
+  }
+
+  getChanges(properties?: Record<string, any> | null): FieldChange[] {
+    return getActivityChanges(properties);
+  }
+
+  openDetails(act: ActivityLog): void {
+    this.dialog.open(ActivityDetailDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      data: { activity: act }
     });
   }
 }

@@ -119,29 +119,59 @@
 
       <!-- Activity Card -->
       <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
-        <div class="flex flex-wrap items-start justify-between gap-2">
-          <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-2.5 dark:border-slate-800/80">
+          <!-- User (Actor) & Action info -->
+          <div class="flex flex-wrap items-center gap-2.5">
             <!-- User avatar -->
-            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-white shadow-xs dark:bg-slate-700">
+            <img *ngIf="act.user?.avatar"
+                 [src]="act.user?.avatar"
+                 [alt]="act.user?.name || 'User'"
+                 class="h-8 w-8 shrink-0 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-2xs" />
+            <span *ngIf="!act.user?.avatar"
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white shadow-2xs dark:bg-slate-700">
               {{ (act.user?.name || 'S')[0] | uppercase }}
             </span>
-            <span class="text-xs font-semibold text-slate-900 dark:text-slate-100">
-              {{ act.user?.name || 'System' }}
-            </span>
-            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium"
-                  [ngClass]="[getActionBadge(act.action).bg, getActionBadge(act.action).text]">
-              {{ getActionBadge(act.action).label }}
-            </span>
-            <span *ngIf="act.entity_type" class="text-[11px] text-slate-400 dark:text-slate-500">
-              on {{ act.entity_type }}
-            </span>
+
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-900 dark:text-white">
+                  {{ act.user?.name || 'System' }}
+                </span>
+                <span *ngIf="act.user?.role"
+                      class="rounded bg-slate-100 px-1.5 py-0.2 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                  {{ act.user?.role }}
+                </span>
+                <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold"
+                      [ngClass]="[getActionBadge(act.action).bg, getActionBadge(act.action).text]">
+                  {{ getActionBadge(act.action).label }}
+                </span>
+                <span *ngIf="act.entity_type" class="text-[11px] text-slate-400 dark:text-slate-500">
+                  on {{ act.entity_type }}
+                </span>
+              </div>
+              <p *ngIf="act.user?.email" class="mb-0 text-[11px] text-slate-400 dark:text-slate-500">
+                {{ act.user?.email }}
+              </p>
+            </div>
           </div>
 
-          <!-- Timestamp -->
-          <span class="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500" [matTooltip]="act.created_at | date:'medium'">
-            <mat-icon class="!h-3.5 !w-3.5 !text-[14px]">schedule</mat-icon>
-            {{ relativeTime(act.created_at) }}
-          </span>
+          <!-- Date Time & View Details Button -->
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <!-- Date & Time of change -->
+            <span class="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[15px] text-slate-400">schedule</mat-icon>
+              <span>{{ act.created_at | date:'medium' }}</span>
+              <span class="text-[11px] text-slate-400 dark:text-slate-500">({{ relativeTime(act.created_at) }})</span>
+            </span>
+
+            <!-- View Details Button -->
+            <button type="button"
+                    (click)="openDetails(act)"
+                    class="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:border-blue-400 hover:bg-blue-50/70 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-500 dark:hover:bg-blue-950/40 dark:hover:text-blue-300">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[15px]">visibility</mat-icon>
+              <span>View Details</span>
+            </button>
+          </div>
         </div>
 
         <!-- Description -->
@@ -159,21 +189,17 @@
           </a>
         </div>
 
-        <!-- Changes / Properties Diff tags -->
-        <div *ngIf="act.properties" class="mt-2.5 flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
-          <span *ngIf="act.properties['from_status'] && act.properties['to_status']"
-                class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            <span class="line-through opacity-70">{{ act.properties['from_status'] }}</span>
-            <mat-icon class="!h-3 !w-3 !text-[12px]">arrow_forward</mat-icon>
-            <span class="font-semibold">{{ act.properties['to_status'] }}</span>
-          </span>
-          <span *ngIf="act.properties['from_priority'] && act.properties['to_priority']"
-                class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            <span>Priority:</span>
-            <span class="line-through opacity-70">{{ act.properties['from_priority'] }}</span>
-            <mat-icon class="!h-3 !w-3 !text-[12px]">arrow_forward</mat-icon>
-            <span class="font-semibold">{{ act.properties['to_priority'] }}</span>
-          </span>
+        <!-- Changes / Properties Diff tags (All fields and values) -->
+        <div *ngIf="getChanges(act.properties).length > 0" class="mt-2.5 flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+          <div *ngFor="let ch of getChanges(act.properties)"
+               class="inline-flex items-center gap-1 rounded-md border border-slate-200/90 bg-slate-50 px-2 py-0.5 text-slate-700 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300">
+            <span class="font-medium text-slate-500 dark:text-slate-400">{{ ch.label }}:</span>
+            <ng-container *ngIf="ch.from !== undefined && ch.from !== null">
+              <span class="line-through opacity-70">{{ ch.from }}</span>
+              <mat-icon class="!h-3 !w-3 !text-[12px] opacity-60">arrow_forward</mat-icon>
+            </ng-container>
+            <span class="font-semibold text-slate-800 dark:text-slate-200">{{ ch.to || ch.value }}</span>
+          </div>
         </div>
       </div>
     </div>

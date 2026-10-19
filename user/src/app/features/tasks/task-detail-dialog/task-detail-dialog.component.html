@@ -177,7 +177,7 @@
 
             <!-- Card Content (Display-only, Cannot Edit) -->
             <div class="rounded-xl border border-slate-200/80 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-              <div class="flex items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-1.5 dark:border-slate-800">
                 <div class="flex items-center gap-2">
                   <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[10px] font-semibold text-white dark:bg-slate-700">
                     {{ (act.user?.name || 'S')[0] | uppercase }}
@@ -190,10 +190,19 @@
                     {{ getActionBadge(act.action).label }}
                   </span>
                 </div>
-                <span class="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500" [matTooltip]="act.created_at | date:'medium'">
-                  <mat-icon class="!h-3 !w-3 !text-[12px]">schedule</mat-icon>
-                  {{ relativeTime(act.created_at) }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <span class="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+                    <mat-icon class="!h-3 !w-3 !text-[12px] text-slate-400">schedule</mat-icon>
+                    <span>{{ act.created_at | date:'medium' }}</span>
+                    <span class="text-[10px] opacity-75">({{ relativeTime(act.created_at) }})</span>
+                  </span>
+                  <button type="button"
+                          (click)="openActivityDetails(act)"
+                          class="inline-flex cursor-pointer items-center gap-1 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                    <mat-icon class="!h-2.5 !w-2.5 !text-[11px]">visibility</mat-icon>
+                    <span>Details</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Description -->
@@ -201,21 +210,17 @@
                 {{ act.description }}
               </p>
 
-              <!-- Status / Priority / Changes Diff tags -->
-              <div *ngIf="act.properties" class="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
-                <span *ngIf="act.properties['from_status'] && act.properties['to_status']"
-                      class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                  <span class="line-through opacity-70">{{ act.properties['from_status'] }}</span>
-                  <mat-icon class="!h-2.5 !w-2.5 !text-[10px]">arrow_forward</mat-icon>
-                  <span class="font-semibold">{{ act.properties['to_status'] }}</span>
-                </span>
-                <span *ngIf="act.properties['from_priority'] && act.properties['to_priority']"
-                      class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                  <span>Priority:</span>
-                  <span class="line-through opacity-70">{{ act.properties['from_priority'] }}</span>
-                  <mat-icon class="!h-2.5 !w-2.5 !text-[10px]">arrow_forward</mat-icon>
-                  <span class="font-semibold">{{ act.properties['to_priority'] }}</span>
-                </span>
+              <!-- Changes / Properties Diff tags (All fields and values) -->
+              <div *ngIf="getChanges(act.properties).length > 0" class="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+                <div *ngFor="let ch of getChanges(act.properties)"
+                     class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  <span class="font-medium opacity-75">{{ ch.label }}:</span>
+                  <ng-container *ngIf="ch.from !== undefined && ch.from !== null">
+                    <span class="line-through opacity-70">{{ ch.from }}</span>
+                    <mat-icon class="!h-2.5 !w-2.5 !text-[10px] leading-none">arrow_forward</mat-icon>
+                  </ng-container>
+                  <span class="font-semibold">{{ ch.to || ch.value }}</span>
+                </div>
               </div>
             </div>
           </div>

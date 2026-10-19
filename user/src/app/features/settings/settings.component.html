@@ -211,21 +211,33 @@
                   <span>{{ act.task.title }}</span>
                 </button>
 
-                <span *ngIf="act.properties && act.properties['from_status'] && act.properties['to_status']"
-                      class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                  <span class="line-through">{{ act.properties['from_status'] }}</span>
-                  <mat-icon class="!h-2.5 !w-2.5 !text-[10px]">arrow_forward</mat-icon>
-                  <span class="font-semibold">{{ act.properties['to_status'] }}</span>
-                </span>
+                <div *ngIf="getChanges(act.properties).length > 0" class="flex flex-wrap items-center gap-1 text-[10px]">
+                  <span *ngFor="let ch of getChanges(act.properties)"
+                        class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                    <span class="font-medium opacity-75">{{ ch.label }}:</span>
+                    <ng-container *ngIf="ch.from !== undefined && ch.from !== null">
+                      <span class="line-through">{{ ch.from }}</span>
+                      <mat-icon class="!h-2.5 !w-2.5 !text-[10px]">arrow_forward</mat-icon>
+                    </ng-container>
+                    <span class="font-semibold text-slate-800 dark:text-slate-200">{{ ch.to || ch.value }}</span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Timestamp -->
-          <div class="shrink-0 text-right">
-            <span class="text-[11px] text-slate-400 dark:text-slate-500" [matTooltip]="act.created_at | date:'medium'">
-              {{ relativeTime(act.created_at) }}
+          <!-- Timestamp & View Details -->
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+              {{ act.created_at | date:'medium' }}
+              <span class="text-[11px] opacity-75">({{ relativeTime(act.created_at) }})</span>
             </span>
+            <button type="button"
+                    (click)="openActivityDetails(act)"
+                    class="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:border-blue-400 hover:bg-blue-50/70 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-500 dark:hover:bg-blue-950/40 dark:hover:text-blue-300">
+              <mat-icon class="!h-3.5 !w-3.5 !text-[13px]">visibility</mat-icon>
+              <span>View Details</span>
+            </button>
           </div>
         </div>
       </div>
