@@ -45,6 +45,7 @@ class TaskListController extends Controller
      * @bodyParam project_id integer required The parent project ID. Example: 1
      * @bodyParam name string required The list name. Example: To Do
      * @bodyParam position integer Ordering position (defaults to the end). Example: 0
+     *
      * @response 201 {"message": "Task list created successfully", "task_list": {"id": 1, "project_id": 1, "name": "To Do", "position": 0}}
      */
     public function store(Request $request)
@@ -52,7 +53,7 @@ class TaskListController extends Controller
         $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'name' => 'required|string|max:255',
-            'position' => 'nullable|integer'
+            'position' => 'nullable|integer',
         ]);
 
         $this->authorizeProject($validated['project_id'], $request);
@@ -60,7 +61,7 @@ class TaskListController extends Controller
         // Default position to the end of the list within the project. The null
         // coalesce matters on an empty project: max() returns null there, and
         // null + 1 would start the first column at position 1 instead of 0.
-        if (!isset($validated['position'])) {
+        if (! isset($validated['position'])) {
             $max = TaskList::where('project_id', $validated['project_id'])->max('position');
             $validated['position'] = ($max ?? -1) + 1;
         }
@@ -69,7 +70,7 @@ class TaskListController extends Controller
 
         return response()->json([
             'message' => 'Task list created successfully',
-            'task_list' => $taskList->load('tasks')
+            'task_list' => $taskList->load('tasks'),
         ], 201);
     }
 
@@ -83,10 +84,10 @@ class TaskListController extends Controller
         $taskList = TaskList::with([
             'project',
             'tasks.assignee',
-            'tasks.creator'
+            'tasks.creator',
         ])->findOrFail($id);
 
-        if (!$taskList->project || !$taskList->project->isVisibleTo($request->user())) {
+        if (! $taskList->project || ! $taskList->project->isVisibleTo($request->user())) {
             abort(404);
         }
 
@@ -97,6 +98,7 @@ class TaskListController extends Controller
      * Update a task list
      *
      * @urlParam id integer required The task list ID. Example: 1
+     *
      * @bodyParam name string The list name. Example: In Progress
      * @bodyParam position integer Ordering position. Example: 1
      */
@@ -108,14 +110,14 @@ class TaskListController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'position' => 'nullable|integer'
+            'position' => 'nullable|integer',
         ]);
 
         $taskList->update($validated);
 
         return response()->json([
             'message' => 'Task list updated successfully',
-            'task_list' => $taskList->load('tasks')
+            'task_list' => $taskList->load('tasks'),
         ]);
     }
 
@@ -123,6 +125,7 @@ class TaskListController extends Controller
      * Delete a task list
      *
      * @urlParam id integer required The task list ID. Example: 1
+     *
      * @response 200 {"message": "Task list deleted successfully"}
      */
     public function destroy(Request $request, string $id)
@@ -134,7 +137,7 @@ class TaskListController extends Controller
         $taskList->delete();
 
         return response()->json([
-            'message' => 'Task list deleted successfully'
+            'message' => 'Task list deleted successfully',
         ]);
     }
 
@@ -148,11 +151,11 @@ class TaskListController extends Controller
         $user = $request->user();
         $project = Project::find($projectId);
 
-        if (!$project || !$project->isVisibleTo($user)) {
+        if (! $project || ! $project->isVisibleTo($user)) {
             abort(404);
         }
 
-        if (!$project->isWritableBy($user)) {
+        if (! $project->isWritableBy($user)) {
             abort(403, 'You do not have permission to modify this project.');
         }
     }
@@ -165,6 +168,7 @@ class TaskListController extends Controller
      * @bodyParam task_lists object[] required The lists with new positions.
      * @bodyParam task_lists[].id integer required The task list ID. Example: 1
      * @bodyParam task_lists[].position integer required The new position. Example: 0
+     *
      * @response 200 {"message": "Task lists reordered successfully"}
      */
     public function reorder(Request $request)
@@ -172,7 +176,7 @@ class TaskListController extends Controller
         $validated = $request->validate([
             'task_lists' => 'required|array',
             'task_lists.*.id' => 'required|exists:task_lists,id',
-            'task_lists.*.position' => 'required|integer'
+            'task_lists.*.position' => 'required|integer',
         ]);
 
         // Authorize every list before writing any of them, so a payload mixing
@@ -190,13 +194,13 @@ class TaskListController extends Controller
         DB::transaction(function () use ($validated) {
             foreach ($validated['task_lists'] as $listData) {
                 TaskList::where('id', $listData['id'])->update([
-                    'position' => $listData['position']
+                    'position' => $listData['position'],
                 ]);
             }
         });
 
         return response()->json([
-            'message' => 'Task lists reordered successfully'
+            'message' => 'Task lists reordered successfully',
         ]);
     }
 }

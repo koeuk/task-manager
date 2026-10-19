@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class TaskList extends Model
 {
@@ -12,7 +12,7 @@ class TaskList extends Model
     protected $fillable = [
         'project_id',
         'name',
-        'position'
+        'position',
     ];
 
     public function project()

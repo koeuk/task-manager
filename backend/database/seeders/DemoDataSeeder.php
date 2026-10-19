@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\TaskList;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,8 +23,11 @@ use Illuminate\Support\Facades\Hash;
 class DemoDataSeeder extends Seeder
 {
     private const USER_COUNT = 10;
+
     private const TASK_COUNT = 230;
+
     private const PROJECT_COUNT = 8;
+
     private const PASSWORD = 'password123';
 
     private const LIST_NAMES = ['Backlog', 'To Do', 'In Progress', 'Review', 'Done'];
@@ -46,10 +50,10 @@ class DemoDataSeeder extends Seeder
             self::PROJECT_COUNT,
             self::TASK_COUNT
         ));
-        $this->command->line('  Sign in as any seeded user with password: ' . self::PASSWORD);
+        $this->command->line('  Sign in as any seeded user with password: '.self::PASSWORD);
     }
 
-    /** @return \Illuminate\Support\Collection<int, User> */
+    /** @return Collection<int, User> */
     private function createUsers()
     {
         return User::factory()
@@ -60,7 +64,7 @@ class DemoDataSeeder extends Seeder
             ]);
     }
 
-    /** @return \Illuminate\Support\Collection<int, Project> */
+    /** @return Collection<int, Project> */
     private function createProjects($users)
     {
         return collect(range(1, self::PROJECT_COUNT))->map(
@@ -73,7 +77,7 @@ class DemoDataSeeder extends Seeder
     /**
      * Give every project the same five columns, in board order.
      *
-     * @return array<int, \Illuminate\Support\Collection<int, TaskList>>
+     * @return array<int, Collection<int, TaskList>>
      */
     private function createTaskLists($projects): array
     {

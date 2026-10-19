@@ -34,9 +34,9 @@ interface DashboardStats {
   in_progress_tasks: number;
   completed_tasks: number;
   overdue_tasks: number;
-  recent_projects: any[];
-  recent_tasks: any[];
-  upcoming_tasks: any[];
+  recent_projects: Project[];
+  recent_tasks: Task[];
+  upcoming_tasks: Task[];
 }
 
 @Component({

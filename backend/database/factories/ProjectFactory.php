@@ -16,11 +16,11 @@ class ProjectFactory extends Factory
     public function definition(): array
     {
         $start = fake()->dateTimeBetween('2026-01-01', '2026-10-31');
-        $due = (clone $start)->modify('+' . fake()->numberBetween(30, 150) . ' days');
+        $due = (clone $start)->modify('+'.fake()->numberBetween(30, 150).' days');
 
         return [
             'owner_id' => User::factory(),
-            'name' => fake()->unique()->randomElement($this->projectNames()) . ' ' . fake()->randomElement(['Rollout', 'Revamp', 'Initiative', 'Programme', 'Sprint Series']),
+            'name' => fake()->unique()->randomElement($this->projectNames()).' '.fake()->randomElement(['Rollout', 'Revamp', 'Initiative', 'Programme', 'Sprint Series']),
             'description' => fake()->sentence(12),
             'color' => fake()->randomElement(['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6']),
             'icon' => fake()->randomElement(['folder', 'rocket', 'dashboard', 'insights', 'campaign', 'build']),

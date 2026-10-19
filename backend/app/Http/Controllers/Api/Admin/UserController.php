@@ -40,7 +40,7 @@ class UserController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -51,7 +51,7 @@ class UserController extends Controller
         $sortDir = strtolower($request->sort_dir) === 'asc' ? 'asc' : 'desc';
 
         $users = $query->orderBy($sortBy, $sortDir)
-                       ->paginate($request->per_page ?? 15);
+            ->paginate($request->per_page ?? 15);
 
         return response()->json($users);
     }
@@ -64,6 +64,7 @@ class UserController extends Controller
      * @bodyParam password string required At least 8 characters. Example: secret123
      * @bodyParam role string required One of: admin, user. Example: user
      * @bodyParam phone string Optional phone number. Example: +85512345678
+     *
      * @response 201 {"id": 5, "name": "Jane Doe", "email": "jane@example.com", "role": "user"}
      */
     public function store(Request $request)
@@ -73,7 +74,7 @@ class UserController extends Controller
             'email' => 'required|string|email|unique:users',
             'password' => ['required', Password::min(8)],
             'role' => 'required|in:admin,user',
-            'phone' => 'nullable|string|max:20'
+            'phone' => 'nullable|string|max:20',
         ]);
 
         $user = User::create([
@@ -81,7 +82,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
-            'phone' => $validated['phone'] ?? null
+            'phone' => $validated['phone'] ?? null,
         ]);
 
         return response()->json($user, 201);
@@ -95,6 +96,7 @@ class UserController extends Controller
     public function show(string $id)
     {
         $user = User::findOrFail($id);
+
         return response()->json($user);
     }
 
@@ -102,6 +104,7 @@ class UserController extends Controller
      * Update a user
      *
      * @urlParam id integer required The user ID. Example: 1
+     *
      * @bodyParam name string Example: Jane D.
      * @bodyParam email string Unique email. Example: jane@example.com
      * @bodyParam role string One of: admin, user. Example: admin
@@ -113,9 +116,9 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|unique:users,email,' . $id,
+            'email' => 'sometimes|string|email|unique:users,email,'.$id,
             'role' => 'sometimes|in:admin,user',
-            'phone' => 'nullable|string|max:20'
+            'phone' => 'nullable|string|max:20',
         ]);
 
         $user->update($validated);
@@ -129,19 +132,20 @@ class UserController extends Controller
      * The last remaining admin cannot be deleted.
      *
      * @urlParam id integer required The user ID. Example: 2
+     *
      * @response 200 {"message": "User deleted successfully"}
      * @response 403 scenario="Last admin" {"message": "Cannot delete the last admin user"}
      */
     public function destroy(string $id)
     {
         $user = User::findOrFail($id);
-        
+
         // Prevent deleting the last admin
         if ($user->role === 'admin') {
             $adminCount = User::where('role', 'admin')->count();
             if ($adminCount <= 1) {
                 return response()->json([
-                    'message' => 'Cannot delete the last admin user'
+                    'message' => 'Cannot delete the last admin user',
                 ], 403);
             }
         }
@@ -149,7 +153,7 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json([
-            'message' => 'User deleted successfully'
+            'message' => 'User deleted successfully',
         ]);
     }
 
@@ -159,7 +163,9 @@ class UserController extends Controller
      * The last remaining admin cannot be demoted.
      *
      * @urlParam id integer required The user ID. Example: 2
+     *
      * @bodyParam role string required One of: admin, user. Example: admin
+     *
      * @response 403 scenario="Last admin" {"message": "Cannot remove admin role from the last admin user"}
      */
     public function updateRole(Request $request, string $id)
@@ -167,7 +173,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
-            'role' => 'required|in:admin,user'
+            'role' => 'required|in:admin,user',
         ]);
 
         // Prevent removing the last admin
@@ -175,7 +181,7 @@ class UserController extends Controller
             $adminCount = User::where('role', 'admin')->count();
             if ($adminCount <= 1) {
                 return response()->json([
-                    'message' => 'Cannot remove admin role from the last admin user'
+                    'message' => 'Cannot remove admin role from the last admin user',
                 ], 403);
             }
         }
@@ -192,7 +198,9 @@ class UserController extends Controller
      * All of that user's sessions are signed out.
      *
      * @urlParam id integer required The user ID. Example: 2
+     *
      * @bodyParam password string required New password, at least 8 characters. Example: newpass123
+     *
      * @response 200 {"message": "Password reset successfully"}
      */
     public function resetPassword(Request $request, string $id)
@@ -200,11 +208,11 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
-            'password' => ['required', Password::min(8)]
+            'password' => ['required', Password::min(8)],
         ]);
 
         $user->update([
-            'password' => Hash::make($validated['password'])
+            'password' => Hash::make($validated['password']),
         ]);
 
         // Sign out all of that user's sessions. An admin resetting a password is
@@ -213,7 +221,7 @@ class UserController extends Controller
         $user->tokens()->delete();
 
         return response()->json([
-            'message' => 'Password reset successfully'
+            'message' => 'Password reset successfully',
         ]);
     }
 }

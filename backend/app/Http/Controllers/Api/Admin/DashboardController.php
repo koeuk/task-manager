@@ -49,7 +49,7 @@ class DashboardController extends Controller
                 ->get(),
             'user_stats' => User::select('role', DB::raw('count(*) as count'))
                 ->groupBy('role')
-                ->get()
+                ->get(),
         ];
 
         return response()->json($stats);
@@ -62,6 +62,7 @@ class DashboardController extends Controller
      *
      * @queryParam start_date date Range start (Y-m-d). Example: 2026-06-14
      * @queryParam end_date date Range end (Y-m-d). Example: 2026-07-14
+     *
      * @response 200 {"tasks_created": 8, "tasks_completed": 5, "projects_created": 2, "new_users": 1, "productivity_by_user": []}
      */
     public function reports(Request $request)
@@ -78,12 +79,12 @@ class DashboardController extends Controller
                 'assignedTasks as completed_tasks' => function ($query) use ($startDate, $endDate) {
                     $query->where('status', 'completed')
                         ->whereBetween('completed_at', [$startDate, $endDate]);
-                }
+                },
             ])->get(),
             'project_progress' => Project::with(['tasks' => function ($query) {
                 $query->select('project_id', 'status', DB::raw('count(*) as count'))
                     ->groupBy('project_id', 'status');
-            }])->get()
+            }])->get(),
         ];
 
         return response()->json($data);

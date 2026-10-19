@@ -18,7 +18,7 @@ class ActivityLogController extends Controller
         $query = ActivityLog::with(['user', 'project', 'task'])
             ->latest('id');
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             // Normal users can only see their own activity
             $query->where('user_id', $user->id);
         } else {
@@ -48,15 +48,16 @@ class ActivityLogController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('action', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%")
-                         ->orWhere('email', 'like', "%{$search}%");
-                  });
+                    ->orWhere('action', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
             });
         }
 
         $perPage = min((int) $request->get('per_page', 20), 100);
+
         return response()->json($query->paginate($perPage));
     }
 
@@ -66,7 +67,7 @@ class ActivityLogController extends Controller
     public function forProject(Request $request, string $projectId)
     {
         $project = Project::findOrFail($projectId);
-        if (!$project->isVisibleTo($request->user())) {
+        if (! $project->isVisibleTo($request->user())) {
             abort(404);
         }
 
@@ -78,13 +79,14 @@ class ActivityLogController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
         $perPage = min((int) $request->get('per_page', 25), 100);
+
         return response()->json($query->paginate($perPage));
     }
 
@@ -116,18 +118,19 @@ class ActivityLogController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('ip_address', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%")
-                         ->orWhere('email', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('project', function ($pq) use ($search) {
-                      $pq->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('ip_address', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('project', function ($pq) use ($search) {
+                        $pq->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
         $perPage = min((int) $request->get('per_page', 25), 100);
+
         return response()->json($query->paginate($perPage));
     }
 }

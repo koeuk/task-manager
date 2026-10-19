@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Comment;
 use App\Models\Task;
 use Illuminate\Http\Request;
@@ -48,13 +49,14 @@ class CommentController extends Controller
      *
      * @bodyParam task_id integer required The task to comment on. Example: 1
      * @bodyParam comment string required The comment text. Example: Looks great, shipping now!
+     *
      * @response 201 {"message": "Comment created successfully", "comment": {"id": 1, "task_id": 1, "comment": "Looks great, shipping now!"}}
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'task_id' => 'required|exists:tasks,id',
-            'comment' => 'required|string'
+            'comment' => 'required|string',
         ]);
 
         // exists:tasks,id only proves the task exists — check the caller can
@@ -65,9 +67,9 @@ class CommentController extends Controller
 
         $comment = Comment::create($validated);
 
-        $task = \App\Models\Task::find($comment->task_id);
+        $task = Task::find($comment->task_id);
         if ($task) {
-            \App\Models\ActivityLog::record(
+            ActivityLog::record(
                 'comment_created',
                 "Added a comment on task '{$task->title}'",
                 $comment,
@@ -79,7 +81,7 @@ class CommentController extends Controller
 
         return response()->json([
             'message' => 'Comment created successfully',
-            'comment' => $comment->load('user')
+            'comment' => $comment->load('user'),
         ], 201);
     }
 
@@ -107,7 +109,7 @@ class CommentController extends Controller
     {
         $task = Task::with('project')->find($taskId);
 
-        if (!$task || !$task->project || !$task->project->isVisibleTo($request->user())) {
+        if (! $task || ! $task->project || ! $task->project->isVisibleTo($request->user())) {
             abort(404);
         }
     }
@@ -118,7 +120,9 @@ class CommentController extends Controller
      * Only the author may edit their comment.
      *
      * @urlParam id integer required The comment ID. Example: 1
+     *
      * @bodyParam comment string required The updated text. Example: Edited comment.
+     *
      * @response 403 scenario="Not the author" {"message": "Unauthorized. You can only edit your own comments."}
      */
     public function update(Request $request, string $id)
@@ -128,19 +132,19 @@ class CommentController extends Controller
         // Only the author may edit their comment
         if ($comment->user_id !== $request->user()->id) {
             return response()->json([
-                'message' => 'Unauthorized. You can only edit your own comments.'
+                'message' => 'Unauthorized. You can only edit your own comments.',
             ], 403);
         }
 
         $validated = $request->validate([
-            'comment' => 'required|string'
+            'comment' => 'required|string',
         ]);
 
         $comment->update($validated);
 
         return response()->json([
             'message' => 'Comment updated successfully',
-            'comment' => $comment->load('user')
+            'comment' => $comment->load('user'),
         ]);
     }
 
@@ -150,6 +154,7 @@ class CommentController extends Controller
      * Only the author may delete their comment.
      *
      * @urlParam id integer required The comment ID. Example: 1
+     *
      * @response 200 {"message": "Comment deleted successfully"}
      * @response 403 scenario="Not the author" {"message": "Unauthorized. You can only delete your own comments."}
      */
@@ -160,14 +165,14 @@ class CommentController extends Controller
         // Only the author may delete their comment
         if ($comment->user_id !== $request->user()->id) {
             return response()->json([
-                'message' => 'Unauthorized. You can only delete your own comments.'
+                'message' => 'Unauthorized. You can only delete your own comments.',
             ], 403);
         }
 
         $comment->delete();
 
         return response()->json([
-            'message' => 'Comment deleted successfully'
+            'message' => 'Comment deleted successfully',
         ]);
     }
 

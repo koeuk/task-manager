@@ -65,13 +65,13 @@ class ActivityLog extends Model
             $entityType = strtolower(class_basename($entity));
             $entityId = $entity->getKey();
 
-            if (!$projectId && isset($entity->project_id)) {
+            if (! $projectId && isset($entity->project_id)) {
                 $projectId = $entity->project_id;
-            } elseif (!$projectId && $entity instanceof Project) {
+            } elseif (! $projectId && $entity instanceof Project) {
                 $projectId = $entity->id;
             }
 
-            if (!$taskId && $entity instanceof Task) {
+            if (! $taskId && $entity instanceof Task) {
                 $taskId = $entity->id;
             }
         }
@@ -84,7 +84,7 @@ class ActivityLog extends Model
             'entity_type' => $entityType,
             'entity_id' => $entityId,
             'description' => $description,
-            'properties' => !empty($properties) ? $properties : null,
+            'properties' => ! empty($properties) ? $properties : null,
             'ip_address' => Request::ip(),
             'user_agent' => Request::userAgent() ? substr(Request::userAgent(), 0, 500) : null,
         ]);

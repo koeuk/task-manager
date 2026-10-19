@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @group Projects
@@ -39,7 +38,7 @@ class ProjectController extends Controller
 
         // Search by name
         if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         $projects = $query->paginate($request->per_page ?? 15);
@@ -57,6 +56,7 @@ class ProjectController extends Controller
      * @bodyParam start_date date Start date (Y-m-d). Example: 2026-07-01
      * @bodyParam due_date date Due date (Y-m-d), on/after start_date. Example: 2026-08-01
      * @bodyParam status string One of: planning, active, on_hold, completed, archived. Example: active
+     *
      * @response 201 {"message": "Project created successfully", "project": {"id": 1, "name": "Website Redesign", "status": "active"}}
      */
     public function store(Request $request)
@@ -68,14 +68,14 @@ class ProjectController extends Controller
             'icon' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
             'due_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'nullable|in:planning,active,on_hold,completed,archived'
+            'status' => 'nullable|in:planning,active,on_hold,completed,archived',
         ]);
 
         $validated['owner_id'] = $request->user()->id;
 
         $project = Project::create($validated);
 
-        \App\Models\ActivityLog::record(
+        ActivityLog::record(
             'project_created',
             "Created project '{$project->name}'",
             $project,
@@ -85,7 +85,7 @@ class ProjectController extends Controller
 
         return response()->json([
             'message' => 'Project created successfully',
-            'project' => $project->load(['taskLists', 'tasks'])
+            'project' => $project->load(['taskLists', 'tasks']),
         ], 201);
     }
 
@@ -95,6 +95,7 @@ class ProjectController extends Controller
      * Returns the project with its task lists, tasks, assignees, creators, and comments.
      *
      * @urlParam id integer required The project ID. Example: 1
+     *
      * @response 404 {"message": "No query results for model [App\\Models\\Project] 1"}
      */
     public function show(Request $request, string $id)
@@ -106,10 +107,10 @@ class ProjectController extends Controller
             'taskLists.tasks.creator',
             'tasks.assignee',
             'tasks.creator',
-            'tasks.comments.user'
+            'tasks.comments.user',
         ])->findOrFail($id);
 
-        if (!$project->isVisibleTo($request->user())) {
+        if (! $project->isVisibleTo($request->user())) {
             abort(404);
         }
 
@@ -120,6 +121,7 @@ class ProjectController extends Controller
      * Update a project
      *
      * @urlParam id integer required The project ID. Example: 1
+     *
      * @bodyParam name string The project name. Example: Website Redesign v2
      * @bodyParam description string A longer description. Example: Updated scope.
      * @bodyParam color string A hex color (max 7 chars). Example: #10b981
@@ -127,6 +129,7 @@ class ProjectController extends Controller
      * @bodyParam start_date date Start date (Y-m-d). Example: 2026-07-01
      * @bodyParam due_date date Due date (Y-m-d), on/after start_date. Example: 2026-09-01
      * @bodyParam status string One of: planning, active, on_hold, completed, archived. Example: completed
+     *
      * @response 200 {"message": "Project updated successfully", "project": {"id": 1, "name": "Website Redesign v2"}}
      */
     public function update(Request $request, string $id)
@@ -142,20 +145,20 @@ class ProjectController extends Controller
             'icon' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
             'due_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'nullable|in:planning,active,on_hold,completed,archived'
+            'status' => 'nullable|in:planning,active,on_hold,completed,archived',
         ]);
 
         $project->update($validated);
         $changes = $project->getChanges();
         $desc = "Updated project '{$project->name}'";
         if (isset($changes['status'])) {
-            $desc = "Changed status of project '{$project->name}' to " . ucfirst(str_replace('_', ' ', $project->status));
+            $desc = "Changed status of project '{$project->name}' to ".ucfirst(str_replace('_', ' ', $project->status));
         }
-        \App\Models\ActivityLog::record('project_updated', $desc, $project, ['changes' => $changes], $project->id);
+        ActivityLog::record('project_updated', $desc, $project, ['changes' => $changes], $project->id);
 
         return response()->json([
             'message' => 'Project updated successfully',
-            'project' => $project->load(['taskLists', 'tasks'])
+            'project' => $project->load(['taskLists', 'tasks']),
         ]);
     }
 
@@ -165,6 +168,7 @@ class ProjectController extends Controller
      * Deletes the project and cascades to its tasks.
      *
      * @urlParam id integer required The project ID. Example: 1
+     *
      * @response 200 {"message": "Project deleted successfully"}
      */
     public function destroy(Request $request, string $id)
@@ -176,15 +180,15 @@ class ProjectController extends Controller
         // only its owner (or an admin) can destroy it.
         $user = $request->user();
 
-        if (!$project->isVisibleTo($user)) {
+        if (! $project->isVisibleTo($user)) {
             abort(404);
         }
 
-        if (!$user->isAdmin() && $project->owner_id !== $user->id) {
+        if (! $user->isAdmin() && $project->owner_id !== $user->id) {
             abort(403, 'Only the project owner can delete this project.');
         }
 
-        \App\Models\ActivityLog::record(
+        ActivityLog::record(
             'project_deleted',
             "Deleted project '{$project->name}'",
             null,
@@ -195,7 +199,7 @@ class ProjectController extends Controller
         $project->delete();
 
         return response()->json([
-            'message' => 'Project deleted successfully'
+            'message' => 'Project deleted successfully',
         ]);
     }
 
@@ -209,11 +213,11 @@ class ProjectController extends Controller
     {
         $user = $request->user();
 
-        if (!$project->isVisibleTo($user)) {
+        if (! $project->isVisibleTo($user)) {
             abort(404);
         }
 
-        if (!$project->isWritableBy($user)) {
+        if (! $project->isWritableBy($user)) {
             abort(403, 'You do not have permission to modify this project.');
         }
     }
@@ -225,6 +229,7 @@ class ProjectController extends Controller
      * projects, upcoming tasks, and recent tasks.
      *
      * @group Dashboard
+     *
      * @response 200 {"total_projects": 3, "active_projects": 2, "completed_projects": 1, "total_tasks": 12, "pending_tasks": 4, "in_progress_tasks": 3, "completed_tasks": 5, "overdue_tasks": 1, "recent_projects": [], "upcoming_tasks": [], "recent_tasks": []}
      */
     public function dashboard(Request $request)
@@ -266,27 +271,27 @@ class ProjectController extends Controller
             ->orderBy('updated_at', 'desc')
             ->limit(5)
             ->get(['id', 'name', 'status', 'updated_at']);
-        
+
         // Get upcoming tasks
-        $upcomingTasks = Task::where(function($q) use ($userId) {
-                $q->where('assigned_to', $userId)
-                  ->orWhere('created_by', $userId);
-            })
+        $upcomingTasks = Task::where(function ($q) use ($userId) {
+            $q->where('assigned_to', $userId)
+                ->orWhere('created_by', $userId);
+        })
             ->where('status', '!=', 'completed')
             ->whereNotNull('due_date')
             ->orderBy('due_date', 'asc')
             ->limit(5)
             ->get(['id', 'title', 'priority', 'due_date', 'status']);
-        
+
         // Get recent tasks
-        $recentTasks = Task::where(function($q) use ($userId) {
-                $q->where('assigned_to', $userId)
-                  ->orWhere('created_by', $userId);
-            })
+        $recentTasks = Task::where(function ($q) use ($userId) {
+            $q->where('assigned_to', $userId)
+                ->orWhere('created_by', $userId);
+        })
             ->orderBy('updated_at', 'desc')
             ->limit(5)
             ->get(['id', 'title', 'status', 'updated_at']);
-        
+
         return response()->json([
             'total_projects' => $projectStats->total_projects ?? 0,
             'active_projects' => $projectStats->active_projects ?? 0,
@@ -298,7 +303,7 @@ class ProjectController extends Controller
             'overdue_tasks' => $taskStats->overdue_tasks ?? 0,
             'recent_projects' => $recentProjects,
             'upcoming_tasks' => $upcomingTasks,
-            'recent_tasks' => $recentTasks
+            'recent_tasks' => $recentTasks,
         ]);
     }
 }

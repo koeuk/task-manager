@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\ActivityLog;
 use App\Models\Project;
-use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;

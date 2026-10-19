@@ -49,7 +49,7 @@ return new class extends Migration
         $ownerId = DB::table('users')->where('role', 'admin')->orderBy('id')->value('id')
             ?? DB::table('users')->orderBy('id')->value('id');
 
-        if (!$ownerId) {
+        if (! $ownerId) {
             return;
         }
 

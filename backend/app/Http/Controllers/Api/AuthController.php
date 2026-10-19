@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -27,11 +28,13 @@ class AuthController extends Controller
      * Creates a `user`-role account and returns an API token. Admin accounts cannot be created here.
      *
      * @unauthenticated
+     *
      * @bodyParam name string required The user's full name. Example: Jane Doe
      * @bodyParam email string required A unique email address. Example: jane@example.com
      * @bodyParam password string required At least 8 characters. Example: secret123
      * @bodyParam password_confirmation string required Must match password. Example: secret123
      * @bodyParam phone string Optional phone number. Example: +85512345678
+     *
      * @response 201 scenario="Created" {"user": {"id": 1, "name": "Jane Doe", "email": "jane@example.com", "role": "user"}, "token": "1|AbCdEf...", "token_type": "Bearer"}
      */
     public function register(Request $request)
@@ -40,7 +43,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users',
             'password' => ['required', 'confirmed', Password::min(8)],
-            'phone' => 'nullable|string|max:20'
+            'phone' => 'nullable|string|max:20',
         ]);
 
         $user = User::create([
@@ -48,7 +51,7 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'] ?? null,
-            'role' => 'user'
+            'role' => 'user',
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -56,7 +59,7 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user,
             'token' => $token,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
         ], 201);
     }
 
@@ -66,8 +69,10 @@ class AuthController extends Controller
      * Authenticates with email + password and returns an API token.
      *
      * @unauthenticated
+     *
      * @bodyParam email string required Example: jane@example.com
      * @bodyParam password string required Example: secret123
+     *
      * @response 200 scenario="Success" {"user": {"id": 1, "name": "Jane Doe", "email": "jane@example.com", "role": "user"}, "token": "1|AbCdEf...", "token_type": "Bearer"}
      * @response 401 scenario="Invalid credentials" {"message": "Invalid credentials"}
      */
@@ -75,24 +80,24 @@ class AuthController extends Controller
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
-        if (!Auth::attempt($credentials)) {
+        if (! Auth::attempt($credentials)) {
             return response()->json([
-                'message' => 'Invalid credentials'
+                'message' => 'Invalid credentials',
             ], 401);
         }
 
         $user = User::where('email', $credentials['email'])->first();
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        \App\Models\ActivityLog::record('user_login', "User '{$user->name}' logged in", $user);
+        ActivityLog::record('user_login', "User '{$user->name}' logged in", $user);
 
         return response()->json([
             'user' => $user,
             'token' => $token,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
         ]);
     }
 
@@ -102,18 +107,19 @@ class AuthController extends Controller
      * Revokes the API token used for the current request.
      *
      * @authenticated
+     *
      * @response 200 {"message": "Successfully logged out"}
      */
     public function logout(Request $request)
     {
         $user = $request->user();
         if ($user) {
-            \App\Models\ActivityLog::record('user_logout', "User '{$user->name}' logged out", $user);
+            ActivityLog::record('user_logout', "User '{$user->name}' logged out", $user);
             $user->currentAccessToken()->delete();
         }
 
         return response()->json([
-            'message' => 'Successfully logged out'
+            'message' => 'Successfully logged out',
         ]);
     }
 
@@ -121,6 +127,7 @@ class AuthController extends Controller
      * Get the authenticated user
      *
      * @authenticated
+     *
      * @response 200 {"id": 1, "name": "Jane Doe", "email": "jane@example.com", "role": "user", "phone": null, "avatar": null}
      */
     public function user(Request $request)
@@ -132,28 +139,30 @@ class AuthController extends Controller
      * Update profile
      *
      * @authenticated
+     *
      * @bodyParam name string The user's full name. Example: Jane D.
      * @bodyParam email string A unique email address. Example: jane@example.com
      * @bodyParam phone string Phone number. Example: +85512345678
      * @bodyParam avatar string Avatar URL. Example: https://example.com/avatar.png
+     *
      * @response 200 {"message": "Profile updated successfully", "user": {"id": 1, "name": "Jane D."}}
      */
     public function updateProfile(Request $request)
     {
         $user = $request->user();
-        
+
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'email' => 'sometimes|email|unique:users,email,'.$user->id,
             'phone' => 'nullable|string|max:20',
-            'avatar' => 'nullable|string'
+            'avatar' => 'nullable|string',
         ]);
 
         $user->update($validated);
 
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
@@ -164,9 +173,11 @@ class AuthController extends Controller
      * the session making the request stays active.
      *
      * @authenticated
+     *
      * @bodyParam current_password string required The current password. Example: oldpass123
      * @bodyParam password string required New password, at least 8 characters. Example: newpass123
      * @bodyParam password_confirmation string required Must match password. Example: newpass123
+     *
      * @response 200 {"message": "Password changed successfully"}
      * @response 422 scenario="Wrong current password" {"message": "Current password is incorrect"}
      */
@@ -174,7 +185,7 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'current_password' => 'required',
-            'password' => ['required', 'confirmed', Password::min(8)]
+            'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         $user = $request->user();
@@ -182,14 +193,14 @@ class AuthController extends Controller
         // Always verify the current password. A valid session token is not enough on
         // its own — without this check anyone holding a stolen or borrowed token could
         // change the password and lock the real owner out of their account.
-        if (!Hash::check($validated['current_password'], $user->password)) {
+        if (! Hash::check($validated['current_password'], $user->password)) {
             return response()->json([
-                'message' => 'Current password is incorrect'
+                'message' => 'Current password is incorrect',
             ], 422);
         }
 
         $user->update([
-            'password' => Hash::make($validated['password'])
+            'password' => Hash::make($validated['password']),
         ]);
 
         // Sign out every other session. Changing a password is how someone locks
@@ -200,7 +211,7 @@ class AuthController extends Controller
         $user->tokens()->where('id', '!=', $request->user()->currentAccessToken()->id)->delete();
 
         return response()->json([
-            'message' => 'Password changed successfully'
+            'message' => 'Password changed successfully',
         ]);
     }
 
@@ -216,24 +227,26 @@ class AuthController extends Controller
      * the reset form manually.
      *
      * @unauthenticated
+     *
      * @bodyParam email string required Example: jane@example.com
+     *
      * @response 200 {"message": "If an account exists for that email, a reset token has been generated."}
      */
     public function forgotPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|email'
+            'email' => 'required|email',
         ]);
 
         // Identical response whether or not the account exists, so this endpoint
         // cannot be used to enumerate registered email addresses.
         $response = [
-            'message' => 'If an account exists for that email, a reset token has been generated.'
+            'message' => 'If an account exists for that email, a reset token has been generated.',
         ];
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json($response);
         }
 
@@ -244,13 +257,13 @@ class AuthController extends Controller
             [
                 'email' => $request->email,
                 'token' => Hash::make($token),
-                'created_at' => now()
+                'created_at' => now(),
             ]
         );
 
         Log::info('Password reset token generated', [
             'email' => $request->email,
-            'token' => $token
+            'token' => $token,
         ]);
 
         if (app()->environment('local')) {
@@ -265,10 +278,12 @@ class AuthController extends Controller
      * Reset password with a token
      *
      * @unauthenticated
+     *
      * @bodyParam email string required Example: jane@example.com
      * @bodyParam token string required The token from the reset request. Example: AbCdEf...
      * @bodyParam password string required New password, at least 8 characters. Example: newpass123
      * @bodyParam password_confirmation string required Must match password. Example: newpass123
+     *
      * @response 200 {"message": "Password has been reset successfully. You can now log in."}
      * @response 422 scenario="Invalid/expired token" {"message": "Invalid password reset token."}
      */
@@ -277,40 +292,41 @@ class AuthController extends Controller
         $validated = $request->validate([
             'email' => 'required|email',
             'token' => 'required|string',
-            'password' => ['required', 'confirmed', Password::min(8)]
+            'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         $record = DB::table('password_reset_tokens')
             ->where('email', $validated['email'])
             ->first();
 
-        if (!$record || !Hash::check($validated['token'], $record->token)) {
+        if (! $record || ! Hash::check($validated['token'], $record->token)) {
             return response()->json([
-                'message' => 'Invalid password reset token.'
+                'message' => 'Invalid password reset token.',
             ], 422);
         }
 
         // Tokens are valid for 60 minutes
         if (Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
             DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+
             return response()->json([
-                'message' => 'Password reset token has expired.'
+                'message' => 'Password reset token has expired.',
             ], 422);
         }
 
         $user = User::where('email', $validated['email'])->first();
 
         // The account can be deleted between issuing the token and using it.
-        if (!$user) {
+        if (! $user) {
             DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
 
             return response()->json([
-                'message' => 'Invalid password reset token.'
+                'message' => 'Invalid password reset token.',
             ], 422);
         }
 
         $user->update([
-            'password' => Hash::make($validated['password'])
+            'password' => Hash::make($validated['password']),
         ]);
 
         // Sign out every existing session. A password reset is the standard way to
@@ -321,7 +337,7 @@ class AuthController extends Controller
         DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
 
         return response()->json([
-            'message' => 'Password has been reset successfully. You can now log in.'
+            'message' => 'Password has been reset successfully. You can now log in.',
         ]);
     }
 
@@ -331,13 +347,15 @@ class AuthController extends Controller
      * Uploads/replaces the authenticated user's avatar image.
      *
      * @authenticated
+     *
      * @bodyParam avatar file required Image file (jpeg, jpg, png, gif, webp), max 2 MB.
+     *
      * @response 200 {"message": "Avatar updated successfully", "avatar": "http://localhost:8000/storage/avatars/abc.png"}
      */
     public function uploadAvatar(Request $request)
     {
         $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:2048' // 2 MB
+            'avatar' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:2048', // 2 MB
         ]);
 
         $user = $request->user();
@@ -353,20 +371,20 @@ class AuthController extends Controller
         // url('storage/') and persist a broken avatar URL while reporting success.
         $path = $request->file('avatar')->store('avatars', 'public');
 
-        if (!$path) {
+        if (! $path) {
             return response()->json([
-                'message' => 'Could not save the uploaded image. Please try again.'
+                'message' => 'Could not save the uploaded image. Please try again.',
             ], 500);
         }
 
-        $url = url('storage/' . $path);
+        $url = url('storage/'.$path);
 
         $user->update(['avatar' => $url]);
 
         return response()->json([
             'message' => 'Avatar updated successfully',
             'user' => $user,
-            'avatar' => $url
+            'avatar' => $url,
         ]);
     }
 }

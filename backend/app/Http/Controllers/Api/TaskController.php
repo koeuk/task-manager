@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskList;
@@ -64,8 +65,8 @@ class TaskController extends Controller
         // Search
         if ($request->has('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
+                $q->where('title', 'like', '%'.$request->search.'%')
+                    ->orWhere('description', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -93,6 +94,7 @@ class TaskController extends Controller
      * @bodyParam due_date date Due date/time, on/after start_date. Example: 2026-07-20
      * @bodyParam estimated_hours number Estimated hours. Example: 4.5
      * @bodyParam position integer Ordering position within the list. Example: 0
+     *
      * @response 201 {"message": "Task created successfully", "task": {"id": 1, "title": "Design the homepage", "status": "todo", "priority": "high"}}
      */
     public function store(Request $request)
@@ -108,7 +110,7 @@ class TaskController extends Controller
             'start_date' => 'nullable|date',
             'due_date' => 'nullable|date|after_or_equal:start_date',
             'estimated_hours' => 'nullable|numeric|min:0',
-            'position' => 'nullable|integer'
+            'position' => 'nullable|integer',
         ]);
 
         // exists:projects,id only proves the project exists, not that this user
@@ -119,7 +121,7 @@ class TaskController extends Controller
 
         $task = Task::create($validated);
 
-        \App\Models\ActivityLog::record(
+        ActivityLog::record(
             'task_created',
             "Created task '{$task->title}'",
             $task,
@@ -130,7 +132,7 @@ class TaskController extends Controller
 
         return response()->json([
             'message' => 'Task created successfully',
-            'task' => $task->load(['project', 'taskList', 'creator', 'assignee'])
+            'task' => $task->load(['project', 'taskList', 'creator', 'assignee']),
         ], 201);
     }
 
@@ -148,10 +150,10 @@ class TaskController extends Controller
             'taskList',
             'creator',
             'assignee',
-            'comments.user'
+            'comments.user',
         ])->findOrFail($id);
 
-        if (!$task->project || !$task->project->isVisibleTo($request->user())) {
+        if (! $task->project || ! $task->project->isVisibleTo($request->user())) {
             abort(404);
         }
 
@@ -164,6 +166,7 @@ class TaskController extends Controller
      * Setting status to `completed` stamps completed_at automatically.
      *
      * @urlParam id integer required The task ID. Example: 1
+     *
      * @bodyParam task_list_id integer Move to another list. Example: 3
      * @bodyParam title string The task title. Example: Design the homepage v2
      * @bodyParam description string A longer description. Example: Updated brief.
@@ -174,6 +177,7 @@ class TaskController extends Controller
      * @bodyParam due_date date Due date/time. Example: 2026-07-25
      * @bodyParam estimated_hours number Estimated hours. Example: 6
      * @bodyParam position integer Ordering position. Example: 1
+     *
      * @response 200 {"message": "Task updated successfully", "task": {"id": 1, "status": "completed"}}
      */
     public function update(Request $request, string $id)
@@ -194,7 +198,7 @@ class TaskController extends Controller
             // date earlier than the task's own start date.
             'due_date' => 'nullable|date|after_or_equal:start_date',
             'estimated_hours' => 'nullable|numeric|min:0',
-            'position' => 'nullable|integer'
+            'position' => 'nullable|integer',
         ]);
 
         // Auto-set completed_at when status changes to completed
@@ -214,16 +218,16 @@ class TaskController extends Controller
                 $action = 'task_completed';
                 $desc = "Completed task '{$task->title}'";
             } else {
-                $desc = "Moved task '{$task->title}' to " . ucfirst(str_replace('_', ' ', $task->status));
+                $desc = "Moved task '{$task->title}' to ".ucfirst(str_replace('_', ' ', $task->status));
             }
         } elseif (isset($changes['priority'])) {
-            $desc = "Changed priority of '{$task->title}' to " . ucfirst($task->priority);
+            $desc = "Changed priority of '{$task->title}' to ".ucfirst($task->priority);
         }
-        \App\Models\ActivityLog::record($action, $desc, $task, ['changes' => $changes], $task->project_id, $task->id);
+        ActivityLog::record($action, $desc, $task, ['changes' => $changes], $task->project_id, $task->id);
 
         return response()->json([
             'message' => 'Task updated successfully',
-            'task' => $task->load(['project', 'taskList', 'creator', 'assignee'])
+            'task' => $task->load(['project', 'taskList', 'creator', 'assignee']),
         ]);
     }
 
@@ -231,6 +235,7 @@ class TaskController extends Controller
      * Delete a task
      *
      * @urlParam id integer required The task ID. Example: 1
+     *
      * @response 200 {"message": "Task deleted successfully"}
      */
     public function destroy(Request $request, string $id)
@@ -239,7 +244,7 @@ class TaskController extends Controller
 
         $this->authorizeTask($task, $request);
 
-        \App\Models\ActivityLog::record(
+        ActivityLog::record(
             'task_deleted',
             "Deleted task '{$task->title}'",
             null,
@@ -251,7 +256,7 @@ class TaskController extends Controller
         $task->delete();
 
         return response()->json([
-            'message' => 'Task deleted successfully'
+            'message' => 'Task deleted successfully',
         ]);
     }
 
@@ -271,11 +276,11 @@ class TaskController extends Controller
         $user = $request->user();
         $project = Project::find($projectId);
 
-        if (!$project || !$project->isVisibleTo($user)) {
+        if (! $project || ! $project->isVisibleTo($user)) {
             abort(404);
         }
 
-        if (!$project->isWritableBy($user)) {
+        if (! $project->isWritableBy($user)) {
             abort(403, 'You do not have permission to modify this project.');
         }
     }
@@ -290,6 +295,7 @@ class TaskController extends Controller
      * @bodyParam tasks[].id integer required The task ID. Example: 1
      * @bodyParam tasks[].position integer required The new position. Example: 0
      * @bodyParam tasks[].task_list_id integer The list the task now belongs to. Example: 2
+     *
      * @response 200 {"message": "Tasks reordered successfully"}
      */
     public function reorder(Request $request)
@@ -298,7 +304,7 @@ class TaskController extends Controller
             'tasks' => 'required|array',
             'tasks.*.id' => 'required|exists:tasks,id',
             'tasks.*.position' => 'required|integer',
-            'tasks.*.task_list_id' => 'nullable|exists:task_lists,id'
+            'tasks.*.task_list_id' => 'nullable|exists:task_lists,id',
         ]);
 
         // Authorize every task up front. Doing this inside the write loop would
@@ -312,24 +318,24 @@ class TaskController extends Controller
         $user = $request->user();
 
         foreach ($tasks as $task) {
-            if (!$task->project || !$task->project->isVisibleTo($user)) {
+            if (! $task->project || ! $task->project->isVisibleTo($user)) {
                 abort(404);
             }
 
-            if (!$task->project->isWritableBy($user)) {
+            if (! $task->project->isWritableBy($user)) {
                 abort(403, 'You do not have permission to modify this project.');
             }
         }
 
         // A task may only move into a list belonging to its own project.
         foreach ($validated['tasks'] as $taskData) {
-            if (!array_key_exists('task_list_id', $taskData) || $taskData['task_list_id'] === null) {
+            if (! array_key_exists('task_list_id', $taskData) || $taskData['task_list_id'] === null) {
                 continue;
             }
 
             $targetList = TaskList::find($taskData['task_list_id']);
 
-            if (!$targetList || $targetList->project_id !== $tasks[$taskData['id']]->project_id) {
+            if (! $targetList || $targetList->project_id !== $tasks[$taskData['id']]->project_id) {
                 abort(422, 'Cannot move a task into a list from another project.');
             }
         }
@@ -350,7 +356,7 @@ class TaskController extends Controller
         });
 
         return response()->json([
-            'message' => 'Tasks reordered successfully'
+            'message' => 'Tasks reordered successfully',
         ]);
     }
 }

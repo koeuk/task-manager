@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
@@ -22,14 +22,14 @@ class Task extends Model
         'due_date',
         'completed_at',
         'position',
-        'estimated_hours'
+        'estimated_hours',
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
         'due_date' => 'datetime',
         'completed_at' => 'datetime',
-        'estimated_hours' => 'decimal:2'
+        'estimated_hours' => 'decimal:2',
     ];
 
     public function project()

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
@@ -18,12 +18,12 @@ class Project extends Model
         'icon',
         'start_date',
         'due_date',
-        'status'
+        'status',
     ];
 
     protected $casts = [
         'start_date' => 'date',
-        'due_date' => 'date'
+        'due_date' => 'date',
     ];
 
     public function taskLists()
