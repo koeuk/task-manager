@@ -183,8 +183,15 @@ export class TaskListComponent implements OnInit {
             this.toast.info('Create a project first before adding tasks');
             return;
           }
-          this.openDialog(TaskFormDialogComponent, { width: '540px', maxWidth: '95vw', data: { projects: this.projects } })
-            .subscribe(() => this.loadTasks());
+          this.openDialog(TaskFormDialogComponent, {
+            position: { right: '0', top: '0' },
+            height: '100vh',
+            maxHeight: '100vh',
+            width: '520px',
+            maxWidth: '100vw',
+            panelClass: 'drawer-panel',
+            data: { projects: this.projects }
+          }).subscribe(() => this.loadTasks());
         },
         error: () => this.toast.error('Failed to load projects')
       });
@@ -193,15 +200,29 @@ export class TaskListComponent implements OnInit {
 
   openTask(task: Task): void {
     // Read-only view — no write guard; the dialog guards its own actions.
-    this.openDialog(TaskDetailDialogComponent, { width: '600px', maxWidth: '95vw', data: { task } })
-      .subscribe(() => this.loadTasks());
+    this.openDialog(TaskDetailDialogComponent, {
+      position: { right: '0', top: '0' },
+      height: '100vh',
+      maxHeight: '100vh',
+      width: '560px',
+      maxWidth: '100vw',
+      panelClass: 'drawer-panel',
+      data: { task }
+    }).subscribe(() => this.loadTasks());
   }
 
   editTask(task: Task, event: Event): void {
     event.stopPropagation();
     this.ifWritable(() => {
-      this.openDialog(TaskFormDialogComponent, { width: '540px', maxWidth: '95vw', data: { task } })
-        .subscribe(() => this.loadTasks());
+      this.openDialog(TaskFormDialogComponent, {
+        position: { right: '0', top: '0' },
+        height: '100vh',
+        maxHeight: '100vh',
+        width: '520px',
+        maxWidth: '100vw',
+        panelClass: 'drawer-panel',
+        data: { task }
+      }).subscribe(() => this.loadTasks());
     });
   }
 

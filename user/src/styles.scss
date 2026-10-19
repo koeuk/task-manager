@@ -57,6 +57,7 @@ body {
 .popup-card {
   display: flex;
   flex-direction: column;
+  height: 100%;
   width: 100% !important;
   min-width: 100% !important;
   max-width: 100% !important;
@@ -91,6 +92,51 @@ body {
   background: rgba(15, 23, 42, 0.5) !important;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+}
+
+// ── Right-side Drawer Panel ─────────────────────────────────────────────────
+// Forms (Project, Task, Task Detail) slide in from the right edge instead of
+// appearing as a centred popup. The `drawer-panel` panelClass is applied to
+// the CDK overlay pane.
+.drawer-panel {
+  animation: drawer-slide-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+
+  .mat-mdc-dialog-container {
+    height: 100vh;
+    max-height: 100vh;
+  }
+
+  .mat-mdc-dialog-surface {
+    border-radius: 20px 0 0 20px !important;
+    box-shadow: -12px 0 48px rgba(15, 23, 42, 0.18), -1px 0 0 rgba(15, 23, 42, 0.06) !important;
+    border: none !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+
+    // Hosted component stretches to fill the drawer
+    > * {
+      display: flex !important;
+      flex-direction: column !important;
+      height: 100% !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+  }
+}
+
+@keyframes drawer-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 // Dark silver

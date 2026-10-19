@@ -4,8 +4,10 @@
 // Material's own button rules.
 
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  height: 100%;
 }
 
 // Icon sizing inside the action buttons (Material sets these itself)

@@ -41,8 +41,10 @@ export interface TaskFormData {
   templateUrl: './task-form-dialog.component.html',
   styles: [`
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       width: 100%;
+      height: 100%;
     }
   `]
 })

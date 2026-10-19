@@ -411,15 +411,26 @@ export class ProjectDetailComponent implements OnInit {
   // ---- Tasks ----
   openTask(task: Task): void {
     // Read-only view — no write guard; the dialog guards its own actions.
-    this.openDialog(TaskDetailDialogComponent, { width: '600px', maxWidth: '95vw', data: { task } })
-      .subscribe(() => this.loadProject());
+    this.openDialog(TaskDetailDialogComponent, {
+      position: { right: '0', top: '0' },
+      height: '100vh',
+      maxHeight: '100vh',
+      width: '560px',
+      maxWidth: '100vw',
+      panelClass: 'drawer-panel',
+      data: { task }
+    }).subscribe(() => this.loadProject());
   }
 
   addTask(column: BoardColumn): void {
     this.ifWritable(() => {
       this.openDialog(TaskFormDialogComponent, {
-        width: '540px',
-        maxWidth: '95vw',
+        position: { right: '0', top: '0' },
+        height: '100vh',
+        maxHeight: '100vh',
+        width: '520px',
+        maxWidth: '100vw',
+        panelClass: 'drawer-panel',
         data: { projectId: this.projectId, taskListId: column.id }
       }).subscribe(() => this.loadProject());
     });

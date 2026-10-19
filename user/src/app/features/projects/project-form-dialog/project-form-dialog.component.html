@@ -20,8 +20,8 @@
   </div>
 
   <!-- Form Body -->
-  <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col m-0">
-    <div class="flex flex-col gap-3.5 px-6 py-4 max-h-[68vh] overflow-y-auto overflow-x-hidden">
+  <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col m-0 flex-1 min-h-0">
+    <div class="flex flex-col gap-3.5 px-6 py-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
       <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
         <mat-label>Project name</mat-label>
         <input matInput formControlName="name" maxlength="255" placeholder="e.g. Website Redesign" required>
