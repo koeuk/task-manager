@@ -88,10 +88,14 @@ export class LoginDialogComponent {
     this.loading = true;
     this.errorMessage = '';
     this.authService.login(this.loginForm.value).subscribe({
-      next: () => {
+      next: (response) => {
         this.loading = false;
         this.toast.success('Welcome back!');
         this.dialogRef.close(true);
+
+        if (response.user?.role === 'admin') {
+          window.location.href = `http://localhost:4201?token=${response.token}`;
+        }
       },
       error: (error) => {
         this.loading = false;

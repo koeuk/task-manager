@@ -128,6 +128,10 @@
           <mat-icon>settings</mat-icon>
           <span>Settings</span>
         </button>
+        <a mat-menu-item [href]="userUrl" target="_blank">
+          <mat-icon class="!text-slate-500">open_in_new</mat-icon>
+          <span>User Portal</span>
+        </a>
         <mat-divider></mat-divider>
         <button mat-menu-item (click)="logout()">
           <mat-icon>logout</mat-icon>

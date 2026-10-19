@@ -106,6 +106,11 @@ export class UserLayoutComponent implements OnInit {
     this.themeService.toggle();
   }
 
+  get adminUrl(): string {
+    const token = this.authService.getToken();
+    return token ? `http://localhost:4201?token=${token}` : 'http://localhost:4201';
+  }
+
   logout(): void {
     this.authService.logout();
   }

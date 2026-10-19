@@ -109,6 +109,11 @@ export class AdminLayoutComponent implements OnInit {
     this.themeService.toggle();
   }
 
+  get userUrl(): string {
+    const token = this.authService.getToken();
+    return token ? `http://localhost:4200?token=${token}` : 'http://localhost:4200';
+  }
+
   logout(): void {
     this.authService.logout();
   }

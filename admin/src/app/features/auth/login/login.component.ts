@@ -61,10 +61,12 @@ export class LoginComponent implements OnInit {
 
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
 
-    // Redirect if already logged in
-    if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
-      this.router.navigate([this.returnUrl]);
-    }
+    // Redirect if already logged in or authenticated via token
+    this.authService.ensureAdmin().subscribe(isAdmin => {
+      if (isAdmin) {
+        this.router.navigate([this.returnUrl]);
+      }
+    });
   }
 
   onSubmit(): void {

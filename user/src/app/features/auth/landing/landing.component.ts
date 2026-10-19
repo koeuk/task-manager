@@ -34,7 +34,13 @@ export class LandingComponent {
 
     dialogRef.afterClosed().subscribe(() => {
       if (this.authService.isAuthenticated()) {
-        this.router.navigate(['/dashboard']);
+        const user = this.authService.currentUserValue;
+        if (user?.role === 'admin') {
+          const token = this.authService.getToken();
+          window.location.href = `http://localhost:4201?token=${token}`;
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       }
     });
   }

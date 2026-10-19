@@ -20,6 +20,15 @@ export class AuthService {
     private http: HttpClient,
     private router: Router
   ) {
+    if (typeof window !== 'undefined' && window.location) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenFromUrl = urlParams.get('token');
+      if (tokenFromUrl) {
+        localStorage.setItem(this.tokenKey, tokenFromUrl);
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
     // Revalidate the token/profile in the background on app start
     this.loadUserFromToken();
   }

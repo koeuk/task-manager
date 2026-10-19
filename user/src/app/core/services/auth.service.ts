@@ -19,6 +19,15 @@ export class AuthService {
     private http: HttpClient,
     private router: Router
   ) {
+    if (typeof window !== 'undefined' && window.location) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenFromUrl = urlParams.get('token');
+      if (tokenFromUrl) {
+        this.setToken(tokenFromUrl);
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
     // Revalidate the persisted session in the background on app start
     this.loadCurrentUser();
   }
