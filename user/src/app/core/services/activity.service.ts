@@ -40,4 +40,13 @@ export class ActivityService {
 
     return this.http.get<Paginated<ActivityLog>>(`${environment.apiUrl}/projects/${projectId}/activities`, { params });
   }
+
+  getTaskActivities(taskId: number, filters: ActivityFilters = {}): Observable<Paginated<ActivityLog>> {
+    let params = new HttpParams();
+    if (filters.action) params = params.set('action', filters.action);
+    if (filters.per_page) params = params.set('per_page', filters.per_page);
+    if (filters.page) params = params.set('page', filters.page);
+
+    return this.http.get<Paginated<ActivityLog>>(`${environment.apiUrl}/tasks/${taskId}/activities`, { params });
+  }
 }

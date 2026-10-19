@@ -60,6 +60,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     // Activity Logs
     Route::get('/activities', [ActivityLogController::class, 'index']);
     Route::get('/projects/{project}/activities', [ActivityLogController::class, 'forProject']);
+    Route::get('/tasks/{task}/activities', [ActivityLogController::class, 'forTask']);
 
     // Admin routes
     Route::middleware([IsAdmin::class])->prefix('admin')->group(function () {

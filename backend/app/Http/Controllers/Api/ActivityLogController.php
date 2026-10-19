@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Project;
+use App\Models\Task;
 use Illuminate\Http\Request;
 
 class ActivityLogController extends Controller
@@ -86,6 +87,25 @@ class ActivityLogController extends Controller
         }
 
         $perPage = min((int) $request->get('per_page', 25), 100);
+
+        return response()->json($query->paginate($perPage));
+    }
+
+    /**
+     * Get activities specifically for a task
+     */
+    public function forTask(Request $request, string $taskId)
+    {
+        $task = Task::with('project')->findOrFail($taskId);
+        if (!$task->project || !$task->project->isVisibleTo($request->user())) {
+            abort(404);
+        }
+
+        $query = ActivityLog::with(['user'])
+            ->where('task_id', $taskId)
+            ->latest('id');
+
+        $perPage = min((int) $request->get('per_page', 50), 100);
 
         return response()->json($query->paginate($perPage));
     }

@@ -67,51 +67,154 @@
     <mat-divider></mat-divider>
 
     <div class="mt-4">
-      <h3 class="mb-3 mt-0 text-[15px] dark:text-[#e5e7eb]">Comments ({{ comments.length }})</h3>
+      <!-- Tab switcher: Comments vs Activity -->
+      <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-[#262c40]">
+        <div class="flex items-center gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+          <button type="button"
+                  (click)="setTab('comments')"
+                  class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+                  [ngClass]="activeTab === 'comments' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+            <mat-icon class="!h-4 !w-4 !text-[16px]">chat_bubble_outline</mat-icon>
+            <span>Comments ({{ comments.length }})</span>
+          </button>
+          <button type="button"
+                  (click)="setTab('activity')"
+                  class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+                  [ngClass]="activeTab === 'activity' ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+            <mat-icon class="!h-4 !w-4 !text-[16px]">history</mat-icon>
+            <span>Activity ({{ activities.length }})</span>
+          </button>
+        </div>
 
-      <div class="mb-4 flex items-start gap-2">
-        <mat-form-field appearance="outline" class="w-full flex-1" subscriptSizing="dynamic">
-          <mat-label>Add a comment</mat-label>
-          <textarea matInput [(ngModel)]="newComment" rows="2"
-                    (keydown.control.enter)="addComment()"></textarea>
-        </mat-form-field>
-        <button mat-flat-button color="primary" (click)="addComment()"
-                [disabled]="postingComment || !newComment.trim()">
-          <mat-icon>send</mat-icon> Post
+        <button *ngIf="activeTab === 'activity'"
+                mat-icon-button
+                (click)="loadActivities()"
+                [disabled]="loadingActivities"
+                matTooltip="Refresh activity"
+                class="!h-7 !w-7 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <mat-icon class="!h-4 !w-4 !text-[16px]" [class.animate-spin]="loadingActivities">refresh</mat-icon>
         </button>
       </div>
 
-      <div class="pb-4 pt-2 text-sm text-black/45 dark:text-[#6b7280]" *ngIf="comments.length === 0">
-        No comments yet. Be the first to comment.
+      <!-- Comments Tab Content -->
+      <div *ngIf="activeTab === 'comments'">
+        <div class="mb-4 flex items-start gap-2">
+          <mat-form-field appearance="outline" class="w-full flex-1" subscriptSizing="dynamic">
+            <mat-label>Add a comment</mat-label>
+            <textarea matInput [(ngModel)]="newComment" rows="2"
+                      (keydown.control.enter)="addComment()"></textarea>
+          </mat-form-field>
+          <button mat-flat-button color="primary" (click)="addComment()"
+                  [disabled]="postingComment || !newComment.trim()">
+            <mat-icon>send</mat-icon> Post
+          </button>
+        </div>
+
+        <div class="pb-4 pt-2 text-sm text-black/45 dark:text-[#6b7280]" *ngIf="comments.length === 0">
+          No comments yet. Be the first to comment.
+        </div>
+
+        <div class="flex gap-3 border-t border-black/[0.06] py-3 dark:border-[#262c40]" *ngFor="let c of comments">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#94a3b8_0%,#64748b_100%)] font-semibold text-white">{{ (c.user?.name || '?')[0] | uppercase }}</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold dark:text-[#e5e7eb]">{{ c.user?.name || 'Unknown' }}</span>
+              <span class="text-xs text-black/45 dark:text-[#6b7280]">{{ c.created_at | date:'medium' }}</span>
+              <span class="flex-1"></span>
+              <ng-container *ngIf="canEditComment(c) && editingCommentId !== c.id">
+                <button mat-icon-button class="mini !h-8 !w-8 !leading-8" (click)="startEditComment(c)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button class="mini !h-8 !w-8 !leading-8" color="warn" (click)="deleteComment(c)" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </ng-container>
+            </div>
+
+            <p *ngIf="editingCommentId !== c.id" class="mt-1 whitespace-pre-wrap leading-normal dark:text-[#e5e7eb]">{{ c.comment }}</p>
+
+            <div *ngIf="editingCommentId === c.id" class="mt-2">
+              <mat-form-field appearance="outline" class="w-full flex-1" subscriptSizing="dynamic">
+                <textarea matInput [(ngModel)]="editingText" rows="2"></textarea>
+              </mat-form-field>
+              <div class="mt-1 flex justify-end gap-2">
+                <button mat-button (click)="cancelEditComment()">Cancel</button>
+                <button mat-flat-button color="primary" (click)="saveEditComment(c)"
+                        [disabled]="!editingText.trim()">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="flex gap-3 border-t border-black/[0.06] py-3 dark:border-[#262c40]" *ngFor="let c of comments">
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#94a3b8_0%,#64748b_100%)] font-semibold text-white">{{ (c.user?.name || '?')[0] | uppercase }}</div>
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold dark:text-[#e5e7eb]">{{ c.user?.name || 'Unknown' }}</span>
-            <span class="text-xs text-black/45 dark:text-[#6b7280]">{{ c.created_at | date:'medium' }}</span>
-            <span class="flex-1"></span>
-            <ng-container *ngIf="canEditComment(c) && editingCommentId !== c.id">
-              <button mat-icon-button class="mini !h-8 !w-8 !leading-8" (click)="startEditComment(c)" matTooltip="Edit">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button class="mini !h-8 !w-8 !leading-8" color="warn" (click)="deleteComment(c)" matTooltip="Delete">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </ng-container>
-          </div>
+      <!-- Activity Tab Content (Read-only Action History) -->
+      <div *ngIf="activeTab === 'activity'">
+        <!-- Loading State -->
+        <div *ngIf="loadingActivities" class="flex flex-col items-center justify-center py-8">
+          <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+          <span class="mt-2 text-xs text-slate-500 dark:text-slate-400">Loading task history...</span>
+        </div>
 
-          <p *ngIf="editingCommentId !== c.id" class="mt-1 whitespace-pre-wrap leading-normal dark:text-[#e5e7eb]">{{ c.comment }}</p>
+        <!-- Empty State -->
+        <div *ngIf="!loadingActivities && activities.length === 0" class="py-8 text-center text-sm text-slate-400 dark:text-slate-500">
+          <mat-icon class="!h-8 !w-8 !text-[32px] opacity-40">history</mat-icon>
+          <p class="m-0 mt-1">No activity logged yet for this task.</p>
+        </div>
 
-          <div *ngIf="editingCommentId === c.id" class="mt-2">
-            <mat-form-field appearance="outline" class="w-full flex-1" subscriptSizing="dynamic">
-              <textarea matInput [(ngModel)]="editingText" rows="2"></textarea>
-            </mat-form-field>
-            <div class="mt-1 flex justify-end gap-2">
-              <button mat-button (click)="cancelEditComment()">Cancel</button>
-              <button mat-flat-button color="primary" (click)="saveEditComment(c)"
-                      [disabled]="!editingText.trim()">Save</button>
+        <!-- Activity Timeline -->
+        <div *ngIf="!loadingActivities && activities.length > 0"
+             class="relative pl-6 pt-1 before:absolute before:bottom-3 before:left-2.5 before:top-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+          <div *ngFor="let act of activities" class="group relative mb-3.5">
+            <!-- Point Icon -->
+            <div class="absolute -left-[27px] top-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white shadow-xs dark:border-slate-900"
+                 [ngClass]="getActionBadge(act.action).bg">
+              <mat-icon class="!h-3 !w-3 !text-[13px]" [ngClass]="getActionBadge(act.action).text">
+                {{ getActionIcon(act.action) }}
+              </mat-icon>
+            </div>
+
+            <!-- Card Content (Display-only, Cannot Edit) -->
+            <div class="rounded-xl border border-slate-200/80 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[10px] font-semibold text-white dark:bg-slate-700">
+                    {{ (act.user?.name || 'S')[0] | uppercase }}
+                  </span>
+                  <span class="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                    {{ act.user?.name || 'System' }}
+                  </span>
+                  <span class="inline-flex items-center rounded-full border px-2 py-0.2 text-[10px] font-medium"
+                        [ngClass]="[getActionBadge(act.action).bg, getActionBadge(act.action).text]">
+                    {{ getActionBadge(act.action).label }}
+                  </span>
+                </div>
+                <span class="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500" [matTooltip]="act.created_at | date:'medium'">
+                  <mat-icon class="!h-3 !w-3 !text-[12px]">schedule</mat-icon>
+                  {{ relativeTime(act.created_at) }}
+                </span>
+              </div>
+
+              <!-- Description -->
+              <p class="mb-0 mt-1.5 text-xs text-slate-700 dark:text-slate-300">
+                {{ act.description }}
+              </p>
+
+              <!-- Status / Priority / Changes Diff tags -->
+              <div *ngIf="act.properties" class="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+                <span *ngIf="act.properties['from_status'] && act.properties['to_status']"
+                      class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  <span class="line-through opacity-70">{{ act.properties['from_status'] }}</span>
+                  <mat-icon class="!h-2.5 !w-2.5 !text-[10px]">arrow_forward</mat-icon>
+                  <span class="font-semibold">{{ act.properties['to_status'] }}</span>
+                </span>
+                <span *ngIf="act.properties['from_priority'] && act.properties['to_priority']"
+                      class="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  <span>Priority:</span>
+                  <span class="line-through opacity-70">{{ act.properties['from_priority'] }}</span>
+                  <mat-icon class="!h-2.5 !w-2.5 !text-[10px]">arrow_forward</mat-icon>
+                  <span class="font-semibold">{{ act.properties['to_priority'] }}</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
